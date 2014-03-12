@@ -1,0 +1,22 @@
+Package: effectliter
+Title: effectliter
+Version: 0.1-2
+Author: Axel Mayer <amayer2010@gmail.com>, Lisa Dietzfelbinger
+    <Lisa.Dietzfelbinger@uni-jena.de>
+Maintainer: Axel Mayer <amayer2010@gmail.com>
+Description: Compute average and conditional causal effects
+Depends:
+    R (>= 2.14.0),
+    lavaan (>= 0.5-16)
+Imports:
+    lavaan,
+    methods,
+    plyr
+Suggests:
+    shiny,
+    Hmisc,
+    ggplot2
+License: GPL (>= 2)
+LazyLoad: yes
+LazyData: yes
+Packaged: 2014-03-11
