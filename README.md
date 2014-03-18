@@ -9,7 +9,7 @@ effectliter is a new program based on the ideas (not the code) of EffectLite (St
 Installation
 =========
 
-effectliter can be installed from this Github repository. For those not familiar with installing packages from Github, the subfolder /old contains tar.gz files (for installing from source) and windows binaries. Please make sure all dependencies are installed (lavaan (>= 0.5-16), methods, plyr), and for the shiny interface, the additional packages shiny, Hmisc, and ggplot2 are required.
+effectliter can be installed from this Github repository. For those not familiar with installing packages from Github, the subfolder /old contains tar.gz files (for installing from source) and Windows binaries. Please make sure all dependencies are installed (lavaan (>= 0.5-16), methods, plyr), and for the shiny interface, the additional packages shiny, Hmisc, and ggplot2 are required.
 
 
 Run effectliter

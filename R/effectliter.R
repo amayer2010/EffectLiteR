@@ -75,8 +75,6 @@ setClass("ELLavaanModel", representation(
 
 ############## main function ##################
 
-## effectLite will eventually be renamed to EffectLiteR and integrated
-
 #' Estimate average and conditional effects
 #' 
 #' This function is the main funtion of the package and can be used to estimate
@@ -880,73 +878,28 @@ effectLiteGUI <- function(){
 }
 
 
+############## documentation ######################
 
+#' effectliter
+#'
+#' @name effectliter
+#' @docType package
+NULL
 
-############ Two Examples... will be deleted ##############
-
-
-##### complex example test
-# 
-# set.seed(664488)
-# 
-# N <- 2000
-# d <- expand.grid(x=c("control","treat1","treat2"),k1=c("male","female"), 
-#                  kateg2=1:2)
-# ind <- sample(1:nrow(d), size=N, replace=T)
-# d <- d[ind,]
-# d$z1 <- rnorm(N)
-# d$z2 <- rnorm(N)
-# d$z3 <- rnorm(N)
-# d$dv <- rnorm(N)
-# 
-# m1 <- effectLite(data=d, y="dv", z=c("z1"), 
-#                  k=c("k1","kateg2"), x="x", 
-#                  control="control")
-# m1
-# 
-# 
-# d <- spss.get("data/Datensatz Klauer 07.sav")
-# 
-# mmtest <- '
-# eta2 =~ 1*CPM12 + 1*CPM22
-# eta1 =~ 1*CPM11 + 1*CPM21
-# 
-# CPM11 + CPM12 ~ 0*1
-# 
-# CPM21 ~ c(m,m)*1
-# CPM22 ~ c(p,p)*1
-# '
-# 
-# m1 <- effectLite(y="eta2", x="TRAINING", z=c("eta1"), control="0", 
-#                  measurement=mmtest, data=d, fixed.cell=FALSE,
-#                  missing="fiml", syntax.only=FALSE)
-# m1
-# # Note: EffectLite seems to be using fixed.cell=TRUE???
-
-
-######### Test Yves idea with one sided main hypothesis
-## with complex example
-# 
-# m1 <- effectLite(data=d, y="dv", z=c("z1"), 
-#                  k=c("k1","kateg2"), x="x", 
-#                  control="control")
-# model <- m1@lavaansyntax@model
-# 
-# constr <- '
-# adjmean0 > 0
-# adjmean0 < adjmean1
-# adjmean0 < adjmean2
-# '
-# 
-# # model <- paste(model,constr,sep="\n")
-# 
-# d <- m1@input@data
-# m2 <- sem(model, group="cell", group.label=levels(d$cell), data=d,
-#     fixed.x=F, group.w.free = TRUE, mimic="mplus")
-# summary(m2)
-# 
-# InformativeTesting(model, R = 1000L, double.bootstrap = "standard", missing="listwise",
-#                    constraints = constr, group="cell", 
-#                    group.label=levels(d$cell), data=d,
-#                    fixed.x=F, group.w.free = TRUE, mimic="mplus")
-#
+#' Dataset example01.
+#' 
+#' A simulated dataset. The variables are as follows:
+#' 
+#' \itemize{
+#'   \item x. treatment variable with values control, treat1, and treat2
+#'   \item k1. categorical covariate with values male and female
+#'   \item kateg2. categorical covariate with values 1 and 2
+#'   \item z1-z3. continuous covariates
+#'   \item dv. coninuous dependent variable
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 2000 rows and 7 variables
+#' @name example01
+NULL
