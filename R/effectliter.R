@@ -791,7 +791,7 @@ computeResults <- function(obj){
   }else if(grep(obj@input@vnames$y,mm) == 1){ ## latent outcome variable
     
     fv.cov <- inspect(m1, what="cov.lv")[1:nk]
-    fv.mean <- lavaan:::computeEETA(m1@Model, samplestats=m1@SampleStats, remove.dummy.lv=TRUE)[1:nk]    
+    fv.mean <- lavaan:::computeEETA(m1@Model, lavsamplestats=m1@SampleStats, remove.dummy.lv=TRUE)[1:nk]    
     
     for(i in 1:nk){
       tmp.cov <- fv.cov[[i]]
