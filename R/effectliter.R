@@ -452,9 +452,14 @@ createLavaanSyntax <- function(obj) {
     observed.freq <- table(obj@input@data$cell)/N
     tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
     model <- paste0(model, "\n", tmp)        
-  }else{    
+  }else{
     groupw <- obj@parnames@groupw
-    tmp <- paste(paste0(relfreq, " := exp(", groupw, ")/" , N), collapse="\n")
+    
+    tmp <- paste(paste0("exp(", groupw, ")"), collapse=" + ")
+    tmp <- paste0("N := ",tmp)
+    model <- paste0(model, "\n", tmp)
+    
+    tmp <- paste(paste0(relfreq, " := exp(", groupw, ")/N"), collapse="\n")
     model <- paste0(model, "\n", tmp)    
   }
   
