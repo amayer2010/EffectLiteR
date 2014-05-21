@@ -18,7 +18,9 @@ setClass("input", representation(
   data="data.frame", 
   measurement="character",
   fixed.cell ="logical",
-  missing="character"
+  missing="character",
+  se="character", ## lavaan standard errors
+  bootstrap="integer" ## number of bootstrap draws
 )
 )
 
@@ -84,32 +86,37 @@ setClass("ELLavaanModel", representation(
 #' model, runs the model in lavaan, and extracts various average and conditional
 #' effects of interest.
 #' 
-#' @param y dependent variable (character string).
-#' @param x treatment variable (character string).
-#' @param k vector of categorical covariates (character vector).
-#' @param z vector of continuous covariates (character vector).
-#' @param measurement measurement model.
-#' @param data a data frame. 
+#' @param y Dependent variable (character string).
+#' @param x Treatment variable (character string).
+#' @param k Vector of categorical covariates (character vector).
+#' @param z Vector of continuous covariates (character vector).
+#' @param measurement Measurement model.
+#' @param data A data frame. 
 #' @param fixed.cell logical. If FALSE (default), the group sizes are treated as
 #' stochastic rather than fixed.
-#' @param missing missing data handling to be used by lavaan::sem(). Will be 
+#' @param missing Missing data handling to be used by lavaan::sem(). Will be 
 #' passed on to sem()
+#' @param se Standard error to be used by lavaan::sem(). Will be 
+#' passed on to sem().
+#' @param bootstrap Number of bootstrap drwas, if bootstrapping is used. Will be 
+#' passed on to lavaan::sem()-
 #' @param syntax.only logical. If TRUE, only syntax is returned and the model 
 #' will not be estimated.
-#' @param ... further arguments passed to lavaan::sem().
-#' @return object of class ELLavaanModel.
+#' @param ... Further arguments passed to lavaan::sem().
+#' @return Object of class ELLavaanModel.
 #' @examples
 #' m1 <- effectLite(y="y", x="x", z="z2", k="z1", control="0", data=daten1411)
 #' print(m1) 
 #' @export
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
-                       measurement=character(), data, fixed.cell=FALSE, missing="listwise",
+                       measurement=character(), data, fixed.cell=FALSE, 
+                       missing="listwise", se="standard", bootstrap=1000L,
                        syntax.only=FALSE, ...){
   
   obj <- new("ELLavaanModel")  
   obj@input <- createInput(y,x,k,z,control,measurement,data, 
-                           fixed.cell, missing)
+                           fixed.cell, missing, se, bootstrap)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
@@ -229,7 +236,7 @@ setMethod("show", "ELLavaanModel", function(object) {
 ################ constructor functions #########################
 
 createInput <- function(y, x, k, z, control, measurement, data, 
-                        fixed.cell, missing){
+                        fixed.cell, missing, se, bootstrap){
   
   #   d <- data[c(y,x,k,z)] ## TODO: adjust for latent variables (indicator variables)
   
@@ -309,7 +316,9 @@ createInput <- function(y, x, k, z, control, measurement, data,
              data=d, 
              measurement=measurement,
              fixed.cell=fixed.cell,
-             missing=missing
+             missing=missing,
+             se=se,
+             bootstrap=bootstrap
   )
   
   return(res)
@@ -742,6 +751,7 @@ createLavaanSyntax <- function(obj) {
 computeResults <- function(obj){
   
   m1 <- sem(obj@lavaansyntax@model, group="cell", missing=obj@input@missing,
+            se=obj@input@se, bootstrap=obj@input@bootstrap,
             group.label=obj@input@vlevels$cell, data=obj@input@data,
             fixed.x=F, group.w.free = TRUE, mimic="mplus") 
   
@@ -757,22 +767,27 @@ computeResults <- function(obj){
   nk <- obj@input@nk  
   
   ## main hypotheses
-  if(nz==0 & nk==1){
-    hypotheses <- data.frame(
-      lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1))    
-    row.names(hypotheses) <- "No average effects"    
+  if(obj@input@se != "standard"){ ## no Wald Test for robust, bootstrapped SE...
+    hypotheses <- data.frame()
   }else{
-    hypotheses <- data.frame(rbind(
-      lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1),
-      lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis2),
-      lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis3),
-      lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis4)    
-    ))
-    row.names(hypotheses) <- c("No average effects",
-                               "No covariate effects in control group",
-                               "No treatment*covariate interaction",
-                               "No treatment effects")    
+    if(nz==0 & nk==1){
+      hypotheses <- data.frame(
+        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1))    
+      row.names(hypotheses) <- "No average effects"    
+    }else{
+      hypotheses <- data.frame(rbind(
+        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1),
+        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis2),
+        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis3),
+        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis4)    
+      ))
+      row.names(hypotheses) <- c("No average effects",
+                                 "No covariate effects in control group",
+                                 "No treatment*covariate interaction",
+                                 "No treatment effects")    
+    }    
   }
+    
   
   
   ## average total effects

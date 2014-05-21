@@ -61,17 +61,6 @@ test <- effectLite(y="y", x="x", z="z2", k="z1", control="0", data=d)
 
 
 
-############ Nonortho  EffectLiteR Lisa Mplus Version ################## 
-# 
-# library(EffectLiteR)
-# data(nonortho)
-# 
-# test <- effectLite(y="y", k="z", x="x", data=nonortho)
-# 
-# EffectLiteR(y="y",x="x",k="z", control="0",data=nonortho,title="complextest")
-
-
-
 ############ Example 01 with latent variable ################## 
 # 
 # set.seed(6636363)
@@ -106,6 +95,10 @@ m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0", 
+                 measurement=mmtest, data=example02lv, fixed.cell=FALSE,
+                 missing="fiml", syntax.only=FALSE,
+                 se="boot", bootstrap=5L)
 
 
 ############ Example 02 with latent variable and K ################## 
@@ -153,3 +146,40 @@ m1 <- effectLite(y="eta2", x="x", k="k", z=c("eta1"), control="0",
 #                    group.label=levels(d$cell), data=d,
 #                    fixed.x=F, group.w.free = TRUE, mimic="mplus")
 #
+
+
+############## Test with non-standard SE ###################
+
+d <- example01
+
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="boot", bootstrap=5L, control="control")
+
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="first.order", control="control")
+
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="robust", control="control")
+
+summary(m1@results@lavresults)
+cat(m1@lavaansyntax@model)
+
+## TODO: Why can SE not be computed for first.order and robust?
+#
+# ## run model without effectLite() and computation of parameters
+# testdaten <- m1@input@data
+# 
+# model <- '
+# dv ~ c(a000,a010,a020,a030,a100,a110,a120,a130,a200,a210,a220,a230)*1
+# dv ~ c(a001,a011,a021,a031,a101,a111,a121,a131,a201,a211,a221,a231)*z1
+# z1 ~ c(mz001,mz011,mz021,mz031,mz101,mz111,mz121,mz131,mz201,mz211,mz221,mz231)*1
+# group % c(gw00,gw01,gw02,gw03,gw10,gw11,gw12,gw13,gw20,gw21,gw22,gw23)*w
+# '
+# 
+# m1 <- sem(model, group="cell",group.label=levels(testdaten$cell), 
+#           data=testdaten, fixed.x=F, group.w.free = TRUE, mimic="mplus",
+#           se="robust")
+# summary(m1)
