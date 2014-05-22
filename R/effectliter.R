@@ -43,6 +43,7 @@ setClass("parnames", representation(
   Egx="character",
   Egxgx="character", ## E(gx|X=x)
   Egxgk="character", ## E(gx|K=k)
+  Egxgxk="character", ## E(gx|X=x,K=k)
   adjmeans="character"
 )
 )
@@ -60,6 +61,7 @@ setClass("results", representation(
   Egx="data.frame",
   Egxgx="data.frame",
   Egxgk="data.frame",
+  Egxgxk="data.frame",
   gx="list",
   adjmeans="data.frame"
 )
@@ -187,7 +189,13 @@ setMethod("show", "ELLavaanModel", function(object) {
   
   
   cat("\n\n------------------ Main Hypotheses ------------------ \n\n")
-  print(object@results@hypotheses, digits=3)
+  if(object@input@se != "standard"){
+    cat(paste0("Wald tests for main hypotheses are not computed for se=",
+               object@input@se))
+  }else{
+    print(object@results@hypotheses, digits=3)
+  }
+  
   
   cat("\n\n ------------------ Average Effects ------------------ \n\n")
   namesEgx <- paste0("E[g",1:(ng-1),"(K,Z)]")
@@ -220,6 +228,17 @@ setMethod("show", "ELLavaanModel", function(object) {
     row.names(Egxgk) <- namesEgxgk
     print(Egxgk, digits=3)    
   }
+
+  if(nk>1 & nz>0){
+    cat("\n\n ------------------ Effects given X=x, K=k ------------------ \n\n")
+    Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)    
+    tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
+    namesEgxgxk <- paste0("E[g",tmp$g,"(K,Z)|X=",tmp$x,", K=",tmp$k,"]")
+    Egxgxk <- object@results@Egxgxk
+    row.names(Egxgxk) <- namesEgxgxk
+    print(Egxgxk, digits=3)    
+  }
+  
   
   cat("\n\n ------------------ Intercept and Effect Functions ------------------ \n")
   
@@ -384,6 +403,10 @@ createParNames <- function(obj){
   tmp <- expand.grid(g=1:(ng-1), k=0:(nk-1))
   Egxgk <- paste0("Eg",tmp$g,"gk",tmp$k)
   
+  ## E(gx|X=x,K=k)
+  tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
+  Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)
+  
   res <- new("parnames",
              alphas=alphas,
              betas=betas,
@@ -403,6 +426,7 @@ createParNames <- function(obj){
              Egx=Egx,
              Egxgx=Egxgx,
              Egxgk=Egxgk,
+             Egxgxk=Egxgxk,
              adjmeans=adjmeans
   )
   
@@ -718,6 +742,34 @@ createLavaanSyntax <- function(obj) {
     
   }
   
+  ## Effects given X=x and K=k
+  Egxgxk <- array(parnames@Egxgxk, dim=c(ng-1,ng,nk))
+  
+  if(nk>1 & nz>0){
+    
+    for(t in 2:ng){
+      for(x in 1:ng){
+        for(k in 1:nk){        
+          if(k==1){
+            rhs <- paste0(gammas[,1,t],"*", c(1,cellmeanz[,1,x]), collapse=" + ")
+            tmp <- paste(Egxgxk[t-1,x,k], ":=", rhs)
+            model <- paste0(model, "\n", tmp) 
+          }else{
+            gammaselect <- c(gammas[,1,t], gammas[,k,t])
+            cellmeanzselect <- rep(c(1,cellmeanz[,k,x]),2)
+            rhs <- paste0(gammaselect,"*", cellmeanzselect, collapse=" + ")
+            tmp <- paste(Egxgxk[t-1,x,k], ":=", rhs)
+            model <- paste0(model, "\n", tmp)
+          }
+        }
+      }
+    }
+    
+  }
+  
+  
+
+   
   ## Hypothesis 1: No average treatment effects
   hypothesis1 <- paste(parnames@Egx, "== 0", collapse="\n")
   
@@ -768,6 +820,7 @@ computeResults <- function(obj){
   
   ## main hypotheses
   if(obj@input@se != "standard"){ ## no Wald Test for robust, bootstrapped SE...
+    ## maybe we could come up with something similar
     hypotheses <- data.frame()
   }else{
     if(nz==0 & nk==1){
@@ -854,6 +907,18 @@ computeResults <- function(obj){
                         est[obj@parnames@Egxgk]/sdyx0)
     names(Egxgk) <- c("Estimate", "SE", "Est./SE", "p-value", "Effect Size")    
   }
+
+  ## Effects given X=x and K=k
+  Egxgxk <- data.frame()
+  if(nk>1 & nz>0){
+    Egxgxk <- data.frame(est[obj@parnames@Egxgxk],
+                        se[obj@parnames@Egxgxk],
+                        tval[obj@parnames@Egxgxk],
+                        pval[obj@parnames@Egxgxk],
+                        est[obj@parnames@Egxgxk]/sdyx0)
+    names(Egxgxk) <- c("Estimate", "SE", "Est./SE", "p-value", "Effect Size")    
+  }
+  
   
   ## g functions
   gammas <- matrix(obj@parnames@gammas, ncol=ng)
@@ -879,6 +944,7 @@ computeResults <- function(obj){
              Egx=Egx,
              Egxgx=Egxgx,
              Egxgk=Egxgk,
+             Egxgxk=Egxgxk,
              gx=gx,
              adjmeans=adjmeans
   )

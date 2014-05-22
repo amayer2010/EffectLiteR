@@ -20,6 +20,9 @@ library(effectliter)
 
 d <- example01
 
+## 1 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control")
+
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", control="control")
 
@@ -164,8 +167,6 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x",
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="robust", control="control")
 
-summary(m1@results@lavresults)
-cat(m1@lavaansyntax@model)
 
 ## TODO: Why can SE not be computed for first.order and robust?
 #
