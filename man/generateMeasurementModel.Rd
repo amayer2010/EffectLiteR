@@ -1,0 +1,36 @@
+\name{generateMeasurementModel}
+\alias{generateMeasurementModel}
+\title{Generate measurement model}
+\usage{
+generateMeasurementModel(names, indicators, ncells, model)
+}
+\arguments{
+  \item{names}{A vector of character strings with names of
+  latent variables.}
+
+  \item{indicators}{A list of vectors of character strings
+  to specify indicators of latent variables (see example).}
+
+  \item{ncells}{Number of groups/cells.}
+
+  \item{model}{A vector of character strings of the same
+  length as names. It is used to specify the measurement
+  model for each of the latent variables. Each element can
+  be one of c("parallel","tau-equi","tau-cong").}
+}
+\description{
+This function automatically generates the measurement model
+for a call to effectLite(). It is currently only used in
+the shiny interface.
+}
+\examples{
+names <- c("etay", "etaz1", "etaz2")
+indicators <- list("etay" = c("y1","y2","y3"),
+                   "etaz1" = c("z1","z2"),
+                   "etaz2" = c("z12","z22","z32","z42"))
+ncells = 6
+model = c("parallel","tau-equi","tau-cong")
+
+cat(generateMeasurementModel(names, indicators, ncells, model))
+}
+
