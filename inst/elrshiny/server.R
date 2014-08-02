@@ -114,7 +114,8 @@ shinyServer(function(input, output, session) {
       nk <- 1
       if(input$variablek != "None"){
         for(i in 1:length(input$variablek)){
-          nk <- nk*length(unique(d[[input$variablek[i]]]))
+          tmpvar <- as.factor(d[[input$variablek[i]]])
+          nk <- nk*length(levels(tmpvar))
         }        
       }
       
