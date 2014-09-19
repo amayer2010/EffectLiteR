@@ -1,6 +1,6 @@
 
 require(ggplot2)
-require(Hmisc)
+require(foreign)
 # require(semPlot)
 
 shinyServer(function(input, output, session) {
@@ -40,8 +40,10 @@ shinyServer(function(input, output, session) {
       }else if(suf == ".txt"){
         return(read.table(inFile$datapath))    
       }else if(suf == ".sav"){
-        return(spss.get(inFile$datapath))
-      }
+        return(read.spss(inFile$datapath, to.data.frame=TRUE))
+      }else if(suf == ".xpt"){
+        return(read.xport(inFile$datapath))
+      }  
     }  
   })
   

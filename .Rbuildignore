@@ -3,3 +3,6 @@ old
 .Rhistory
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.git
+.gitignore
+.gitattributes

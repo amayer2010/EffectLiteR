@@ -9,10 +9,9 @@ Depends:
     R (>= 2.14.1),
     lavaan (>= 0.5-16)
 Imports:
-    methods
-Suggests:
+    methods,
     shiny,
-    Hmisc,
+    foreign,
     ggplot2
 License: GPL (>= 2)
 LazyLoad: yes

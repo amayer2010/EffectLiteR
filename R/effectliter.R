@@ -261,6 +261,8 @@ createInput <- function(y, x, k, z, control, measurement, data,
   
   #   d <- data[c(y,x,k,z)] ## TODO: adjust for latent variables (indicator variables)
   
+  ## TODO: What do we do with missing values in X or K? These observations can not be
+  ## assigned to a group...
   d <- data
   vnames <- list(y=y,x=x,k=k,z=z)
   
@@ -268,11 +270,9 @@ createInput <- function(y, x, k, z, control, measurement, data,
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  
   }
-  stopifnot(length(levels(d[,x])) <= 10)
+  stopifnot(length(levels(d[,x])) <= 10) # test if it works for > 10 (problems with subscripts?)
   
-  if(!is.null(control)){
-    d[,x] <- relevel(d[,x], control)  
-  }
+  d[,x] <- relevel(d[,x], control)
   levels.x.original <- levels(d[,x])
   levels(d[,x]) <- paste(0:(length(levels(d[,x]))-1))
   
@@ -1030,6 +1030,7 @@ computeResults <- function(obj){
 #' 
 #' This function calls a shiny interface for effectLite().
 #' 
+#' @param launch.browser Option will be passed on to shiny::runApp()
 #' @export
 effectLiteGUI <- function(launch.browser=TRUE){  
   shiny::runApp(system.file('elrshiny', package='effectliter'),

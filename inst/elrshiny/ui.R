@@ -21,9 +21,10 @@ shinyUI(pageWithSidebar(
         hr(),
         h5("Choose Data File"),
         tryCatch(
-          fileInput("file1", "", accept=c(".csv",".txt",".sav"))
+          fileInput("file1", "", accept=c(".csv", ".txt", ".sav", ".xpt", 
+                                          ".CSV", ".TXT", ".SAV", ".XPT"))
         ),
-        helpText('Select either a .csv, .txt, or a .sav file to be uploaded. The corresponding R function (read.csv, read.table, or spss.get) will be chosen automatically with the default settings for arguments.')
+        helpText('Select either a .csv, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. To read in data from inside R into the shiny interface, it is easiest to save your dataset using write.csv with the default settings. If reading your SPSS file does not work, please try saving it in SAS Transport format with file ending .xpt. Causes for errors may be special characters in file names and/or path names.')
       ),
       ########## Manifest Variables ############
       tabPanel('Manifest Variables',
