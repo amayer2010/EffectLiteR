@@ -305,8 +305,9 @@ shinyServer(function(input, output, session) {
       p <- qplot(y, data=dp, geom="histogram",
                  binwidth=binwidth,
                  xlab=input$variabley,
-                 main=paste0("Distribution of ", input$variabley, " in Cells"))
+                 main=paste0("Distribution of ", input$variabley, " in cells"))
       p <- p + facet_wrap( ~ cell)
+      p <- p + theme_bw()
       print(p)
     }  
         
@@ -332,9 +333,10 @@ shinyServer(function(input, output, session) {
                  ylab=input$variabley,
                  xlab=input$zselect,                 
                  main=paste0("Regression of ", input$variabley, " on ", 
-                             input$zselect, " in Cells"))
+                             input$zselect, " in cells"))
       p <- p + facet_wrap( ~ cell)
       p <- p + geom_smooth(method = "lm")
+      p <- p + theme_bw()
       print(p)                  
     }
         
@@ -355,13 +357,17 @@ shinyServer(function(input, output, session) {
       yselected <- condeffects[[input$gxselect]]    
       zselected <- condeffects[[input$zselect2]]    
       
+      g1label <- "(K,Z)"
+      if(input$variablek == "None"){g1label <- "(Z)"}
+      
       p <- qplot(y=yselected, x=zselected, data=condeffects, 
-                 ylab=paste0(input$gxselect,"(K,Z)"),
+                 ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 
-                 main=paste0("Regression of ",
-                             paste0(input$gxselect,"(K,Z)"), " on ", 
+                 main=paste0("Estimated regression of ",
+                             paste0(input$gxselect,g1label), " on ", 
                              input$zselect2))
       p <- p + geom_smooth(method="loess")
+      p <- p + theme_bw()
       print(p)                  
       
       print(p)

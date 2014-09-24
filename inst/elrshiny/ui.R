@@ -31,22 +31,22 @@ shinyUI(pageWithSidebar(
 #                submitButton(text = "Run", icon = NULL),
                conditionalPanel(
                   condition = "!input.latenty",
-                  h5("Dependent Variable"),
+                  h5("Dependent Variable Y"),
                   selectInput("variabley", "", "",
                               selectize=FALSE)
                ),
                br(),
-               h5("Treatment Variable"),
+               h5("Treatment Variable X"),
                selectInput("variablex", "", "",
                            selectize=FALSE),
                br(),
                br(),
-               h5("Categorical Covariates"),
+               h5("Categorical Covariates K"),
                selectInput("variablek", "", "", 
                            multiple=TRUE, selectize=FALSE),
                br(),
                br(),
-               h5("Continuous Covariates"),
+               h5("Continuous Covariates Z"),
                selectInput("variablez", "", "", multiple=TRUE,
                            selectize=FALSE)
       ),
@@ -65,9 +65,9 @@ shinyUI(pageWithSidebar(
           selectInput("indicatorsy", "Indicators of Latent Dependent Variable", "",
                       multiple=TRUE, selectize=FALSE),
           radioButtons("mm.etay", "Measurement Model for Latent Dependent Variable",
-                       choices = c("parallel tests" = "parallel",
-                                   "essentially tau-equivalent tests" = "tau-equi",
-                                   "tau-congeneric tests" = "tau-cong"),
+                       choices = c("equivalent measures" = "parallel",
+                                   "essentially equivalent measures" = "tau-equi",
+                                   "congeneric measures" = "tau-cong"),
                        selected = "parallel")
         ),
         br(),
@@ -90,9 +90,9 @@ shinyUI(pageWithSidebar(
             selectInput("indicatorsz1", "Indicators of Latent Covariate 1", "",
                         multiple=TRUE, selectize=FALSE),
             radioButtons("mm.etaz1", "Measurement Model for Latent Covariate 1",
-                        choices = c("parallel tests" = "parallel",
-                                    "essentially tau-equivalent tests" = "tau-equi",
-                                    "tau-congeneric tests" = "tau-cong"))
+                        choices = c("equivalent measures" = "parallel",
+                                    "essentially equivalent measures" = "tau-equi",
+                                    "congeneric measures" = "tau-cong"))
           ),
           ### Cov 2
           conditionalPanel(
@@ -104,9 +104,9 @@ shinyUI(pageWithSidebar(
             selectInput("indicatorsz2", "Indicators of Latent Covariate 2", "",
                         multiple=TRUE, selectize=FALSE),
             radioButtons("mm.etaz2", "Measurement Model for Latent Covariate 2",
-                         choices = c("parallel tests" = "parallel",
-                                     "essentially tau-equivalent tests" = "tau-equi",
-                                     "tau-congeneric tests" = "tau-cong"))
+                         choices = c("equivalent measures" = "parallel",
+                                     "essentially equivalent measures" = "tau-equi",
+                                     "congeneric measures" = "tau-cong"))
           ),  
           ### Cov 3
           conditionalPanel(
@@ -118,9 +118,9 @@ shinyUI(pageWithSidebar(
             selectInput("indicatorsz3", "Indicators of Latent Covariate 3", "",
                         multiple=TRUE, selectize=FALSE),
             radioButtons("mm.etaz3", "Measurement Model for Latent Covariate 3",
-                         choices = c("parallel tests" = "parallel",
-                                     "essentially tau-equivalent tests" = "tau-equi",
-                                     "tau-congeneric tests" = "tau-cong"))
+                         choices = c("equivalent measures" = "parallel",
+                                     "essentially equivalent measures" = "tau-equi",
+                                     "congeneric measures" = "tau-cong"))
           ),  
           ### Cov 4
           conditionalPanel(
@@ -132,9 +132,9 @@ shinyUI(pageWithSidebar(
             selectInput("indicatorsz4", "Indicators of Latent Covariate 4", "",
                         multiple=TRUE, selectize=FALSE),
             radioButtons("mm.etaz4", "Measurement Model for Latent Covariate 4",
-                         choices = c("parallel tests" = "parallel",
-                                     "essentially tau-equivalent tests" = "tau-equi",
-                                     "tau-congeneric tests" = "tau-cong"))
+                         choices = c("equivalent measures" = "parallel",
+                                     "essentially equivalent measures" = "tau-equi",
+                                     "congeneric measures" = "tau-cong"))
           ),  
           ### Cov 5
           conditionalPanel(
@@ -146,9 +146,9 @@ shinyUI(pageWithSidebar(
             selectInput("indicatorsz5", "Indicators of Latent Covariate 5", "",
                         multiple=TRUE, selectize=FALSE),
             radioButtons("mm.etaz5", "Measurement Model for Latent Covariate 5",
-                         choices = c("parallel tests" = "parallel",
-                                     "essentially tau-equivalent tests" = "tau-equi",
-                                     "tau-congeneric tests" = "tau-cong"))
+                         choices = c("equivalent measures" = "parallel",
+                                     "essentially equivalent measures" = "tau-equi",
+                                     "congeneric measures" = "tau-cong"))
           )            
         )
       ),
@@ -209,7 +209,7 @@ shinyUI(pageWithSidebar(
                      condition = "input.variablez != 'None' & 
                       input.variablez != ''",
                      selectInput("zselect", 
-                                 "Select Continuous Covariate", 
+                                 "Select continuous covariate", 
                                  "", 
                                  multiple=FALSE,
                                  selectize=FALSE)
@@ -226,12 +226,12 @@ shinyUI(pageWithSidebar(
                  condition = "input.variablez != 'None' & 
                       input.variablez != ''",
                  selectInput("gxselect", 
-                             "Select Effect Function (y-Axis)", 
+                             "Select effect function (y-axis)", 
                              "g1(K,Z)", 
                              multiple=FALSE,
                              selectize=FALSE),
                  selectInput("zselect2", 
-                             "Select Continuous Covariate  (x-Axis)", 
+                             "Select continuous covariate  (x-axis)", 
                              "", 
                              multiple=FALSE,
                              selectize=FALSE)                 

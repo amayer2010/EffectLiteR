@@ -149,11 +149,11 @@ setMethod("show", "effectlite", function(object) {
   cat("\n\n------------------ Variables and Descriptive Statistics ------------------ \n\n")
   
   cat("Variable Names \n\n")
-  cat("Outcome variable: ", paste0(vnames$y), "\n")
-  cat("Treatment variable: ", paste0(vnames$x), "\n")
+  cat("Outcome variable Y: ", paste0(vnames$y), "\n")
+  cat("Treatment variable X: ", paste0(vnames$x), "\n")
   cat("Reference group (Control group): ", paste0(object@input@control), "\n")
-  cat("Categorical covariates: ", paste0(vnames$k), "\n")
-  cat("Continuous covariates: ", paste0(vnames$z), "\n\n")
+  cat("Categorical covariates K: ", paste0(vnames$k), "\n")
+  cat("Continuous covariates Z: ", paste0(vnames$z), "\n\n")
   
   if(nk>1){
     cat("Levels of Unfolded Categorical Covariate K \n")
@@ -181,6 +181,10 @@ setMethod("show", "effectlite", function(object) {
   
   cat("\n")
   cat("Cell Counts \n\n")
+  cat("This table shows cell counts including missings. \n")
+  cat("See also output under lavaan results for number of observations \n")
+  cat("actually used in the analysis. \n\n")
+  
   if(nk==1){
     print(ftable(object@input@data[vnames$x]))
   }else{
@@ -188,7 +192,9 @@ setMethod("show", "effectlite", function(object) {
                                     "~", vnames$x))
     print(ftable(cellcounts, data=object@input@data))
   }
-  
+
+#  cat("\n\n------------------ Parameterization of Regression ------------------ \n\n")  
+
   
   cat("\n\n------------------ Main Hypotheses ------------------ \n\n")
   if(object@input@se != "standard"){
@@ -280,7 +286,7 @@ createInput <- function(y, x, k, z, control, measurement, data,
   levels.k.original <- vector("list",length(k))
   names(levels.k.original) <- k
   
-  if(!is.null(k)){
+  if(!is.null(k)){    
     for(i in 1:length(k)){
       d[,k[i]] <- as.factor(d[,k[i]])
       levels.k.original[[i]] <- levels(d[,k[i]])
@@ -299,7 +305,13 @@ createInput <- function(y, x, k, z, control, measurement, data,
     }
     levels.kstar.original <- levels(d$kstar)
     levels(d$kstar) <- paste(0:(length(levels(d$kstar))-1))
+    
+    ## check for empty cells
+    if(any(table(d$kstar, d[,x]) == 0)){
+      stop("Empty cells are currently not allowed.")
+    }    
     stopifnot(length(levels(d$kstar)) <= 10)    
+    
   }else{
     d$kstar <- NULL
   }
@@ -321,7 +333,7 @@ createInput <- function(y, x, k, z, control, measurement, data,
   }else{
     cell <- levels(d[,x])
     d$cell <- d[,x]
-  }
+  }  
   
   ## add vlevels for created variables
   vlevels <- list(levels.x.original=levels.x.original,
@@ -1087,6 +1099,8 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
       mm <- paste0(mm, tmp, "\n")
     }    
   }
+  
+  ##TODO method factors...
   
   ## intercepts
   for(i in 1:length(names)){

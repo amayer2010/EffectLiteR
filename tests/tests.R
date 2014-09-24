@@ -223,3 +223,25 @@ d$z1[10] <- NA
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
                  missing="fiml")
 
+
+############ Test with constraints (NOT RUN) ################
+# 
+# lavsyntax <- m1@lavaansyntax@model
+# lavsyntax <- paste(lavsyntax,"\n", "g101 == 0")
+# testdata <- m1@input@data
+# 
+# 
+# m1star <- sem(lavsyntax, group="cell", data=testdata,
+#           fixed.x=FALSE, group.w.free = TRUE, mimic="mplus") 
+
+
+############ Test with empty cell ################
+
+## should give error message...
+# d <- subset(example01, subset= !(x=="treat1" & k1=="male"))
+# m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
+#                  missing="fiml")
+
+
+
+
