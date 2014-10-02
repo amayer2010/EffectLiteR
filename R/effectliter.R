@@ -20,7 +20,8 @@ setClass("input", representation(
   fixed.cell ="logical",
   missing="character",
   se="character", ## lavaan standard errors
-  bootstrap="numeric" ## number of bootstrap draws
+  bootstrap="numeric", ## number of bootstrap draws
+  interactions="character" ## type of interaction (all, 2-way, no)  
 )
 )
 
@@ -106,6 +107,7 @@ setClass("effectlite", representation(
 #' passed on to lavaan::sem()-
 #' @param syntax.only logical. If TRUE, only syntax is returned and the model 
 #' will not be estimated.
+#' @param interactions character. Can be one of c("all","2-way","no") and indicates the type of interaction used in the parameterization of the regression.
 #' @param ... Further arguments passed to lavaan::sem().
 #' @return Object of class effectlite.
 #' @examples
@@ -116,11 +118,12 @@ setClass("effectlite", representation(
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
-                       syntax.only=FALSE, ...){
+                       syntax.only=FALSE, interactions="all", ...){
   
   obj <- new("effectlite")  
   obj@input <- createInput(y,x,k,z,control,measurement,data, 
-                           fixed.cell, missing, se, bootstrap)
+                           fixed.cell, missing, se, bootstrap,
+                           interactions)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
@@ -263,7 +266,8 @@ setMethod("show", "effectlite", function(object) {
 ################ constructor functions #########################
 
 createInput <- function(y, x, k, z, control, measurement, data, 
-                        fixed.cell, missing, se, bootstrap){
+                        fixed.cell, missing, se, bootstrap,
+                        interactions){
   
   #   d <- data[c(y,x,k,z)] ## TODO: adjust for latent variables (indicator variables)
   
@@ -360,7 +364,8 @@ createInput <- function(y, x, k, z, control, measurement, data,
              fixed.cell=fixed.cell,
              missing=missing,
              se=se,
-             bootstrap=bootstrap
+             bootstrap=bootstrap,
+             interactions=interactions
   )
   
   return(res)
@@ -379,7 +384,12 @@ createParNames <- function(obj){
   alphas <- with(tmp, array(paste0("a",x,k,z), dim=c(nz+1,nk,ng)))
   betas <- with(tmp, array(paste0("b",x,k,z), dim=c(nz+1,nk,ng)))
   gammas <- with(tmp, array(paste0("g",x,k,z), dim=c(nz+1,nk,ng)))
-  
+
+#   ## if no interaction (does not work; see example...)
+#   if(inp@interactions == "no"){
+#     alphas <- with(tmp, array(paste0("a","0","0",z), dim=c(nz+1,nk,ng)))
+#   }
+    
   pk <- paste0("Pk",1:nk)
   px <- paste0("Px",0:(ng-1))
   if(nz>0){
@@ -803,6 +813,12 @@ createLavaanSyntax <- function(obj) {
   }
   
   
+#   ## Experimental: Constraints about 2 and 3 way interactions
+#   ## does not work
+#   if(inp@interactions == "no"){
+#     gammas <- matrix(c(parnames@gammas), ncol=ng)[-1,-1]
+#     model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
+#   }  
 
    
   ## Hypothesis 1: No average treatment effects

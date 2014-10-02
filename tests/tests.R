@@ -243,5 +243,24 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
 #                  missing="fiml")
 
 
+############ Tests with no interaction option ########################
+## does not work...
+# 
+d <- example01
 
+## 1 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
+                 control="control",  syntax.only=FALSE)
+
+lavsyntax <- '
+dv ~ c(a000,a000,a000,a000,a000,a000)*1
+dv ~ c(a001,a001,a001,a001,a001,a001)*z1
+z1 ~ c(mz001,mz011,mz101,mz111,mz201,mz211)*1
+group % c(gw11,gw12,gw21,gw22,gw31,gw32)*w
+'
+
+testdata <- m1@input@data
+
+m1star <- sem(lavsyntax, group="cell", data=testdata,
+          fixed.x=FALSE, group.w.free = TRUE, mimic="mplus") 
 
