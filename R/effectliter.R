@@ -1,4 +1,4 @@
-## package effectliter
+## package EffectLiteR
 
 ######################## class definitions #####################
 
@@ -1045,7 +1045,7 @@ computeResults <- function(obj){
 #' @param launch.browser Option will be passed on to shiny::runApp()
 #' @export
 effectLiteGUI <- function(launch.browser=TRUE){  
-  shiny::runApp(system.file('elrshiny', package='effectliter'),
+  shiny::runApp(system.file('elrshiny', package='EffectLiteR'),
                 launch.browser=launch.browser)
 }
 
@@ -1130,9 +1130,9 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
 
 ############## documentation ######################
 
-#' effectliter
+#' EffectLiteR
 #'
-#' @name effectliter
+#' @name EffectLiteR
 #' @docType package
 NULL
 

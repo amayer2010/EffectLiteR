@@ -1,6 +1,6 @@
 
 
-library(effectliter)
+library(EffectLiteR)
 
 
 
