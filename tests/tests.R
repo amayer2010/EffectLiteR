@@ -98,6 +98,22 @@ m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0",
                  se="boot", bootstrap=5L)
 
 
+############ Example 01a with method factor ################## 
+
+mmtest <- '
+eta2 =~ 1*CPM12 + 1*CPM22
+eta1 =~ 1*CPM11 + 1*CPM21
+mf =~ 1*CPM11 + 1*CPM12
+
+CPM11 + CPM21 + CPM12 + CPM22 ~ 0*1
+'
+
+m1 <- effectLite(y="eta2", x="x", z=c("eta1","mf"), control="0", 
+                 measurement=mmtest, data=example02lv, fixed.cell=FALSE,
+                 missing="fiml", syntax.only=FALSE)
+
+
+
 ############ Example 02 with latent variable and K ################## 
 
 mmtest <- '
@@ -241,7 +257,3 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
 # d <- subset(example01, subset= !(x=="treat1" & k1=="male"))
 # m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
 #                  missing="fiml")
-
-
-
-

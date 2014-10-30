@@ -1096,7 +1096,7 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
       tmp <- paste0("c(",paste(rep(loading,ncells),collapse=","),")")
       tmp <- paste0(tmp,"*",indicators[[i]][k])
       tmp <- paste0(names[i], " =~ ", tmp)
-      mm <- paste0(mm, tmp, "\n")
+      mm <- c(mm, tmp)
     }    
   }
   
@@ -1119,10 +1119,12 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
             
       tmp <- paste0("c(",paste(rep(intercept,ncells),collapse=","),")")
       tmp <- paste0(indicators[[i]][k], " ~ " , tmp,"*1")
-      mm <- paste0(mm, tmp, "\n")
+      mm <- c(mm, tmp)
     }    
   }
   
+  mm <- unique(mm) ## remove duplicate entries (for method factors and alike)
+  mm <- paste(mm, collapse="\n")
   
   return(mm)
 }

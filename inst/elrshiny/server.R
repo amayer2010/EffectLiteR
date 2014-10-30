@@ -428,7 +428,8 @@ shinyServer(function(input, output, session) {
     }else{
           
       m1 <- model()
-      summary(m1@results@lavresults, fit.measures=FALSE)  
+      summary(m1@results@lavresults, fit.measures=TRUE)  
+      ## maybe there was a reason I set fit.measures=FALSE in prior versions...
     }  
   })
 

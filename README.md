@@ -34,6 +34,7 @@ The main function of the package is `effectLite()`. Type `example(effectLite)` f
 
 ```
 library(EffectLiteR)
+
 example(effectLite)
 effectLiteGUI()
 ```
