@@ -1,16 +1,18 @@
 
-shinyUI(pageWithSidebar(
-  headerPanel("EffectLiteR"),
+shinyUI(fluidPage(
+  titlePanel(title="EffectLiteR"),
   
+  sidebarLayout(
   sidebarPanel(
     tabsetPanel(
       ######### Data ############
       tabPanel('Data',
+        img(src='effectliter_logo.png', align = "right"),
         h5("Start a New Analysis"),
         actionButton("newanalysis","New Analysis"),
         uiOutput("reload"),
         br(),
-        helpText("You can also use the reload button of your browser to start a new analysis."),        
+#         helpText("You can also use the reload button of your browser to start a new analysis."),        
         hr(),        
         ##TODO check out selectize options...
         h5("Select Example Data"),
@@ -242,6 +244,6 @@ shinyUI(pageWithSidebar(
 #       tabPanel("Path Diagram", plotOutput("plotpd"))
             
     )    
-  )
+  ))
 
 ))
