@@ -14,11 +14,10 @@ shinyUI(fluidPage(
         br(),
 #         helpText("You can also use the reload button of your browser to start a new analysis."),        
         hr(),        
-        ##TODO check out selectize options...
         h5("Select Example Data"),
         selectInput("exdata", "", 
                     c("none","nonortho","example01","example02lv"),
-                    selected="none", selectize=FALSE),
+                    selected="none", selectize=TRUE),
         br(),        
         hr(),
         h5("Choose Data File"),
@@ -30,30 +29,32 @@ shinyUI(fluidPage(
       ),
       ########## Manifest Variables ############
       tabPanel('Manifest Variables',
+               img(src='effectliter_logo.png', align = "right"),
 #                submitButton(text = "Run", icon = NULL),
                conditionalPanel(
                   condition = "!input.latenty",
                   h5("Dependent Variable Y"),
                   selectInput("variabley", "", "",
-                              selectize=FALSE)
+                              selectize=TRUE)
                ),
                br(),
                h5("Treatment Variable X"),
                selectInput("variablex", "", "",
-                           selectize=FALSE),
+                           selectize=TRUE),
                br(),
                br(),
                h5("Categorical Covariates K"),
                selectInput("variablek", "", "", 
-                           multiple=TRUE, selectize=FALSE),
+                           multiple=TRUE, selectize=TRUE),
                br(),
                br(),
                h5("Continuous Covariates Z"),
                selectInput("variablez", "", "", multiple=TRUE,
-                           selectize=FALSE)
+                           selectize=TRUE)
       ),
       ############ Latent Variables ###########
       tabPanel('Latent Variables',
+        img(src='effectliter_logo.png', align = "right"),       
         h5("Latent Dependent Variable"),       
         checkboxInput("latenty", "The dependent variable is latent", FALSE),        
         conditionalPanel(
@@ -65,7 +66,7 @@ shinyUI(fluidPage(
           textInput("name.etay", "Name of Latent Dependent Variable", 
                     value = "etay"),
           selectInput("indicatorsy", "Indicators of Latent Dependent Variable", "",
-                      multiple=TRUE, selectize=FALSE),
+                      multiple=TRUE, selectize=TRUE),
           radioButtons("mm.etay", "Measurement Model for Latent Dependent Variable",
                        choices = c("equivalent measures" = "parallel",
                                    "essentially equivalent measures" = "tau-equi",
@@ -90,7 +91,7 @@ shinyUI(fluidPage(
             textInput("name.etaz1", "Name of Latent Covariate 1", 
                       value = "etaz1"),
             selectInput("indicatorsz1", "Indicators of Latent Covariate 1", "",
-                        multiple=TRUE, selectize=FALSE),
+                        multiple=TRUE, selectize=TRUE),
             radioButtons("mm.etaz1", "Measurement Model for Latent Covariate 1",
                         choices = c("equivalent measures" = "parallel",
                                     "essentially equivalent measures" = "tau-equi",
@@ -104,7 +105,7 @@ shinyUI(fluidPage(
             textInput("name.etaz2", "Name of Latent Covariate 2", 
                       value = "etaz2"),
             selectInput("indicatorsz2", "Indicators of Latent Covariate 2", "",
-                        multiple=TRUE, selectize=FALSE),
+                        multiple=TRUE, selectize=TRUE),
             radioButtons("mm.etaz2", "Measurement Model for Latent Covariate 2",
                          choices = c("equivalent measures" = "parallel",
                                      "essentially equivalent measures" = "tau-equi",
@@ -118,7 +119,7 @@ shinyUI(fluidPage(
             textInput("name.etaz3", "Name of Latent Covariate 3", 
                       value = "etaz3"),
             selectInput("indicatorsz3", "Indicators of Latent Covariate 3", "",
-                        multiple=TRUE, selectize=FALSE),
+                        multiple=TRUE, selectize=TRUE),
             radioButtons("mm.etaz3", "Measurement Model for Latent Covariate 3",
                          choices = c("equivalent measures" = "parallel",
                                      "essentially equivalent measures" = "tau-equi",
@@ -132,7 +133,7 @@ shinyUI(fluidPage(
             textInput("name.etaz4", "Name of Latent Covariate 4", 
                       value = "etaz4"),
             selectInput("indicatorsz4", "Indicators of Latent Covariate 4", "",
-                        multiple=TRUE, selectize=FALSE),
+                        multiple=TRUE, selectize=TRUE),
             radioButtons("mm.etaz4", "Measurement Model for Latent Covariate 4",
                          choices = c("equivalent measures" = "parallel",
                                      "essentially equivalent measures" = "tau-equi",
@@ -146,7 +147,7 @@ shinyUI(fluidPage(
             textInput("name.etaz5", "Name of Latent Covariate 5", 
                       value = "etaz5"),
             selectInput("indicatorsz5", "Indicators of Latent Covariate 5", "",
-                        multiple=TRUE, selectize=FALSE),
+                        multiple=TRUE, selectize=TRUE),
             radioButtons("mm.etaz5", "Measurement Model for Latent Covariate 5",
                          choices = c("equivalent measures" = "parallel",
                                      "essentially equivalent measures" = "tau-equi",
@@ -156,6 +157,7 @@ shinyUI(fluidPage(
       ),
       ########## Options #############
       tabPanel('Options',
+        img(src='effectliter_logo.png', align = "right"),       
         h5("Control Group"),       
         selectInput("control", "", ""),
         br(),
@@ -214,7 +216,7 @@ shinyUI(fluidPage(
                                  "Select continuous covariate", 
                                  "", 
                                  multiple=FALSE,
-                                 selectize=FALSE)
+                                 selectize=TRUE)
                    ),                              
                plotOutput("plot2")),
       
@@ -231,12 +233,12 @@ shinyUI(fluidPage(
                              "Select effect function (y-axis)", 
                              "g1(K,Z)", 
                              multiple=FALSE,
-                             selectize=FALSE),
+                             selectize=TRUE),
                  selectInput("zselect2", 
                              "Select continuous covariate  (x-axis)", 
                              "", 
                              multiple=FALSE,
-                             selectize=FALSE)                 
+                             selectize=TRUE)                 
                ),                              
                plotOutput("plot3")) #,
 #       
