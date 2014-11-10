@@ -125,8 +125,7 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
   if(syntax.only){
-    res <- obj@lavaansyntax@model
-    cat(res)    
+    res <- obj@lavaansyntax@model    
   }else{
     obj@results <- computeResults(obj)
     res <- obj
@@ -507,20 +506,21 @@ createLavaanSyntax <- function(obj) {
       }
     }
   }
-  
-  ## syntax group weights
-  tmp <- paste0("group % c(", paste(parnames@groupw, collapse=","), ")*w")
-  model <- paste0(model, "\n", tmp)
-  
+    
   ## compute relative frequencies
-  relfreq <- obj@parnames@relfreq
-  N <- nrow(obj@input@data)    
+  relfreq <- obj@parnames@relfreq    
   
   if(fixed.cell){
+    N <- nrow(obj@input@data)
     observed.freq <- table(obj@input@data$cell)/N
     tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
     model <- paste0(model, "\n", tmp)        
   }else{
+    
+    ## syntax group weights
+    tmp <- paste0("group % c(", paste(parnames@groupw, collapse=","), ")*w")
+    model <- paste0(model, "\n", tmp)
+    
     groupw <- obj@parnames@groupw
     
     tmp <- paste(paste0("exp(", groupw, ")"), collapse=" + ")
@@ -840,7 +840,7 @@ computeResults <- function(obj){
   m1 <- sem(obj@lavaansyntax@model, group="cell", missing=obj@input@missing,
             se=obj@input@se, bootstrap=obj@input@bootstrap,
             group.label=obj@input@vlevels$cell, data=obj@input@data,
-            fixed.x=FALSE, group.w.free = TRUE, mimic="mplus") 
+            fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, mimic="mplus") 
   
   #TODO: ask Yves for unclass(se(m1, type="user")): inspect(m1,"se") does not give SE for new parameters
   est <- unclass(coef(m1, type="user")) ## parameter estimates

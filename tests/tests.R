@@ -184,13 +184,13 @@ d <- example01
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="boot", bootstrap=5L, control="control")
 
-## 2 K; 1 Z
-m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
-                 se="first.order", control="control")
-
-## 2 K; 1 Z
-m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
-                 se="robust", control="control")
+# ## 2 K; 1 Z
+# m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+#                  se="first.order", control="control")
+# 
+# ## 2 K; 1 Z
+# m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+#                  se="robust", control="control")
 
 
 ## TODO: Why can SE not be computed for first.order and robust?
@@ -239,6 +239,13 @@ d$z1[10] <- NA
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
                  missing="fiml")
 
+
+########## Tests with fixed cell size ################
+d <- example01
+
+## 1 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
+                 control="control", fixed.cell=TRUE)
 
 ############ Test with constraints (NOT RUN) ################
 # 
