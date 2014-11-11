@@ -18,7 +18,7 @@ shinyServer(function(input, output, session) {
     exdata <- input$exdata
     
     if(is.null(inFile)){      
-      if(exdata=="none"){
+      if(exdata==""){
         return(NULL)        
       }else if(exdata=="nonortho"){
         return(nonortho)  
@@ -56,10 +56,11 @@ shinyServer(function(input, output, session) {
     
     dv <- depv()
     x <- input$variablex
-    k <- NULL; if(input$variablek[1]!="None"){k <- input$variablek}
+    
+    k <- NULL; if(length(input$variablek) != 0){k <- input$variablek}
     fixed.cell <- FALSE; if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
     
-    z <- NULL; if(input$variablez[1]!="None"){z <- input$variablez}
+    z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
     if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
     
     
@@ -114,7 +115,7 @@ shinyServer(function(input, output, session) {
       d <- dataInput()
       ng <- length(unique(d[[input$variablex]]))
       nk <- 1
-      if(input$variablek != "None"){
+      if(length(input$variablek) != 0){
         for(i in 1:length(input$variablek)){
           tmpvar <- as.factor(d[[input$variablek[i]]])
           nk <- nk*length(levels(tmpvar))
@@ -208,7 +209,7 @@ shinyServer(function(input, output, session) {
     inFile <- input$file1
     exdata <- input$exdata
     
-    if(is.null(inFile) & exdata=="none")
+    if(is.null(inFile) & exdata=="")
       return(NULL)  
     
     d <- dataInput()
@@ -218,11 +219,11 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "variablex", 
                       choices = c("", names(d)))
     updateSelectInput(session, "variablek", 
-                      choices = c("None", names(d)),
-                      selected = "None")
+                      choices = c("", names(d)),
+                      selected = "")
     updateSelectInput(session, "variablez", 
-                      choices = c("None", names(d)),
-                      selected = "None")
+                      choices = c("", names(d)),
+                      selected = "")
     updateSelectInput(session, "indicatorsy", choices = names(d))
     updateSelectInput(session, "indicatorsz1", choices = names(d))
     updateSelectInput(session, "indicatorsz2", choices = names(d))
@@ -276,7 +277,19 @@ shinyServer(function(input, output, session) {
     d
   })
 
-  ###### Output Conditional Effects Table #########  
+  ###### Output Conditional Effects Table #########
+  output$helptextcondeffects <- renderPrint({
+    if(input$variabley == "" || input$variablex == "" || 
+         input$latenty || input$latentz){
+      
+      cat("Conditional effects are only shown if you have specified the dependent variable and the treatment variable. Conditional effects are not available if there are latent variables in the analysis.")
+      
+    }else{
+      
+      cat("This datatable shows the values of the effect function for given values of the categorical and continuous covariates.")
+    }
+  })
+    
   output$condeffs = renderDataTable({
     if(input$variabley == "" || input$variablex == "" || 
          input$latenty || input$latentz){
@@ -289,6 +302,17 @@ shinyServer(function(input, output, session) {
   
   
   ###### Output Plot 1 #########
+  output$helptextplot1 <- renderPrint({
+    if(input$variabley == "" || input$variablex == "" || input$latenty == TRUE){
+      
+      cat("Plot 1 only works for a manifest dependent variable and a treatment variable.")
+      
+    }else{
+      
+      cat("Plot 1 shows a histogram of the dependent variable in each cell.")
+    }
+  })
+    
   output$plot1 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || input$latenty == TRUE){
@@ -313,11 +337,25 @@ shinyServer(function(input, output, session) {
         
   })
 
-  ###### Output Plot 2 #########
+  ###### Output Plot 2 #########  
+  output$helptextplot2 <- renderPrint({
+    if(input$variabley == "" || input$variablex == "" || 
+         is.null(input$variablez) || input$latenty){
+      
+      cat("Plot 2 only works for a manifest dependent variable, a treatment variable, and at least one continuous covariate.")
+      
+    }else{
+      
+      cat("Plot 2 shows the regression of the dependent variable on the selected continuous covariate in each cell.")
+    }
+  })
+  
+  
   output$plot2 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || 
-         input$variablez == "None" || input$latenty){
+         is.null(input$variablez) || input$latenty){
+      
       return(NULL)
     }else{
       
@@ -344,10 +382,23 @@ shinyServer(function(input, output, session) {
 
   
   ###### Output Plot 3 #########
+  output$helptextplot3 <- renderPrint({
+    if(input$variabley == "" || input$variablex == "" || 
+         is.null(input$variablez) || input$latenty ||
+         input$latentz){
+      
+      cat("Plot 3 only works for a manifest dependent variable, a treatment variable, at least one continuous covariate, and no latent covariates.")
+      
+    }else{
+      
+      cat("Plot 3 shows the regression of the selected effect function on the selected continuous covariate.")
+    }
+  })
+  
   output$plot3 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || 
-         input$variablez == "None" || input$latenty ||
+         is.null(input$variablez) || input$latenty ||
          input$latentz){
       return(NULL)
     }else{
@@ -358,7 +409,7 @@ shinyServer(function(input, output, session) {
       zselected <- condeffects[[input$zselect2]]    
       
       g1label <- "(K,Z)"
-      if(input$variablek == "None"){g1label <- "(Z)"}
+      if(length(input$variablek) == 0){g1label <- "(Z)"}
       
       p <- qplot(y=yselected, x=zselected, data=condeffects, 
                  ylab=paste0(input$gxselect,g1label),
@@ -368,7 +419,6 @@ shinyServer(function(input, output, session) {
                              input$zselect2))
       p <- p + geom_smooth(method="loess")
       p <- p + theme_bw()
-      print(p)                  
       
       print(p)
     }

@@ -12,18 +12,18 @@ shinyUI(fluidPage(
         actionButton("newanalysis","New Analysis"),
         uiOutput("reload"),
         br(),
-#         helpText("You can also use the reload button of your browser to start a new analysis."),        
         hr(),        
-        h5("Select Example Data"),
-        selectInput("exdata", "", 
-                    c("none","nonortho","example01","example02lv"),
-                    selected="none", selectize=TRUE),
+        h5("Example Data"),
+        selectizeInput(inputId="exdata", label="", selected="",
+                       choices= c("","nonortho","example01","example02lv"),
+                       options = list(placeholder = 'choose example data')),
         br(),        
         hr(),
-        h5("Choose Data File"),
+        h5("Data File"),
         tryCatch(
-          fileInput("file1", "", accept=c(".csv", ".txt", ".sav", ".xpt", 
-                                          ".CSV", ".TXT", ".SAV", ".XPT"))
+          fileInput("file1", "", 
+                    accept=c(".csv", ".txt", ".sav", ".xpt", 
+                              ".CSV", ".TXT", ".SAV", ".XPT"))
         ),
         helpText('Select either a .csv, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. To read in data from inside R into the shiny interface, it is easiest to save your dataset using write.csv with the default settings. If reading your SPSS file does not work, please try saving it in SAS Transport format with file ending .xpt. Causes for errors may be special characters in file names and/or path names.')
       ),
@@ -34,23 +34,24 @@ shinyUI(fluidPage(
                conditionalPanel(
                   condition = "!input.latenty",
                   h5("Dependent Variable Y"),
-                  selectInput("variabley", "", "",
-                              selectize=TRUE)
+                  selectizeInput("variabley", "", "",
+                        options = list(placeholder = 'select dependent variable'))
                ),
                br(),
                h5("Treatment Variable X"),
-               selectInput("variablex", "", "",
-                           selectize=TRUE),
+               selectizeInput("variablex", "", "",
+                    options = list(placeholder = 'select treatment variable')),
                br(),
                br(),
                h5("Categorical Covariates K"),
-               selectInput("variablek", "", "", 
-                           multiple=TRUE, selectize=TRUE),
+               selectizeInput("variablek", "", "", 
+                   multiple=TRUE, selected="",
+                   options = list(placeholder = 'select categorical covariates')),
                br(),
                br(),
                h5("Continuous Covariates Z"),
-               selectInput("variablez", "", "", multiple=TRUE,
-                           selectize=TRUE)
+               selectizeInput("variablez", "", "", multiple=TRUE, selected="",
+                    options = list(placeholder = 'select continuous covariates'))
       ),
       ############ Latent Variables ###########
       tabPanel('Latent Variables',
@@ -198,48 +199,39 @@ shinyUI(fluidPage(
       tabPanel("lavaan Results", verbatimTextOutput("lavresults")),
       
       ######### Conditional Effects ##########
-      tabPanel('Conditional Effects', dataTableOutput("condeffs")),
+      tabPanel('Conditional Effects', 
+               verbatimTextOutput("helptextcondeffects"),
+               dataTableOutput("condeffs")),
       
       ######### Plot 1 ##########
-      tabPanel("Plot 1", plotOutput("plot1")),
+      tabPanel("Plot 1", 
+               verbatimTextOutput("helptextplot1"),
+               plotOutput("plot1")
+      ),
       
       ######### Plot 2 ##########
       tabPanel("Plot 2", 
-#                    conditionalPanel(
-#                     condition="input.latenty == TRUE || input.latentz == TRUE",
-#                     helpText("Plot 2 is only available for manifest dependent variables and manifest continuous covariates.")
-#                    ),
-                   conditionalPanel(
-                     condition = "input.variablez != 'None' & 
-                      input.variablez != ''",
-                     selectInput("zselect", 
-                                 "Select continuous covariate", 
-                                 "", 
-                                 multiple=FALSE,
-                                 selectize=TRUE)
-                   ),                              
-               plotOutput("plot2")),
+        verbatimTextOutput("helptextplot2"),
+        selectInput("zselect", 
+            "Select continuous covariate", "", 
+            multiple=FALSE,
+            selectize=TRUE                 
+        ),
+      plotOutput("plot2")),
       
       ######### Plot 3 ##########
       tabPanel("Plot 3",
-#                conditionalPanel(
-#                  condition="input.latenty == TRUE | input.latentz == TRUE",
-#                  helpText("Plot 3 is only available for manifest dependent variables and manifest continuous covariates.")
-#                ),
-               conditionalPanel(
-                 condition = "input.variablez != 'None' & 
-                      input.variablez != ''",
-                 selectInput("gxselect", 
-                             "Select effect function (y-axis)", 
-                             "g1(K,Z)", 
-                             multiple=FALSE,
-                             selectize=TRUE),
-                 selectInput("zselect2", 
-                             "Select continuous covariate  (x-axis)", 
-                             "", 
-                             multiple=FALSE,
-                             selectize=TRUE)                 
-               ),                              
+              verbatimTextOutput("helptextplot3"),
+              selectInput("gxselect", 
+                          "Select effect function (y-axis)", 
+                          "g1(K,Z)", 
+                          multiple=FALSE,
+                          selectize=TRUE),
+              selectInput("zselect2", 
+                          "Select continuous covariate  (x-axis)", 
+                          "", 
+                          multiple=FALSE,
+                          selectize=TRUE),                 
                plotOutput("plot3")) #,
 #       
 #       ######### Path Diagram ##########
