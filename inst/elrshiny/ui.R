@@ -180,7 +180,10 @@ shinyUI(fluidPage(
         h5("Cell Sizes"),
         radioButtons("fixed.cell", "", 
                      choices=c("stochastic","fixed"), 
-                     selected = "stochastic")
+                     selected = "stochastic"),
+        br(),
+        h5("Additional Options"),
+        checkboxInput("vallabels", "Use value labels from SPSS", TRUE)                                      
     )
   )),
   

@@ -40,7 +40,8 @@ shinyServer(function(input, output, session) {
       }else if(suf == ".txt"){
         return(read.table(inFile$datapath))    
       }else if(suf == ".sav"){
-        return(read.spss(inFile$datapath, to.data.frame=TRUE))
+        return(read.spss(inFile$datapath, to.data.frame=TRUE,
+                         use.value.labels=input$vallabels))
       }else if(suf == ".xpt"){
         return(read.xport(inFile$datapath))
       }  

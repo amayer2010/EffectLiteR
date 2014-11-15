@@ -1,8 +1,10 @@
 tests
 old
+private
 .Rhistory
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.git
 .gitignore
 .gitattributes
+TODO.txt
