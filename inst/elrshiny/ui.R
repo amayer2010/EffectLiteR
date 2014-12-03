@@ -51,7 +51,17 @@ shinyUI(fluidPage(
                br(),
                h5("Continuous Covariates Z"),
                selectizeInput("variablez", "", "", multiple=TRUE, selected="",
-                    options = list(placeholder = 'select continuous covariates'))
+                    options = list(placeholder = 'select continuous covariates')),
+br(),
+br(),
+br(),
+br(),
+br(),
+br(),
+br(),
+br(),
+br(),
+br()
       ),
       ############ Latent Variables ###########
       tabPanel('Latent Variables',
