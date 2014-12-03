@@ -137,6 +137,7 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
 
 ################ methods #############################
 
+
 setMethod("show", "effectlite", function(object) {
   
   ng <- object@input@ng
@@ -144,6 +145,11 @@ setMethod("show", "effectlite", function(object) {
   nz <- object@input@nz
   vnames <- object@input@vnames    
   vlevels <- object@input@vlevels
+  
+  label.g.function <- "(K,Z)"
+  if(nk==1 & nz==0){label.g.function <- "()"}
+  if(nk>1 & nz==0){label.g.function <- "(K)"}
+  if(nk==1 & nz>0){label.g.function <- "(Z)"}
   
   cat("\n\n------------------ Variables and Descriptive Statistics ------------------ \n\n")
   
@@ -205,7 +211,7 @@ setMethod("show", "effectlite", function(object) {
   
   
   cat("\n\n ------------------ Average Effects ------------------ \n\n")
-  namesEgx <- paste0("E[g",1:(ng-1),"(K,Z)]")
+  namesEgx <- paste0("E[g",1:(ng-1),label.g.function,"]")
   Egx <- object@results@Egx
   row.names(Egx) <- namesEgx
   print(Egx, digits=3)
@@ -220,7 +226,7 @@ setMethod("show", "effectlite", function(object) {
   if(!(nz==0 & nk==1)){
     cat("\n\n ------------------ Effects given a Treatment Condition ------------------ \n\n")
     tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1))
-    namesEgxgx <- paste0("E[g",tmp$g,"(K,Z)|X=",tmp$x, "]")
+    namesEgxgx <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x, "]")
     Egxgx <- object@results@Egxgx
     row.names(Egxgx) <- namesEgxgx
     print(Egxgx, digits=3)
@@ -230,7 +236,7 @@ setMethod("show", "effectlite", function(object) {
   if(nk>1){
     cat("\n\n ------------------ Effects given K=k ------------------ \n\n")
     tmp <- expand.grid(g=1:(ng-1), k=0:(nk-1))
-    namesEgxgk <- paste0("E[g",tmp$g,"(K,Z)|K=",tmp$k,"]")
+    namesEgxgk <- paste0("E[g",tmp$g,label.g.function,"|K=",tmp$k,"]")
     Egxgk <- object@results@Egxgk
     row.names(Egxgk) <- namesEgxgk
     print(Egxgk, digits=3)    
@@ -240,7 +246,7 @@ setMethod("show", "effectlite", function(object) {
     cat("\n\n ------------------ Effects given X=x, K=k ------------------ \n\n")
     Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)    
     tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
-    namesEgxgxk <- paste0("E[g",tmp$g,"(K,Z)|X=",tmp$x,", K=",tmp$k,"]")
+    namesEgxgxk <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x,", K=",tmp$k,"]")
     Egxgxk <- object@results@Egxgxk
     row.names(Egxgxk) <- namesEgxgxk
     print(Egxgxk, digits=3)    
@@ -250,7 +256,7 @@ setMethod("show", "effectlite", function(object) {
   cat("\n\n ------------------ Intercept and Effect Functions ------------------ \n")
   
   for(i in 1:ng){
-    tmp <- paste0("g",i-1,"(K,Z) Function")
+    tmp <- paste0("g",i-1,label.g.function," Function")
     cat("\n",tmp, "\n\n")
     print(object@results@gx[[i]], digits=3)
   }
@@ -899,12 +905,11 @@ computeResults <- function(obj){
   }else{ ## latent outcome variable
     
     fv.cov <- inspect(m1, what="cov.lv")[1:nk]
-    fv.mean <- lavaan:::computeEETA(m1@Model, lavsamplestats=m1@SampleStats, remove.dummy.lv=TRUE)[1:nk]    
+    fv.mean <- inspect(m1, what="mean.lv")[1:nk]    
     
     for(i in 1:nk){
       tmp.cov <- fv.cov[[i]]
       tmp.mean <- fv.mean[[i]]
-      names(tmp.mean) <- row.names(fv.cov[[1]])
       
       vary[i] <- tmp.cov[[obj@input@vnames$y,obj@input@vnames$y]]
       meany[i] <- tmp.mean[[obj@input@vnames$y]]

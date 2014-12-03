@@ -275,7 +275,8 @@ shinyServer(function(input, output, session) {
   ###### Output Data Table #########  
   output$mytable1 = renderDataTable({ 
     d <- dataInput()
-    d
+    dprint <- format(d, digits=3)
+    dprint
   })
 
   ###### Output Conditional Effects Table #########
@@ -297,7 +298,8 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }else{            
       m1 <- model()
-      m1@results@condeffects
+      condprint <- format(m1@results@condeffects, digits=3)
+      condprint
     }  
   })
   
