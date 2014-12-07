@@ -64,6 +64,8 @@ shinyServer(function(input, output, session) {
     z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
     if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
     
+    interactions <- input$interactions
+    
     
     tryCatch(
       effectLite(y=dv, 
@@ -76,7 +78,8 @@ shinyServer(function(input, output, session) {
                  missing=input$missing,
                  se=input$se,
                  bootstrap=input$bootstrap,
-                 fixed.cell=fixed.cell)
+                 fixed.cell=fixed.cell,
+                 interactions=interactions)
     )  
   })
 

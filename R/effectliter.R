@@ -20,7 +20,8 @@ setClass("input", representation(
   fixed.cell ="logical",
   missing="character",
   se="character", ## lavaan standard errors
-  bootstrap="numeric" ## number of bootstrap draws
+  bootstrap="numeric", ## number of bootstrap draws
+  interactions="character" ## type of interaction (all, 2-way, no)
 )
 )
 
@@ -106,6 +107,7 @@ setClass("effectlite", representation(
 #' passed on to lavaan::sem()-
 #' @param syntax.only logical. If TRUE, only syntax is returned and the model 
 #' will not be estimated.
+#' @param interactions character. Can be one of c("all","2-way","none") and indicates the type of interaction used in the parameterization of the regression.
 #' @param ... Further arguments passed to lavaan::sem().
 #' @return Object of class effectlite.
 #' @examples
@@ -116,11 +118,12 @@ setClass("effectlite", representation(
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
-                       syntax.only=FALSE, ...){
+                       syntax.only=FALSE, interactions="all", ...){
   
   obj <- new("effectlite")  
   obj@input <- createInput(y,x,k,z,control,measurement,data, 
-                           fixed.cell, missing, se, bootstrap)
+                           fixed.cell, missing, se, bootstrap,
+                           interactions)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
@@ -258,7 +261,7 @@ setMethod("show", "effectlite", function(object) {
   for(i in 1:ng){
     tmp <- paste0("g",i-1,label.g.function," Function")
     cat("\n",tmp, "\n\n")
-    print(object@results@gx[[i]], digits=3)
+    print(round(object@results@gx[[i]], digits=3))
   }
   
 })
@@ -268,7 +271,8 @@ setMethod("show", "effectlite", function(object) {
 ################ constructor functions #########################
 
 createInput <- function(y, x, k, z, control, measurement, data, 
-                        fixed.cell, missing, se, bootstrap){
+                        fixed.cell, missing, se, bootstrap,
+                        interactions){
   
   #   d <- data[c(y,x,k,z)] ## TODO: adjust for latent variables (indicator variables)
   
@@ -365,7 +369,8 @@ createInput <- function(y, x, k, z, control, measurement, data,
              fixed.cell=fixed.cell,
              missing=missing,
              se=se,
-             bootstrap=bootstrap
+             bootstrap=bootstrap,
+             interactions=interactions
   )
   
   return(res)
@@ -809,8 +814,24 @@ createLavaanSyntax <- function(obj) {
   }
   
   
-
-   
+    ## Experimental: Constraints about 2 and 3 way interactions
+    stopifnot(inp@interactions %in% c("all","none","2-way"))
+    if(inp@interactions == "none"){      
+      gammas <- matrix(c(parnames@gammas), ncol=ng)[-1,-1]
+      model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
+    } 
+    if(inp@interactions == "2-way"){
+      if(nk>1 & nz>0){
+        for(t in 1:(ng-1)){
+          for(k in 1:(nk-1)){
+            for(z in 1:nz){
+              model <- paste0(model, "\n", "g",t,k,z," == 0")
+            }
+          }
+        }                
+      }
+    }
+  
   ## Hypothesis 1: No average treatment effects
   hypothesis1 <- paste(parnames@Egx, "== 0", collapse="\n")
   
@@ -860,7 +881,9 @@ computeResults <- function(obj){
   nk <- obj@input@nk  
   
   ## main hypotheses
-  if(obj@input@se != "standard"){ ## no Wald Test for robust, bootstrapped SE...
+  if(obj@input@se != "standard" | obj@input@interactions != "all"){ 
+    ## no Wald Test for robust, bootstrapped SE...
+    ## no Wald Test for interaction constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
     hypotheses <- data.frame()
   }else{

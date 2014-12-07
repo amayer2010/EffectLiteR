@@ -194,7 +194,18 @@ br()
         br(),
         h5("Additional Options"),
         checkboxInput("vallabels", "Use value labels from SPSS", TRUE)                                      
-    )
+    ),
+########## New Features #############
+    tabPanel('New Features',
+         img(src='effectliter_logo.png', align = "right"),
+         helpText('Here you will find some new features that are currently under development. This means they have not yet been tested thoroughly and they may require development versions of lavaan (https://github.com/yrosseel/lavaan) or  additional packages.'),        
+         br(),
+         h5("Interactions"),
+         radioButtons("interactions", "", 
+                      choices=c("all","2-way","none"), 
+                      selected = "all"),
+         br()                
+      )
   )),
   
   mainPanel(
