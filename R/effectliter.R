@@ -814,7 +814,7 @@ createLavaanSyntax <- function(obj) {
   }
   
   
-    ## Experimental: Constraints about 2 and 3 way interactions
+    ##Constraints about 2 and 3 way interactions
     stopifnot(inp@interactions %in% c("all","none","2-way"))
     if(inp@interactions == "none"){      
       gammas <- matrix(c(parnames@gammas), ncol=ng)[-1,-1]
@@ -822,13 +822,8 @@ createLavaanSyntax <- function(obj) {
     } 
     if(inp@interactions == "2-way"){
       if(nk>1 & nz>0){
-        for(t in 1:(ng-1)){
-          for(k in 1:(nk-1)){
-            for(z in 1:nz){
-              model <- paste0(model, "\n", "g",t,k,z," == 0")
-            }
-          }
-        }                
+        gammas <- parnames@gammas[2:(nz+1), 2:nk, 2:ng]
+        model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
       }
     }
   
@@ -893,10 +888,10 @@ computeResults <- function(obj){
       row.names(hypotheses) <- "No average effects"    
     }else{
       hypotheses <- data.frame(rbind(
-        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1),
-        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis2),
-        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis3),
-        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis4)    
+        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis1)[1:3],
+        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis2)[1:3],
+        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis3)[1:3],
+        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis4)[1:3]    
       ))
       row.names(hypotheses) <- c("No average effects",
                                  "No covariate effects in control group",

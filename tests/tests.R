@@ -274,7 +274,7 @@ d <- example01
 ## 1 K; 1 Z
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control",  syntax.only=FALSE,
-                 interactions="no")
+                 interactions="none")
 
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control",  syntax.only=FALSE,
