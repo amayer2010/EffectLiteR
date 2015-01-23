@@ -352,16 +352,24 @@ createInput <- function(y, x, k, z, control, measurement, data,
                   kstar=levels(d$kstar),
                   cell=levels(d$cell))
   
+  
+  ## nk
   nk <- 1L
   if(!is.null(k)){
     nk <- length(levels(d$kstar))
   }
   
+  ## nz
+  nz <- length(z)
+  
+  ## ng
+  ng <- length(levels(d[,x]))
+  
   res <- new("input",
              vnames=vnames, 
-             vlevels=vlevels, 
-             ng=length(levels(d[,x])),
-             nz=length(z),
+             vlevels=vlevels,
+             ng=ng,
+             nz=nz,
              nk=nk,
              control=control,
              data=d, 
@@ -884,7 +892,7 @@ computeResults <- function(obj){
   }else{
     if(nz==0 & nk==1){
       hypotheses <- data.frame(
-        lavTestWald(m1, constraints = obj@lavaansyntax@hypotheses$hypothesis1))    
+        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis1)[1:3])    
       row.names(hypotheses) <- "No average effects"    
     }else{
       hypotheses <- data.frame(rbind(
@@ -997,50 +1005,7 @@ computeResults <- function(obj){
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
   ## conditional effects
-  if(length(mm) == 0){
-    
-    #TODO: How to prevent model.matrix from deleting rows with missings? => na.action does not work...
-    if(nz==0 & nk==1){
-      formula <- as.formula(" ~ 1")
-      modmat <- model.matrix(formula, data=obj@input@data)
-      kz <- "00"
-      
-    }else if(nz>0 & nk==1){
-      formula <- as.formula(paste0(" ~ ", paste(obj@input@vnames$z, collapse=" + ")))
-      modmat <- model.matrix(formula, data=obj@input@data)
-      kz <- paste0("0",0:nz)
-      
-    }else if(nz==0 & nk>1){      
-      formula <- as.formula(" ~ kstar")
-      modmat <- model.matrix(formula, data=obj@input@data)      
-      kz <- paste0(1:nk-1,"0")
-      
-    }else if(nz>0 & nk>1){ 
-      formula <- as.formula(paste0(" ~ ", 
-                    paste("kstar", obj@input@vnames$z, sep="*", collapse=" + ")))
-      modmat <- model.matrix(formula, data=obj@input@data)            
-      kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
-      kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
-      
-    }
-    
-    estimates <- est[paste0("g1",kz)]
-    condeffects <- cbind(modmat %*% estimates)
-    
-    if(ng > 2){
-      for(i in 3:ng){
-        estimates <- est[paste0("g",i-1,kz)]
-        condeffects <- cbind(condeffects, modmat %*% estimates)
-      }      
-    }  
-    condeffects <- as.data.frame(condeffects)
-    names(condeffects) <- paste0("g",2:ng-1)
-    condeffects <- cbind(modmat,condeffects)
-    
-    
-  }else{
-    condeffects <- data.frame()
-  }
+  condeffects <- computeConditionalEffects(obj, est)
   
   res <- new("results",
              lavresults=m1,
@@ -1057,6 +1022,77 @@ computeResults <- function(obj){
   return(res)
 }
 
+
+
+computeConditionalEffects <- function(obj, est){
+  
+  current.na.action <- options('na.action')
+  on.exit(options(current.na.action))
+  
+  options(na.action='na.pass')
+  
+  ## required things
+  z <- obj@input@vnames$z
+  k <- obj@input@vnames$k
+  data <- obj@input@data  
+  mm <- obj@input@measurement 
+  nz <- obj@input@nz
+  nk <- obj@input@nk
+  ng <- obj@input@ng  
+
+  if(length(mm) == 0){
+    
+    if(nz==0 & nk==1){
+      formula <- as.formula(" ~ 1")
+      modmat <- model.matrix(formula, data=data)
+      kz <- "00"
+      dsub <- data.frame(matrix(vector(),nrow=nrow(data),ncol=0))
+      
+    }else if(nz>0 & nk==1){
+      formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
+      modmat <- model.matrix(formula, data=data)
+      kz <- paste0("0",0:nz)
+      dsub <- subset(data, select=z)
+      
+    }else if(nz==0 & nk>1){      
+      formula <- as.formula(" ~ kstar")
+      modmat <- model.matrix(formula, data=data)      
+      kz <- paste0(1:nk-1,"0")
+      dsub <- subset(data, select=c("kstar",k))
+      names(dsub)[1] <- "K"
+      
+    }else if(nz>0 & nk>1){ 
+      formula <- as.formula(paste0(" ~ ", 
+                                   paste("kstar", z, sep="*", collapse=" + ")))
+      modmat <- model.matrix(formula, data=data)            
+      kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
+      kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
+      dsub <- subset(data, select=c("kstar",k,z))
+      names(dsub)[1] <- "K"
+      
+    }
+    
+    estimates <- est[paste0("g1",kz)]
+    condeffects <- cbind(modmat %*% estimates)
+    
+    if(ng > 2){
+      for(i in 3:ng){
+        estimates <- est[paste0("g",i-1,kz)]
+        condeffects <- cbind(condeffects, modmat %*% estimates)
+      }      
+    }  
+    condeffects <- as.data.frame(condeffects)
+    names(condeffects) <- paste0("g",2:ng-1)
+    condeffects <- cbind(dsub,condeffects)
+    
+    
+  }else{
+    condeffects <- data.frame()
+  }
+  
+  return(condeffects)
+  
+}
 
 
 ############ shiny ##############

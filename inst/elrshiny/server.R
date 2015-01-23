@@ -412,18 +412,21 @@ shinyServer(function(input, output, session) {
       m1 <- model()
       condeffects <- m1@results@condeffects
       yselected <- condeffects[[input$gxselect]]    
-      zselected <- condeffects[[input$zselect2]]    
-      
+      zselected <- condeffects[[input$zselect2]]
+      K <- condeffects$K
+              
       g1label <- "(K,Z)"
       if(length(input$variablek) == 0){g1label <- "(Z)"}
       
-      p <- qplot(y=yselected, x=zselected, data=condeffects, 
+      p <- qplot(y=yselected, x=zselected, 
+                 data=condeffects, 
                  ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 
                  main=paste0("Estimated regression of ",
                              paste0(input$gxselect,g1label), " on ", 
                              input$zselect2))
       p <- p + geom_smooth(method="loess")
+      p <- p + geom_point(aes(colour=K))
       p <- p + theme_bw()
       
       print(p)

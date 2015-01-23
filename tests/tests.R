@@ -26,6 +26,10 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control")
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", control="control")
 
+## 2 K; 0 Z
+m1 <- effectLite(data=d, y="dv", z=NULL, k=c("k1","kateg2"), x="x", control="control")
+
+
 ## 0 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k=NULL, x="x", control="control")
 
