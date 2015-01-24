@@ -264,7 +264,7 @@ setMethod("show", "effectlite", function(object) {
     cat("\n",tmp, "\n\n")
     
     tmp <- object@results@gx[[i]]
-    tmp[,2:4] <- round(tmp[,2:4], digits=3)
+    tmp[,2:5] <- round(tmp[,2:5], digits=3)
     print(tmp)
   }
   
@@ -887,9 +887,8 @@ computeResults <- function(obj){
             group.label=obj@input@vlevels$cell, data=obj@input@data,
             fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, mimic="mplus") 
   
-  #TODO: ask Yves for unclass(se(m1, type="user")): inspect(m1,"se") does not give SE for new parameters
   est <- unclass(coef(m1, type="user")) ## parameter estimates
-  se <- m1@Fit@se ## standard errors
+  se <- parameterEstimates(m1)$se ## standard errors
   names(se) <- names(est) 
   tval <- est/se
   pval <- 2*(1-pnorm(abs(tval)))
@@ -1010,8 +1009,9 @@ computeResults <- function(obj){
     tmp <- data.frame(gammas[,i],
                       est[gammas[,i]],
                       se[gammas[,i]],
-                      tval[gammas[,i]])
-    names(tmp) <- c("Coef", "Estimate", "SE", "Est./SE")
+                      tval[gammas[,i]],
+                      pval[gammas[,i]])
+    names(tmp) <- c("Coef", "Estimate", "SE", "Est./SE", "p-value")
     rownames(tmp) <- gammalabels[,i]
     gx[[i]] <- tmp 
   }

@@ -426,7 +426,7 @@ shinyServer(function(input, output, session) {
       
       m1 <- model()
       condeffects <- m1@results@condeffects
-      yselected <- condeffects[[input$gxselect]]    
+      yselected <- round(condeffects[[input$gxselect]],4)    
       zselected <- condeffects[[input$zselect2]]
       colourselected <- condeffects[[input$zselect3]]
               
