@@ -104,8 +104,17 @@ shinyServer(function(input, output, session) {
   
   ######## Reactive zselect2 for Plot 3 ########
   zSelect2 <- reactive({
-    zselect <- input$variablez
+    zselect <- c(input$variablez, input$variablek, input$variablex)
     return(zselect)
+  })
+
+  
+  ######## Reactive zselect3 (colour) for Plot 3 ########
+  zSelect3 <- reactive({
+    kstar <- NULL
+    if(!is.null(input$variablek)){kstar <- "K"}
+    zselect3 <- c("", input$variablek, kstar, input$variablex, input$variablez)
+    return(zselect3)
   })
   
   
@@ -259,6 +268,12 @@ shinyServer(function(input, output, session) {
                       choices = zsel)  
   })
   
+  ###### Update zselect3 for Plot 3 ########
+  observe({
+    zsel3 <- zSelect3()
+    updateSelectInput(session, "zselect3", 
+                      choices = zsel3)  
+  })
   
   ###### Update Control Group UI ########
   observe({
@@ -390,22 +405,22 @@ shinyServer(function(input, output, session) {
   ###### Output Plot 3 #########
   output$helptextplot3 <- renderPrint({
     if(input$variabley == "" || input$variablex == "" || 
-         is.null(input$variablez) || input$latenty ||
-         input$latentz){
+         (is.null(input$variablez) & is.null(input$variablek))  || 
+         input$latenty || input$latentz){
       
-      cat("Plot 3 only works for a manifest dependent variable, a treatment variable, at least one continuous covariate, and no latent covariates.")
+      cat("Plot 3 only works for a manifest dependent variable, a treatment variable, at least one covariate, and no latent covariates.")
       
     }else{
       
-      cat("Plot 3 shows the regression of the selected effect function on the selected continuous covariate.")
+      cat("Plot 3 shows the regression of the selected effect function on the selected regressor.")
     }
   })
   
   output$plot3 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || 
-         is.null(input$variablez) || input$latenty ||
-         input$latentz){
+         (is.null(input$variablez) & is.null(input$variablek)) || 
+         input$latenty || input$latentz){
       return(NULL)
     }else{
       
@@ -413,20 +428,21 @@ shinyServer(function(input, output, session) {
       condeffects <- m1@results@condeffects
       yselected <- condeffects[[input$gxselect]]    
       zselected <- condeffects[[input$zselect2]]
-      K <- condeffects$K
+      colourselected <- condeffects[[input$zselect3]]
               
       g1label <- "(K,Z)"
       if(length(input$variablek) == 0){g1label <- "(Z)"}
       
       p <- qplot(y=yselected, x=zselected, 
-                 data=condeffects, 
+                 data=condeffects,
                  ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 
                  main=paste0("Estimated regression of ",
                              paste0(input$gxselect,g1label), " on ", 
                              input$zselect2))
       p <- p + geom_smooth(method="loess")
-      p <- p + geom_point(aes(colour=K))
+      p <- p + geom_point(aes(colour=colourselected))
+      p <- p + guides(colour = guide_legend(input$zselect3))            
       p <- p + theme_bw()
       
       print(p)

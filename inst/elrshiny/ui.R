@@ -252,10 +252,15 @@ br()
                           multiple=FALSE,
                           selectize=TRUE),
               selectInput("zselect2", 
-                          "Select continuous covariate  (x-axis)", 
+                          "Select regressor  (x-axis)", 
                           "", 
                           multiple=FALSE,
-                          selectize=TRUE),                 
+                          selectize=TRUE),
+              selectInput("zselect3", 
+                          "Select colour variable", 
+                          "", 
+                          multiple=FALSE,
+                          selectize=TRUE),
                plotOutput("plot3")) #,
 #       
 #       ######### Path Diagram ##########

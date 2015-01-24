@@ -29,6 +29,7 @@ setClass("parnames", representation(
   alphas="array", 
   betas="array", 
   gammas="array", 
+  gammalabels="array",
   cellmeanz="character",
   meanz="character",
   pk="character",
@@ -261,7 +262,10 @@ setMethod("show", "effectlite", function(object) {
   for(i in 1:ng){
     tmp <- paste0("g",i-1,label.g.function," Function")
     cat("\n",tmp, "\n\n")
-    print(round(object@results@gx[[i]], digits=3))
+    
+    tmp <- object@results@gx[[i]]
+    tmp[,2:4] <- round(tmp[,2:4], digits=3)
+    print(tmp)
   }
   
 })
@@ -398,6 +402,16 @@ createParNames <- function(obj){
   betas <- with(tmp, array(paste0("b",x,k,z), dim=c(nz+1,nk,ng)))
   gammas <- with(tmp, array(paste0("g",x,k,z), dim=c(nz+1,nk,ng)))
   
+  ## for pretty printing
+  gammalabels <- with(tmp, paste0("I_X=",x, " * I_K=",k, " * Z",z))
+  
+  ## delete entries with zeros in it
+  gammalabels <- gsub("I_X=0 * ", "", gammalabels, fixed=TRUE)
+  gammalabels <- gsub("I_K=0 * ", "", gammalabels, fixed=TRUE) 
+  gammalabels <- gsub(" * Z0", "", gammalabels, fixed=TRUE)
+  gammalabels[1] <- "Intercept"
+  gammalabels <- array(gammalabels, dim=c(nz+1,nk,ng))
+  
   pk <- paste0("Pk",1:nk)
   px <- paste0("Px",0:(ng-1))
   if(nz>0){
@@ -452,6 +466,7 @@ createParNames <- function(obj){
              alphas=alphas,
              betas=betas,
              gammas=gammas,
+             gammalabels=gammalabels,
              cellmeanz=cellmeanz,
              meanz=meanz,
              pk=pk,
@@ -988,13 +1003,16 @@ computeResults <- function(obj){
   
   ## g functions
   gammas <- matrix(obj@parnames@gammas, ncol=ng)
+  gammalabels <- matrix(obj@parnames@gammalabels, ncol=ng)
   gx <- vector("list",ng)
   
   for(i in 1:ng){
-    tmp <- data.frame(est[gammas[,i]],
+    tmp <- data.frame(gammas[,i],
+                      est[gammas[,i]],
                       se[gammas[,i]],
                       tval[gammas[,i]])
-    names(tmp) <- c("Estimate", "SE", "Est./SE")
+    names(tmp) <- c("Coef", "Estimate", "SE", "Est./SE")
+    rownames(tmp) <- gammalabels[,i]
     gx[[i]] <- tmp 
   }
   
@@ -1034,6 +1052,7 @@ computeConditionalEffects <- function(obj, est){
   ## required things
   z <- obj@input@vnames$z
   k <- obj@input@vnames$k
+  x <- obj@input@vnames$x
   data <- obj@input@data  
   mm <- obj@input@measurement 
   nz <- obj@input@nz
@@ -1052,14 +1071,14 @@ computeConditionalEffects <- function(obj, est){
       formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
       modmat <- model.matrix(formula, data=data)
       kz <- paste0("0",0:nz)
-      dsub <- subset(data, select=z)
+      dsub <- data[,c(x,z)]
       
     }else if(nz==0 & nk>1){      
       formula <- as.formula(" ~ kstar")
       modmat <- model.matrix(formula, data=data)      
       kz <- paste0(1:nk-1,"0")
-      dsub <- subset(data, select=c("kstar",k))
-      names(dsub)[1] <- "K"
+      dsub <- data[,c(x,"kstar",k)]
+      names(dsub)[2] <- "K"
       
     }else if(nz>0 & nk>1){ 
       formula <- as.formula(paste0(" ~ ", 
@@ -1067,8 +1086,8 @@ computeConditionalEffects <- function(obj, est){
       modmat <- model.matrix(formula, data=data)            
       kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
       kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
-      dsub <- subset(data, select=c("kstar",k,z))
-      names(dsub)[1] <- "K"
+      dsub <- data[,c(x,"kstar",k,z)]
+      names(dsub)[2] <- "K"
       
     }
     
