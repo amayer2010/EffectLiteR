@@ -95,6 +95,7 @@ setClass("effectlite", representation(
 #' @param x Treatment variable (character string).
 #' @param k Vector of categorical covariates (character vector).
 #' @param z Vector of continuous covariates (character vector).
+#' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Requires package nnet to be installed. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control of the propensity score model.
 #' @param control Value of x that should be used as control group.
 #' @param measurement Measurement model.
 #' @param data A data frame. 
@@ -116,15 +117,16 @@ setClass("effectlite", representation(
 #' print(m1) 
 #' @export
 #' @import lavaan
-effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
+effectLite <- function(y, x, k=NULL, z=NULL, propscore=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
                        syntax.only=FALSE, interactions="all", ...){
   
   obj <- new("effectlite")  
-  obj@input <- createInput(y,x,k,z,control,measurement,data, 
+  obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, missing, se, bootstrap,
                            interactions)
+  obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
@@ -274,17 +276,13 @@ setMethod("show", "effectlite", function(object) {
 
 ################ constructor functions #########################
 
-createInput <- function(y, x, k, z, control, measurement, data, 
+createInput <- function(y, x, k, z, propscore, control, measurement, data, 
                         fixed.cell, missing, se, bootstrap,
                         interactions){
   
-  #   d <- data[c(y,x,k,z)] ## TODO: adjust for latent variables (indicator variables)
-  
-  ## TODO: What do we do with missing values in X or K? These observations can not be
-  ## assigned to a group...
   d <- data
-  vnames <- list(y=y,x=x,k=k,z=z)
-  
+  vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore)  
+    
   ## treatment variable
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  
@@ -293,7 +291,7 @@ createInput <- function(y, x, k, z, control, measurement, data,
   
   d[,x] <- relevel(d[,x], control)
   levels.x.original <- levels(d[,x])
-  levels(d[,x]) <- paste(0:(length(levels(d[,x]))-1))
+  levels(d[,x]) <- paste(0:(length(levels(d[,x]))-1))  
   
   ## categorical covariates
   levels.k.original <- vector("list",length(k))
@@ -362,18 +360,16 @@ createInput <- function(y, x, k, z, control, measurement, data,
   if(!is.null(k)){
     nk <- length(levels(d$kstar))
   }
-  
-  ## nz
-  nz <- length(z)
-  
+    
   ## ng
-  ng <- length(levels(d[,x]))
+  ng <- length(levels(d[,x]))  
+  
   
   res <- new("input",
              vnames=vnames, 
              vlevels=vlevels,
              ng=ng,
-             nz=nz,
+             nz=length(vnames$z),
              nk=nk,
              control=control,
              data=d, 
@@ -1110,6 +1106,51 @@ computeConditionalEffects <- function(obj, est){
   }
   
   return(condeffects)
+  
+}
+
+
+computePropensityScore <- function(input){
+  
+  propscore <- input@vnames$propscore
+  
+  ## propensity score
+  if(!is.null(propscore)){
+    
+    current.na.action <- options('na.action')
+    on.exit(options(current.na.action))
+    
+    options(na.action='na.pass')
+    
+    x <- input@vnames$x
+    d <- input@data
+    
+    if(is(propscore, "formula")){      
+      form <- propscore
+      
+    }else{
+      form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
+    }
+    
+    mprop <- nnet::multinom(form, data=d, trace=FALSE)
+    dprop <- fitted(mprop)
+    if(input@ng > 2){dprop <- dprop[,-1]}
+    dprop <- apply(dprop,2,function(x){log(x/(1-x))})
+    dprop <- as.data.frame(dprop)
+    names(dprop) <- paste0("logprop",1:(input@ng-1))
+    
+    if(any(diag(var(dprop)) < 0.05)){
+      warning(paste("very small variance of propensity scores \n ",
+                    diag(var(dprop))))
+    }
+    
+    input@data <- cbind(d,dprop)
+    input@vnames$z <- c(input@vnames$z,paste0("logprop",1:(input@ng-1)))
+    input@nz <- length(input@vnames$z)
+    
+  }
+  
+  return(input)
   
 }
 

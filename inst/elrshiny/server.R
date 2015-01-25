@@ -1,7 +1,4 @@
 
-require(ggplot2)
-require(foreign)
-# require(semPlot)
 
 shinyServer(function(input, output, session) {
   
@@ -40,10 +37,10 @@ shinyServer(function(input, output, session) {
       }else if(suf == ".txt"){
         return(read.table(inFile$datapath))    
       }else if(suf == ".sav"){
-        return(read.spss(inFile$datapath, to.data.frame=TRUE,
+        return(foreign::read.spss(inFile$datapath, to.data.frame=TRUE,
                          use.value.labels=input$vallabels))
       }else if(suf == ".xpt"){
-        return(read.xport(inFile$datapath))
+        return(foreign::read.xport(inFile$datapath))
       }  
     }  
   })
@@ -347,7 +344,7 @@ shinyServer(function(input, output, session) {
       dp <- data.frame(y,cell)
       binwidth <- (range(y)[2]-range(y)[1])/30
 
-      p <- qplot(y, data=dp, geom="histogram",
+      p <- ggplot2::qplot(y, data=dp, geom="histogram",
                  binwidth=binwidth,
                  xlab=input$variabley,
                  main=paste0("Distribution of ", input$variabley, " in cells"))
@@ -388,7 +385,7 @@ shinyServer(function(input, output, session) {
       
       dp <- data.frame(y,cell,zselected)
       
-      p <- qplot(y=y, x=zselected, data=dp, 
+      p <- ggplot2::qplot(y=y, x=zselected, data=dp, 
                  ylab=input$variabley,
                  xlab=input$zselect,                 
                  main=paste0("Regression of ", input$variabley, " on ", 
@@ -433,7 +430,7 @@ shinyServer(function(input, output, session) {
       g1label <- "(K,Z)"
       if(length(input$variablek) == 0){g1label <- "(Z)"}
       
-      p <- qplot(y=yselected, x=zselected, 
+      p <- ggplot2::qplot(y=yselected, x=zselected, 
                  data=condeffects,
                  ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 

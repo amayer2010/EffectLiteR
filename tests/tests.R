@@ -271,7 +271,6 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 
 
 ############ Tests with no interaction option ########################
-## does not work...
 # 
 d <- example01
 
@@ -283,3 +282,19 @@ m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control",  syntax.only=FALSE,
                  interactions="2-way")
+
+
+############ Tests with no propensity score ########################
+# 
+d <- example01
+
+## variance of propscore too low in this example -- causes error in lavaan
+## write informative error message
+m1 <- effectLite(y="dv", z=c("z1"), x="x", 
+                 propscore=c("z2"), control="control",data=d,
+                 syntax.only=FALSE)
+
+d <- nonortho
+m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
+
+
