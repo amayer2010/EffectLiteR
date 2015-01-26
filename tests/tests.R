@@ -297,4 +297,8 @@ m1 <- effectLite(y="dv", z=c("z1"), x="x",
 d <- nonortho
 m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
 
+d$z[15] <- NA
+m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
+
+m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 

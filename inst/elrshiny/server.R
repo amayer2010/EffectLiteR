@@ -61,6 +61,12 @@ shinyServer(function(input, output, session) {
     z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
     if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
     
+    propscore <- NULL 
+    if(length(input$propscore) != 0 & !input$propscoreformula){
+      propscore <- input$propscore}
+    if(input$prop.formula != "" & input$propscoreformula){
+      propscore <- as.formula(input$prop.formula)}
+    
     interactions <- input$interactions
     
     
@@ -69,6 +75,7 @@ shinyServer(function(input, output, session) {
                  x=x,
                  k=k,
                  z=z,
+                 propscore=propscore,
                  data=d,
                  control=input$control,
                  measurement=mm,
@@ -84,6 +91,14 @@ shinyServer(function(input, output, session) {
   ######## Reactive zselect for Plot 2 ########
   zSelect <- reactive({
     zselect <- input$variablez
+    
+    if(!is.null(input$propscore)){
+      d <- dataInput()
+      x <- d[[input$variablex]]    
+      ng <- length(unique(x))
+      zselect <- c(zselect, paste0("logprop",1:(ng-1)))
+    }
+        
     return(zselect)
   })
 
@@ -102,6 +117,14 @@ shinyServer(function(input, output, session) {
   ######## Reactive zselect2 for Plot 3 ########
   zSelect2 <- reactive({
     zselect <- c(input$variablez, input$variablek, input$variablex)
+    
+    if(!is.null(input$propscore)){
+      d <- dataInput()
+      x <- d[[input$variablex]]    
+      ng <- length(unique(x))
+      zselect <- c(zselect, paste0("logprop",1:(ng-1)))
+    }
+    
     return(zselect)
   })
 
@@ -111,6 +134,14 @@ shinyServer(function(input, output, session) {
     kstar <- NULL
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect3 <- c("", input$variablek, kstar, input$variablex, input$variablez)
+    
+    if(!is.null(input$propscore)){
+      d <- dataInput()
+      x <- d[[input$variablex]]    
+      ng <- length(unique(x))
+      zselect3 <- c(zselect3, paste0("logprop",1:(ng-1)))
+    }
+    
     return(zselect3)
   })
   
@@ -234,6 +265,9 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "variablez", 
                       choices = c("", names(d)),
                       selected = "")
+    updateSelectInput(session, "propscore", 
+                      choices = c("", names(d)),
+                      selected = "")
     updateSelectInput(session, "indicatorsy", choices = names(d))
     updateSelectInput(session, "indicatorsz1", choices = names(d))
     updateSelectInput(session, "indicatorsz2", choices = names(d))
@@ -341,10 +375,11 @@ shinyServer(function(input, output, session) {
 
       y <- m1@input@data[[input$variabley]]      
       cell <- m1@input@data[["cell"]]
-      dp <- data.frame(y,cell)
-      binwidth <- (range(y)[2]-range(y)[1])/30
+      dp <- na.omit(data.frame(y,cell))
+      binwidth <- (range(y, na.rm=TRUE)[2]-range(y, na.rm=TRUE)[1])/30
 
-      p <- ggplot2::qplot(y, data=dp, geom="histogram",
+      require(ggplot2)
+      p <- qplot(y, data=dp, geom="histogram",
                  binwidth=binwidth,
                  xlab=input$variabley,
                  main=paste0("Distribution of ", input$variabley, " in cells"))
@@ -358,7 +393,8 @@ shinyServer(function(input, output, session) {
   ###### Output Plot 2 #########  
   output$helptextplot2 <- renderPrint({
     if(input$variabley == "" || input$variablex == "" || 
-         is.null(input$variablez) || input$latenty){
+         (is.null(input$variablez) & is.null(input$propscore)) || 
+         input$latenty){
       
       cat("Plot 2 only works for a manifest dependent variable, a treatment variable, and at least one continuous covariate.")
       
@@ -372,7 +408,8 @@ shinyServer(function(input, output, session) {
   output$plot2 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || 
-         is.null(input$variablez) || input$latenty){
+         (is.null(input$variablez) & is.null(input$propscore)) || 
+         input$latenty){
       
       return(NULL)
     }else{
@@ -385,7 +422,8 @@ shinyServer(function(input, output, session) {
       
       dp <- data.frame(y,cell,zselected)
       
-      p <- ggplot2::qplot(y=y, x=zselected, data=dp, 
+      require(ggplot2)
+      p <- qplot(y=y, x=zselected, data=dp, 
                  ylab=input$variabley,
                  xlab=input$zselect,                 
                  main=paste0("Regression of ", input$variabley, " on ", 
@@ -402,7 +440,8 @@ shinyServer(function(input, output, session) {
   ###### Output Plot 3 #########
   output$helptextplot3 <- renderPrint({
     if(input$variabley == "" || input$variablex == "" || 
-         (is.null(input$variablez) & is.null(input$variablek))  || 
+         (is.null(input$variablez) & is.null(input$variablek) & 
+            is.null(input$propscore))  || 
          input$latenty || input$latentz){
       
       cat("Plot 3 only works for a manifest dependent variable, a treatment variable, at least one covariate, and no latent covariates.")
@@ -416,7 +455,8 @@ shinyServer(function(input, output, session) {
   output$plot3 <- renderPlot({    
     
     if(input$variabley == "" || input$variablex == "" || 
-         (is.null(input$variablez) & is.null(input$variablek)) || 
+         (is.null(input$variablez) & is.null(input$variablek) & 
+            is.null(input$propscore)) || 
          input$latenty || input$latentz){
       return(NULL)
     }else{
@@ -430,7 +470,8 @@ shinyServer(function(input, output, session) {
       g1label <- "(K,Z)"
       if(length(input$variablek) == 0){g1label <- "(Z)"}
       
-      p <- ggplot2::qplot(y=yselected, x=zselected, 
+      require(ggplot2)
+      p <- qplot(y=yselected, x=zselected, 
                  data=condeffects,
                  ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 

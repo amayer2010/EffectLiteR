@@ -189,16 +189,42 @@ br()
         h5("Additional Options"),
         checkboxInput("vallabels", "Use value labels from SPSS", TRUE)                                      
     ),
-########## New Features #############
-    tabPanel('New Features',
+########## Interactions #############
+    tabPanel('Interactions',
          img(src='effectliter_logo.png', align = "right"),
-         helpText('Here you will find some new features that are currently under development. This means they have not yet been tested thoroughly and they may require development versions of lavaan (https://github.com/yrosseel/lavaan) or  additional packages.'),        
          br(),
-         h5("Interactions"),
-         radioButtons("interactions", "", 
-                      choices=c("all","2-way","none"), 
+         helpText('Constraints on interactions are currently under development and require a development version of lavaan to work properly.'),        
+         br(),
+         radioButtons("interactions", "Interactions", 
+                      choices=c("Full model"="all",
+                                "Only two-way interactions"="2-way",
+                                "No treatment*covariate interactions"="none"), 
                       selected = "all"),
          br()                
+      ),
+########## Propensity Scores #############
+      tabPanel('Propensity Scores',
+         img(src='effectliter_logo.png', align = "right"),
+         br(),
+         helpText('Propensity scores are predicted probabilities from a multinomial regression of the treatment variable on below selected covariates. The logit transformed propensity score(s) are included as continuous covariates in the EffectLiteR analysis. For more flexibility, you can specify the formula yourself.'),        
+         br(),
+         conditionalPanel(
+           condition = "!input.propscoreformula",
+           br(),
+
+           selectizeInput("propscore", "Covariates in Propensity Score Model", "",
+                          multiple=TRUE, selected="",
+                          options = list(placeholder = 'select covariates'))
+         ),
+         br(),
+         checkboxInput("propscoreformula", "Specify formula for propensity score model yourself", FALSE),
+         conditionalPanel(
+           condition = "input.propscoreformula",
+           br(),           
+           textInput("prop.formula", "Specify formula", 
+                     value = "")
+         )
+                  
       )
   )),
   

@@ -1116,14 +1116,10 @@ computePropensityScore <- function(input){
   
   ## propensity score
   if(!is.null(propscore)){
-    
-    current.na.action <- options('na.action')
-    on.exit(options(current.na.action))
-    
-    options(na.action='na.pass')
-    
+        
     x <- input@vnames$x
     d <- input@data
+    ng <- input@ng
     
     if(is(propscore, "formula")){      
       form <- propscore
@@ -1132,18 +1128,19 @@ computePropensityScore <- function(input){
       form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
     }
     
-    mprop <- nnet::multinom(form, data=d, trace=FALSE)
+    mprop <- nnet::multinom(form, data=d, na.action="na.omit", trace=FALSE)
     dprop <- fitted(mprop)
     if(input@ng > 2){dprop <- dprop[,-1]}
-    dprop <- apply(dprop,2,function(x){log(x/(1-x))})
-    dprop <- as.data.frame(dprop)
-    names(dprop) <- paste0("logprop",1:(input@ng-1))
+    dprop <- apply(dprop,2,logit)       
     
     if(any(diag(var(dprop)) < 0.05)){
       warning(paste("very small variance of propensity scores \n ",
                     diag(var(dprop))))
     }
-    
+        
+    dprop <- dprop[match(row.names(d), row.names(dprop)),] ## for missings    
+    dprop <- as.data.frame(dprop) 
+    names(dprop) <- paste0("logprop",1:(ng-1))
     input@data <- cbind(d,dprop)
     input@vnames$z <- c(input@vnames$z,paste0("logprop",1:(input@ng-1)))
     input@nz <- length(input@vnames$z)
@@ -1151,6 +1148,35 @@ computePropensityScore <- function(input){
   }
   
   return(input)
+  
+}
+
+
+## adopted from John Fox car::logit package
+logit <- function (p, percents = range.p[2] > 1, adjust){
+  
+  range.p <- range(p, na.rm = TRUE)
+  if (percents) {
+    if (range.p[1] < 0 || range.p[1] > 100) 
+      stop("p must be in the range 0 to 100")
+    p <- p/100
+    range.p <- range.p/100
+  }
+  else if (range.p[1] < 0 || range.p[1] > 1) 
+    stop("p must be in the range 0 to 1")
+  a <- if (missing(adjust)) {
+    if (isTRUE(all.equal(range.p[1], 0)) || isTRUE(all.equal(range.p[2], 
+                                                             1))) 
+      0.025
+    else 0
+  }
+  else adjust
+  if (missing(adjust) && a != 0) 
+    warning(paste("proportions remapped to (", a, ", ", 1 - 
+                    a, ")", sep = ""))
+  a <- 1 - 2 * a
+  log((0.5 + a * (p - 0.5))/(1 - (0.5 + a * (p - 0.5))))
+  
   
 }
 
