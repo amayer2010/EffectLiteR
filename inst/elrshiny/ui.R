@@ -14,7 +14,8 @@ shinyUI(fluidPage(
         uiOutput("reload"),
         hr(),        
         selectizeInput(inputId="exdata", label="Example Data", selected="",
-                       choices= c("","nonortho","example01","example02lv"),
+                       choices= c("","nonortho","example01","example02lv",
+                                  "example_multilevel"),
                        options = list(placeholder = 'choose example data')),    
         hr(),
         tryCatch(
@@ -184,7 +185,7 @@ br()
         br(),
         radioButtons("fixed.cell", "Cell Sizes", 
                      choices=c("stochastic","fixed"), 
-                     selected = "stochastic"),
+                     selected = "fixed"),
         br(),
         h5("Additional Options"),
         checkboxInput("vallabels", "Use value labels from SPSS", TRUE)                                      
@@ -225,6 +226,21 @@ br()
                      value = "")
          )
                   
+      ),
+
+########## Complex Survey #############
+tabPanel('Complex Survey',
+         img(src='effectliter_logo.png', align = "right"),
+         br(),
+         helpText('The lavaan.survey package is called to account for cluster variables and sampling weights.'),        
+         br(),
+         selectizeInput("ids", "Cluster Variable", "",
+                        multiple=FALSE, selected="",
+                        options = list(placeholder = 'select cluster ID')),
+         selectizeInput("weights", "Sampling Weights", "",
+                        multiple=FALSE, selected="",
+                        options = list(placeholder = 'select sampling weights'))
+         
       )
   )),
   

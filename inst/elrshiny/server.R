@@ -23,7 +23,9 @@ shinyServer(function(input, output, session) {
         return(example01)
       }else if(exdata=="example02lv"){
         return(example02lv)
-      }      
+      }else if(exdata=="example_multilevel"){
+        return(example_multilevel)
+      }                        
     }
     
     if(!is.null(inFile)){
@@ -69,6 +71,11 @@ shinyServer(function(input, output, session) {
     
     interactions <- input$interactions
     
+    ids <- NULL
+    if(input$ids != ""){ids <- as.formula(paste0(" ~ ", input$ids))}
+    
+    weights <- NULL
+    if(input$weights != ""){weights <- as.formula(paste0(" ~ ", input$weights))}
     
     tryCatch(
       effectLite(y=dv, 
@@ -83,7 +90,9 @@ shinyServer(function(input, output, session) {
                  se=input$se,
                  bootstrap=input$bootstrap,
                  fixed.cell=fixed.cell,
-                 interactions=interactions)
+                 interactions=interactions,
+                 ids=ids,
+                 weights=weights)
     )  
   })
 
@@ -266,6 +275,12 @@ shinyServer(function(input, output, session) {
                       choices = c("", names(d)),
                       selected = "")
     updateSelectInput(session, "propscore", 
+                      choices = c("", names(d)),
+                      selected = "")
+    updateSelectInput(session, "ids", 
+                      choices = c("", names(d)),
+                      selected = "")
+    updateSelectInput(session, "weights", 
                       choices = c("", names(d)),
                       selected = "")
     updateSelectInput(session, "indicatorsy", choices = names(d))
