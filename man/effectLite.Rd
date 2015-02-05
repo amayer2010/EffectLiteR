@@ -7,7 +7,8 @@
 effectLite(y, x, k = NULL, z = NULL, propscore = NULL, control = "0",
   measurement = character(), data, fixed.cell = FALSE,
   missing = "listwise", se = "standard", bootstrap = 1000L,
-  syntax.only = FALSE, interactions = "all", ...)
+  syntax.only = FALSE, interactions = "all", ids = NULL, weights = NULL,
+  ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string).}
@@ -42,6 +43,10 @@ passed on to lavaan::sem()-}
 will not be estimated.}
 
 \item{interactions}{character. Can be one of c("all","2-way","none") and indicates the type of interaction used in the parameterization of the regression.}
+
+\item{ids}{Formula specifying cluster ID variables. Will be passed on to lavaan.survey. See ?survey::svydesign for details.}
+
+\item{weights}{Formula to specify sampling weights. Will be passed on to lavaan.survey. See ?survey::svydesign for details.}
 
 \item{...}{Further arguments passed to lavaan::sem().}
 }

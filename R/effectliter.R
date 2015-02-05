@@ -21,7 +21,8 @@ setClass("input", representation(
   missing="character",
   se="character", ## lavaan standard errors
   bootstrap="numeric", ## number of bootstrap draws
-  interactions="character" ## type of interaction (all, 2-way, no)
+  interactions="character", ## type of interaction (all, 2-way, no)
+  complexsurvey="list"
 )
 )
 
@@ -110,6 +111,8 @@ setClass("effectlite", representation(
 #' @param syntax.only logical. If TRUE, only syntax is returned and the model 
 #' will not be estimated.
 #' @param interactions character. Can be one of c("all","2-way","none") and indicates the type of interaction used in the parameterization of the regression.
+#' @param ids Formula specifying cluster ID variables. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
+#' @param weights Formula to specify sampling weights. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
 #' @param ... Further arguments passed to lavaan::sem().
 #' @return Object of class effectlite.
 #' @examples
@@ -120,12 +123,13 @@ setClass("effectlite", representation(
 effectLite <- function(y, x, k=NULL, z=NULL, propscore=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
-                       syntax.only=FALSE, interactions="all", ...){
+                       syntax.only=FALSE, interactions="all", ids=NULL,
+                       weights=NULL, ...){
   
   obj <- new("effectlite")  
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, missing, se, bootstrap,
-                           interactions)
+                           interactions, ids, weights)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
@@ -278,7 +282,7 @@ setMethod("show", "effectlite", function(object) {
 
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
                         fixed.cell, missing, se, bootstrap,
-                        interactions){
+                        interactions, ids, weights){
   
   d <- data
   vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore)  
@@ -364,6 +368,8 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   ## ng
   ng <- length(levels(d[,x]))  
   
+  complexsurvey <- list(ids=ids, weights=weights)
+  
   
   res <- new("input",
              vnames=vnames, 
@@ -378,7 +384,8 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              missing=missing,
              se=se,
              bootstrap=bootstrap,
-             interactions=interactions
+             interactions=interactions,
+             complexsurvey=complexsurvey
   )
   
   return(res)
@@ -878,10 +885,34 @@ createLavaanSyntax <- function(obj) {
 
 computeResults <- function(obj){
   
-  m1 <- sem(obj@lavaansyntax@model, group="cell", missing=obj@input@missing,
-            se=obj@input@se, bootstrap=obj@input@bootstrap,
-            group.label=obj@input@vlevels$cell, data=obj@input@data,
-            fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, mimic="mplus") 
+  ## this is necessary for lavaan.survey to work -- talk to Daniel and Yves
+  sem.call <- call("sem", model=obj@lavaansyntax@model,
+                   group="cell", missing=obj@input@missing,
+                   se=obj@input@se, bootstrap=obj@input@bootstrap,
+                   group.label=obj@input@vlevels$cell, data=obj@input@data,
+                   fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, 
+                   mimic="mplus")
+  
+  m1 <- eval(sem.call)
+      
+#   m1 <- sem(model=obj@lavaansyntax@model, group="cell", missing=obj@input@missing,
+#             se=obj@input@se, bootstrap=obj@input@bootstrap,
+#             group.label=obj@input@vlevels$cell, data=obj@input@data,
+#             fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, mimic="mplus") 
+  
+  ## lavaan.survey -- complex survey designs
+  ids <- obj@input@complexsurvey$ids
+  weights <- obj@input@complexsurvey$weights
+  
+  if(!is.null(ids) | !is.null(weights)){
+        
+    stopifnot(obj@input@fixed.cell) ## currently only works for fixed cell sizes
+    survey.design <- survey::svydesign(ids=ids, weights=weights, 
+                                       data=obj@input@data)
+    m1 <- lavaan.survey::lavaan.survey(lavaan.fit=m1, 
+                                       survey.design=survey.design)    
+  }
+  
   
   est <- unclass(coef(m1, type="user")) ## parameter estimates
   se <- parameterEstimates(m1)$se ## standard errors
@@ -1338,5 +1369,25 @@ NULL
 #' @keywords datasets
 #' @format A data frame with 300 rows and 6 variables
 #' @name example02lv
+NULL
+
+
+#' Dataset example_multilevel.
+#' 
+#' A simulated dataset. The variables are as follows:
+#' 
+#' \itemize{
+#'   \item y. coninuous dependent variable
+#'   \item x. treatment variable with values 0, 1
+#'   \item z. continuous covariate
+#'   \item xz. product of x and z
+#'   \item cid. cluster ID
+#'   \item weights. sampling weights
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 800 rows and 6 variables
+#' @name example_multilevel
 NULL
 

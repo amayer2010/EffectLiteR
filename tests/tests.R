@@ -284,15 +284,15 @@ m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
                  interactions="2-way")
 
 
-############ Tests with no propensity score ########################
+############ Tests with propensity score ########################
 # 
 d <- example01
 
 ## variance of propscore too low in this example -- causes error in lavaan
 ## write informative error message
-m1 <- effectLite(y="dv", z=c("z1"), x="x", 
-                 propscore=c("z2"), control="control",data=d,
-                 syntax.only=FALSE)
+# m1 <- effectLite(y="dv", z=c("z1"), x="x", 
+#                  propscore=c("z2"), control="control",data=d,
+#                  syntax.only=FALSE)
 
 d <- nonortho
 m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
@@ -302,3 +302,36 @@ m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
 
 m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 
+
+########## complex survey design #################
+# 
+# set.seed(2356)
+# 
+# N <- 800
+# Nc <- 40
+# csize <- N/Nc
+# cid <- rep(1:Nc, each=csize)
+# 
+# ## treatment
+# x <- rep(c(0,1), each=Nc/2)[cid]
+# 
+# ## covariate
+# ujz <- rnorm(Nc, 0, sqrt(0.1))[cid]
+# rij <- rnorm(N, 0, sqrt(1.5))
+# z <- 0.4 + 0.7*x + ujz + rij
+# xz <- x*z ## interaction
+# 
+# ## outcome
+# ujy <- rnorm(Nc, 0, sqrt(0.2))[cid]
+# eij <- rnorm(N, 0, sqrt(2))
+# y <- 0 + 1*x + 0.6*z + 0.4*xz + ujy + eij
+# weights <- plogis(rnorm(N))
+# 
+# example_multilevel <- data.frame(y, z, x, xz, cid, weights)
+# 
+# save(example_multilevel, file="example_multilevel.RData")
+
+
+model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+                    syntax.only=F, data=example_multilevel, 
+                    ids=~cid, weights=~weights)
