@@ -185,10 +185,12 @@ br()
         br(),
         radioButtons("fixed.cell", "Cell Sizes", 
                      choices=c("stochastic","fixed"), 
-                     selected = "fixed"),
+                     selected = "stochastic"),
         br(),
         h5("Additional Options"),
-        checkboxInput("vallabels", "Use value labels from SPSS", TRUE)                                      
+        checkboxInput("homoscedasticity", "Homoscedastic residual variances", 
+                      value=FALSE),
+        checkboxInput("vallabels", "Use value labels from SPSS", TRUE)
     ),
 ########## Interactions #############
     tabPanel('Interactions',
@@ -199,6 +201,8 @@ br()
          radioButtons("interactions", "Interactions", 
                       choices=c("Full model"="all",
                                 "Only two-way interactions"="2-way",
+                                "Only X:K interactions"="X:K",
+                                "Only X:Z interactions"="X:Z",                                
                                 "No treatment*covariate interactions"="none"), 
                       selected = "all"),
          br()                

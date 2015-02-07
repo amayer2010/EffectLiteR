@@ -22,7 +22,8 @@ setClass("input", representation(
   se="character", ## lavaan standard errors
   bootstrap="numeric", ## number of bootstrap draws
   interactions="character", ## type of interaction (all, 2-way, no)
-  complexsurvey="list"
+  complexsurvey="list",
+  homoscedasticity="logical"
 )
 )
 
@@ -96,7 +97,6 @@ setClass("effectlite", representation(
 #' @param x Treatment variable (character string).
 #' @param k Vector of categorical covariates (character vector).
 #' @param z Vector of continuous covariates (character vector).
-#' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Requires package nnet to be installed. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control of the propensity score model.
 #' @param control Value of x that should be used as control group.
 #' @param measurement Measurement model.
 #' @param data A data frame. 
@@ -110,9 +110,11 @@ setClass("effectlite", representation(
 #' passed on to lavaan::sem()-
 #' @param syntax.only logical. If TRUE, only syntax is returned and the model 
 #' will not be estimated.
-#' @param interactions character. Can be one of c("all","2-way","none") and indicates the type of interaction used in the parameterization of the regression.
+#' @param interactions character. Can be one of c("all","none","2-way","X:K","X:Z") and indicates the type of interaction used in the parameterization of the regression.
+#' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Requires package nnet to be installed. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control of the propensity score model.
 #' @param ids Formula specifying cluster ID variables. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
 #' @param weights Formula to specify sampling weights. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
+#' @param homoscedasticity logical. If TRUE, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param ... Further arguments passed to lavaan::sem().
 #' @return Object of class effectlite.
 #' @examples
@@ -120,16 +122,17 @@ setClass("effectlite", representation(
 #' print(m1) 
 #' @export
 #' @import lavaan
-effectLite <- function(y, x, k=NULL, z=NULL, propscore=NULL, control="0", 
+effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
-                       syntax.only=FALSE, interactions="all", ids=NULL,
-                       weights=NULL, ...){
+                       syntax.only=FALSE, interactions="all", 
+                       propscore=NULL, ids=NULL, weights=NULL, 
+                       homoscedasticity=FALSE, ...){
   
   obj <- new("effectlite")  
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, missing, se, bootstrap,
-                           interactions, ids, weights)
+                           interactions, ids, weights, homoscedasticity)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
@@ -282,7 +285,7 @@ setMethod("show", "effectlite", function(object) {
 
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
                         fixed.cell, missing, se, bootstrap,
-                        interactions, ids, weights){
+                        interactions, ids, weights, homoscedasticity){
   
   d <- data
   vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore)  
@@ -385,7 +388,8 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              se=se,
              bootstrap=bootstrap,
              interactions=interactions,
-             complexsurvey=complexsurvey
+             complexsurvey=complexsurvey,
+             homoscedasticity=homoscedasticity
   )
   
   return(res)
@@ -542,6 +546,14 @@ createLavaanSyntax <- function(obj) {
         }
       }
     }
+  }
+  
+  ## homoscedastic residual variances
+  if(inp@homoscedasticity){
+    tmp <- paste0(y, " ~~ c(", 
+                  paste(rep("veps", times=ng*nk),collapse=","),
+                  ")*", y)
+    model <- paste0(model, "\n", tmp)
   }
     
   ## compute relative frequencies
@@ -841,7 +853,7 @@ createLavaanSyntax <- function(obj) {
   
   
     ##Constraints about 2 and 3 way interactions
-    stopifnot(inp@interactions %in% c("all","none","2-way"))
+    stopifnot(inp@interactions %in% c("all","none","2-way","X:K","X:Z"))
     if(inp@interactions == "none"){      
       gammas <- matrix(c(parnames@gammas), ncol=ng)[-1,-1]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
@@ -852,6 +864,19 @@ createLavaanSyntax <- function(obj) {
         model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
       }
     }
+  if(inp@interactions == "X:K"){
+    if(nk>1 & nz>0){
+      gammas <- parnames@gammas[2:(nz+1), , 2:ng]
+      model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
+    }
+  }
+  if(inp@interactions == "X:Z"){
+    if(nk>1 & nz>0){
+      gammas <- parnames@gammas[, 2:nk, 2:ng]
+      model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
+    }
+  }
+  
   
   ## Hypothesis 1: No average treatment effects
   hypothesis1 <- paste(parnames@Egx, "== 0", collapse="\n")
@@ -906,7 +931,9 @@ computeResults <- function(obj){
   
   if(!is.null(ids) | !is.null(weights)){
         
-    stopifnot(obj@input@fixed.cell) ## currently only works for fixed cell sizes
+    if(!obj@input@fixed.cell){## currently only works for fixed cell sizes
+      stop("EffectLiteR error: The complex survey functionality currently only works for fixed cell sizes. Please specify this option.")
+    } 
     survey.design <- survey::svydesign(ids=ids, weights=weights, 
                                        data=obj@input@data)
     m1 <- lavaan.survey::lavaan.survey(lavaan.fit=m1, 

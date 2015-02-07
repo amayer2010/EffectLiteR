@@ -77,12 +77,13 @@ shinyServer(function(input, output, session) {
     weights <- NULL
     if(input$weights != ""){weights <- as.formula(paste0(" ~ ", input$weights))}
     
+    homoscedasticity <- input$homoscedasticity
+    
     tryCatch(
       effectLite(y=dv, 
                  x=x,
                  k=k,
                  z=z,
-                 propscore=propscore,
                  data=d,
                  control=input$control,
                  measurement=mm,
@@ -91,8 +92,10 @@ shinyServer(function(input, output, session) {
                  bootstrap=input$bootstrap,
                  fixed.cell=fixed.cell,
                  interactions=interactions,
+                 propscore=propscore,                 
                  ids=ids,
-                 weights=weights)
+                 weights=weights,
+                 homoscedasticity=homoscedasticity)
     )  
   })
 

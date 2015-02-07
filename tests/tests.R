@@ -270,7 +270,7 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 #                  missing="fiml")
 
 
-############ Tests with no interaction option ########################
+############ Tests with interaction option ########################
 # 
 d <- example01
 
@@ -283,6 +283,15 @@ m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
                  control="control",  syntax.only=FALSE,
                  interactions="2-way")
 
+m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1","z2"), 
+                 k=c("k1","kateg2"), x="x", 
+                 control="control",  syntax.only=FALSE,
+                 interactions="X:K")
+
+m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1","z2"), 
+                 k=c("k1","kateg2"), x="x", 
+                 control="control",  syntax.only=FALSE,
+                 interactions="X:Z")
 
 ############ Tests with propensity score ########################
 # 
@@ -335,3 +344,9 @@ m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
                     syntax.only=F, data=example_multilevel, 
                     ids=~cid, weights=~weights)
+
+
+################ homoscedastic residual variances ##############
+d <- example01
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
+                 control="control", homoscedasticity=TRUE)
