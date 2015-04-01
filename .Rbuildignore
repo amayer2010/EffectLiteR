@@ -1,6 +1,7 @@
 tests
 old
 private
+inst/elrshiny/shinyapps
 .Rhistory
 ^.*\.Rproj$
 ^\.Rproj\.user$

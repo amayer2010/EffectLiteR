@@ -126,7 +126,7 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
                        measurement=character(), data, fixed.cell=FALSE, 
                        missing="listwise", se="standard", bootstrap=1000L,
                        syntax.only=FALSE, interactions="all", 
-                       propscore=NULL, ids=NULL, weights=NULL, 
+                       propscore=NULL, ids=~0, weights=NULL, 
                        homoscedasticity=FALSE, ...){
   
   obj <- new("effectlite")  
@@ -562,6 +562,19 @@ createLavaanSyntax <- function(obj) {
   if(fixed.cell){
     N <- nrow(obj@input@data)
     observed.freq <- table(obj@input@data$cell)/N
+    
+    # change observed frequencies if we have sampling weights
+    if(!is.null(obj@input@complexsurvey$weights)){
+      weights <- model.matrix(obj@input@complexsurvey$weights,
+                              obj@input@data)
+      if(ncol(weights) > 2){stop("ELR Error: Currently only support for one
+                                 weights variable")}
+      weights <- weights[,-1]
+      observed.freq <- tapply(weights,obj@input@data$cell,sum)
+      observed.freq <- observed.freq/sum(observed.freq) ## rescale to sum to one
+    }
+    
+    
     tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
     model <- paste0(model, "\n", tmp)        
   }else{
@@ -760,6 +773,7 @@ createLavaanSyntax <- function(obj) {
   
   
   ## create matrix of conditional expectations of Z, K, Z*K given X=x
+  ##TODO: maybe we can get rid of the if conditions and only use last one
   expectationsgx <- character()
   if(nz==0 & nk==1){
     expectationsgx <- matrix("1", nrow=ng)
@@ -781,11 +795,17 @@ createLavaanSyntax <- function(obj) {
     select <- c(array(parnames@Ezkgx, dim=c(nz,nk,ng))[,-1,])
     Ezkgx <- array(select, dim=c(nz,nk-1,ng))
     
-    expectationsgx <- c(1, Ezgx[1,], c(rbind(Pkgx[1,], Ezkgx[,,1])))
+    tmp1 <- matrix(Pkgx[1,], nrow=nk-1, ncol=1)
+    tmp2 <- matrix(Ezkgx[,,1], nrow=nk-1, ncol=nz, byrow=TRUE)
+    expectationsgx <- c(1, Ezgx[1,], c(t(cbind(tmp1, tmp2))))
+
     for(i in 2:ng){
+      tmp1 <- matrix(Pkgx[i,], nrow=nk-1, ncol=1)
+      tmp2 <- matrix(Ezkgx[,,i], nrow=nk-1, ncol=nz, byrow=TRUE)      
       expectationsgx <- rbind(expectationsgx,
-                              c(1, Ezgx[i,], c(rbind(Pkgx[i,], Ezkgx[,,i]))))
-    }    
+                              c(1, Ezgx[i,], c(t(cbind(tmp1, tmp2)))))
+    }
+            
   }
   
   
@@ -795,7 +815,7 @@ createLavaanSyntax <- function(obj) {
   for(gx in 1:ng){
     for(i in 2:ng){
       tmp <- paste0(Egxgx[i-1,gx], " := ", 
-                    paste(gammas[,,i],expectationsgx[gx,], sep="*", collapse=" + "))
+                    paste(c(gammas[,,i]),expectationsgx[gx,], sep="*", collapse=" + "))
       model <- paste0(model, "\n", tmp)
       
     }    
@@ -929,7 +949,7 @@ computeResults <- function(obj){
   ids <- obj@input@complexsurvey$ids
   weights <- obj@input@complexsurvey$weights
   
-  if(!is.null(ids) | !is.null(weights)){
+  if((ids != ~0) | (!is.null(weights))){
         
     if(!obj@input@fixed.cell){## currently only works for fixed cell sizes
       stop("EffectLiteR error: The complex survey functionality currently only works for fixed cell sizes. Please specify this option.")
@@ -941,9 +961,10 @@ computeResults <- function(obj){
   }
   
   
-  est <- unclass(coef(m1, type="user")) ## parameter estimates
+  est <- parameterEstimates(m1)$est ## parameter estimates
   se <- parameterEstimates(m1)$se ## standard errors
-  names(se) <- names(est) 
+  names(se) <- names(est) <- parameterEstimates(m1)$label 
+## Yves: what would be the best way to get (default) parameter names 
   tval <- est/se
   pval <- 2*(1-pnorm(abs(tval)))
   

@@ -1,3 +1,11 @@
+# library(EffectLiteR)
+# library(lavaan)
+# library(methods)
+# library(shiny)
+# library(foreign)
+# library(ggplot2)
+# library(nnet)
+# library(lavaan.survey)
 
 
 shinyServer(function(input, output, session) {
@@ -71,7 +79,7 @@ shinyServer(function(input, output, session) {
     
     interactions <- input$interactions
     
-    ids <- NULL
+    ids <- ~0
     if(input$ids != ""){ids <- as.formula(paste0(" ~ ", input$ids))}
     
     weights <- NULL

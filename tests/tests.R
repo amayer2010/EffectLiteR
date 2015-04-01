@@ -18,32 +18,91 @@ library(EffectLiteR)
 # d$z3 <- rnorm(N)
 # d$dv <- rnorm(N)
 
+res_list <- list()
+
 d <- example01
 
 ## 1 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 2 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k=c("k1","kateg2"), x="x", control="control")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ## 0 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k=NULL, x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 0 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=NULL, x="x", control="control")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ## 1 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k="k1", x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
+## 2 K; 2 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1","z2"), 
+                 k=c("k1","kateg2"), x="x", control="control")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 2 K; 3 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1","z2","z3"), 
                  k=c("k1","kateg2"), x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
+## 1 K; 4 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1","z2","z3","k1"), 
+                 k="kateg2", x="x", control="control")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 ######################### Example Daten1411.sav #####################
 # 
@@ -96,6 +155,12 @@ m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0", 
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE,
@@ -134,6 +199,10 @@ m1 <- effectLite(y="eta2", x="x", k="k", z=c("eta1"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ######### Example with latent z and manifest y #############
@@ -149,6 +218,10 @@ m1 <- effectLite(y="CPM22", x="x", z=c("eta1"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 
@@ -243,6 +316,11 @@ d$z1[10] <- NA
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
                  missing="fiml")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 ########## Tests with fixed cell size ################
 d <- example01
@@ -250,6 +328,11 @@ d <- example01
 ## 1 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control", fixed.cell=TRUE)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 ############ Test with constraints (NOT RUN) ################
 # 
@@ -350,3 +433,21 @@ model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
 d <- example01
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control", homoscedasticity=TRUE)
+
+
+
+
+############# check with results from previous lavaan version ###########
+
+# res_list_save <- res_list
+# save(res_list_save, file="private/res_list_save.RData")
+
+load("private/res_list_save.RData")
+
+stopifnot(all.equal(res_list,res_list_save))
+
+for(i in 1:70){
+  print(paste0("entry ", i, ": ", all.equal(res_list[i],res_list_save[i])))
+}
+
+
