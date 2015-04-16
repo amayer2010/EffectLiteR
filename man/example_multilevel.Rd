@@ -4,18 +4,18 @@
 \name{example_multilevel}
 \alias{example_multilevel}
 \title{Dataset example_multilevel.}
-\format{A data frame with 800 rows and 6 variables}
+\format{A data frame with 800 rows and 6 variables.}
 \description{
-A simulated dataset. The variables are as follows:
+A simulated dataset with a cluster ID and sampling weights to test multilevel options. The variables are:
 }
 \details{
 \itemize{
-  \item y. coninuous dependent variable
-  \item x. treatment variable with values 0, 1
-  \item z. continuous covariate
-  \item xz. product of x and z
-  \item cid. cluster ID
-  \item weights. sampling weights
+  \item y. Coninuous dependent variable.
+  \item x. Treatment variable with values 0, 1.
+  \item z. Continuous covariate.
+  \item xz. Product of x and z.
+  \item cid. Cluster ID.
+  \item weights. Sampling weights.
 }
 }
 \keyword{datasets}

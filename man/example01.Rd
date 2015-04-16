@@ -4,17 +4,17 @@
 \name{example01}
 \alias{example01}
 \title{Dataset example01.}
-\format{A data frame with 2000 rows and 7 variables}
+\format{A data frame with 2000 rows and 7 variables.}
 \description{
-A simulated dataset. The variables are as follows:
+A simulated dataset. The variables are:
 }
 \details{
 \itemize{
-  \item x. treatment variable with values control, treat1, and treat2
-  \item k1. categorical covariate with values male and female
-  \item kateg2. categorical covariate with values 1 and 2
-  \item z1-z3. continuous covariates
-  \item dv. coninuous dependent variable
+  \item x. Treatment variable with values control, treat1, and treat2.
+  \item k1. Categorical covariate with values male and female.
+  \item kateg2. Categorical covariate with values 1 and 2.
+  \item z1-z3. Continuous covariates.
+  \item dv. Coninuous dependent variable.
 }
 }
 \keyword{datasets}

@@ -175,7 +175,8 @@ br()
                      selected = "listwise"),
         br(),
         radioButtons("se", "Standard Errors", 
-                     choices=c("standard","boot"), ##TODO: add robust SE 
+                     choices=c("standard","boot","first.order",
+                               "robust.sem","robust.huber.white"), ##TODO: add robust SE 
                      selected = "standard"),
         conditionalPanel(
           condition = "input.se == 'boot'",

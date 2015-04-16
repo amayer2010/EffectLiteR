@@ -4,51 +4,51 @@
 \alias{effectLite}
 \title{Estimate average and conditional effects}
 \usage{
-effectLite(y, x, k = NULL, z = NULL, propscore = NULL, control = "0",
+effectLite(y, x, k = NULL, z = NULL, control = "0",
   measurement = character(), data, fixed.cell = FALSE,
   missing = "listwise", se = "standard", bootstrap = 1000L,
-  syntax.only = FALSE, interactions = "all", ids = NULL, weights = NULL,
-  ...)
+  syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
+  weights = NULL, homoscedasticity = FALSE, ...)
 }
 \arguments{
-\item{y}{Dependent variable (character string).}
+\item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
 
-\item{x}{Treatment variable (character string).}
+\item{x}{Treatment variable (character string) treated as categorical variable.}
 
-\item{k}{Vector of categorical covariates (character vector).}
+\item{k}{Vector of manifest variables treated as categorical covariates (character vector).}
 
-\item{z}{Vector of continuous covariates (character vector).}
+\item{z}{Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.}
 
-\item{propscore}{Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Requires package nnet to be installed. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control of the propensity score model.}
+\item{control}{Value of \code{x} that is used as control group.}
 
-\item{control}{Value of x that should be used as control group.}
-
-\item{measurement}{Measurement model.}
+\item{measurement}{Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.}
 
 \item{data}{A data frame.}
 
-\item{fixed.cell}{logical. If FALSE (default), the group sizes are treated as
-stochastic rather than fixed.}
+\item{fixed.cell}{logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.}
 
-\item{missing}{Missing data handling to be used by lavaan::sem(). Will be
-passed on to sem()}
+\item{missing}{Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.}
 
-\item{se}{Standard error to be used by lavaan::sem(). Will be
-passed on to sem().}
+\item{se}{Type of standard errors. Will be
+passed on to \code{\link[lavaan]{sem}}.}
 
-\item{bootstrap}{Number of bootstrap drwas, if bootstrapping is used. Will be
-passed on to lavaan::sem()-}
+\item{bootstrap}{Number of bootstrap draws, if bootstrapping is used. Will be
+passed on to \code{\link[lavaan]{sem}}.}
 
-\item{syntax.only}{logical. If TRUE, only syntax is returned and the model
+\item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model
 will not be estimated.}
 
-\item{interactions}{character. Can be one of c("all","2-way","none") and indicates the type of interaction used in the parameterization of the regression.}
+\item{interactions}{character. Can be one of \code{c("all","none","2-way","X:K","X:Z")} and indicates the type of interaction used in the parameterization of the regression.}
 
-\item{ids}{Formula specifying cluster ID variables. Will be passed on to lavaan.survey. See ?survey::svydesign for details.}
+\item{propscore}{Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.}
 
-\item{weights}{Formula to specify sampling weights. Will be passed on to lavaan.survey. See ?survey::svydesign for details.}
+\item{ids}{Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.}
 
-\item{...}{Further arguments passed to lavaan::sem().}
+\item{weights}{Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.}
+
+\item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
+
+\item{...}{Further arguments passed to \code{\link[lavaan]{sem}}.}
 }
 \value{
 Object of class effectlite.
@@ -58,11 +58,36 @@ This function is the main funtion of the package and can be used to estimate
 average and conditional effects of a treatment variable on an outcome variable,
 taking into account any number of continuous and categorical covariates.
 It automatically generates lavaan syntax for a multi-group structural equation
-model, runs the model in lavaan, and extracts various average and conditional
+model, runs the model using lavaan, and extracts various average and conditional
 effects of interest.
 }
 \examples{
+## Example with one categorical covariate
 m1 <- effectLite(y="y", x="x", k="z", control="0", data=nonortho)
 print(m1)
+
+## Example with one categorical and one continuous covariate
+m1 <- effectLite(y="dv", x="x", k=c("k1"), z=c("z1"), control="control", data=example01)
+print(m1)
+
+## Example with latent outcome and latent covariate
+measurement <- '
+eta2 =~ 1*CPM12 + 1*CPM22
+eta1 =~ 1*CPM11 + 1*CPM21
+CPM11 + CPM12 ~ 0*1
+CPM21 ~ c(m,m)*1
+CPM22 ~ c(p,p)*1'
+
+m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0",
+                 measurement=measurement, data=example02lv)
+print(m1)
+
+\dontrun{
+## Example with cluster variable and sampling weights
+m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
+                    syntax.only=F, data=example_multilevel,
+                    ids=~cid, weights=~weights)
+print(m1)
+}
 }
 

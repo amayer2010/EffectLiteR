@@ -13,10 +13,10 @@ generateMeasurementModel(names, indicators, ncells, model)
 
 \item{ncells}{Number of groups/cells.}
 
-\item{model}{A vector of character strings of the same length as names. It is used to specify the measurement model for each of the latent variables. Each element can be one of c("parallel","tau-equi","tau-cong").}
+\item{model}{A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used.}
 }
 \description{
-This function automatically generates the measurement model for a call to effectLite(). It is currently only used in the shiny interface.
+This function automatically generates \code{lavaan} syntax for the measurement model for a call to \code{\link[EffectLiteR]{effectLite}}. It is currently also used in the shiny interface.
 }
 \examples{
 names <- c("etay", "etaz1", "etaz2")

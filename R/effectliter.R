@@ -90,36 +90,59 @@ setClass("effectlite", representation(
 #' average and conditional effects of a treatment variable on an outcome variable,
 #' taking into account any number of continuous and categorical covariates.
 #' It automatically generates lavaan syntax for a multi-group structural equation
-#' model, runs the model in lavaan, and extracts various average and conditional
+#' model, runs the model using lavaan, and extracts various average and conditional
 #' effects of interest.
 #' 
-#' @param y Dependent variable (character string).
-#' @param x Treatment variable (character string).
-#' @param k Vector of categorical covariates (character vector).
-#' @param z Vector of continuous covariates (character vector).
-#' @param control Value of x that should be used as control group.
-#' @param measurement Measurement model.
+#' @param y Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.
+#' @param x Treatment variable (character string) treated as categorical variable.
+#' @param k Vector of manifest variables treated as categorical covariates (character vector).
+#' @param z Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.
+#' @param control Value of \code{x} that is used as control group.
+#' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
 #' @param data A data frame. 
-#' @param fixed.cell logical. If FALSE (default), the group sizes are treated as
-#' stochastic rather than fixed.
-#' @param missing Missing data handling to be used by lavaan::sem(). Will be 
-#' passed on to sem()
-#' @param se Standard error to be used by lavaan::sem(). Will be 
-#' passed on to sem().
-#' @param bootstrap Number of bootstrap drwas, if bootstrapping is used. Will be 
-#' passed on to lavaan::sem()-
-#' @param syntax.only logical. If TRUE, only syntax is returned and the model 
+#' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
+#' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.
+#' @param se Type of standard errors. Will be 
+#' passed on to \code{\link[lavaan]{sem}}.
+#' @param bootstrap Number of bootstrap draws, if bootstrapping is used. Will be 
+#' passed on to \code{\link[lavaan]{sem}}.
+#' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
-#' @param interactions character. Can be one of c("all","none","2-way","X:K","X:Z") and indicates the type of interaction used in the parameterization of the regression.
-#' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Requires package nnet to be installed. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control of the propensity score model.
-#' @param ids Formula specifying cluster ID variables. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
-#' @param weights Formula to specify sampling weights. Will be passed on to lavaan.survey. See ?survey::svydesign for details.
-#' @param homoscedasticity logical. If TRUE, residual variances of the dependent variable are assumed to be homogeneous across cells.
-#' @param ... Further arguments passed to lavaan::sem().
+#' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z")} and indicates the type of interaction used in the parameterization of the regression.
+#' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
+#' @param ids Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
+#' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
+#' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
+#' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
 #' @examples
+#' ## Example with one categorical covariate
 #' m1 <- effectLite(y="y", x="x", k="z", control="0", data=nonortho)
 #' print(m1) 
+#' 
+#' ## Example with one categorical and one continuous covariate
+#' m1 <- effectLite(y="dv", x="x", k=c("k1"), z=c("z1"), control="control", data=example01)
+#' print(m1)
+#' 
+#' ## Example with latent outcome and latent covariate
+#' measurement <- '
+#' eta2 =~ 1*CPM12 + 1*CPM22
+#' eta1 =~ 1*CPM11 + 1*CPM21
+#' CPM11 + CPM12 ~ 0*1
+#' CPM21 ~ c(m,m)*1
+#' CPM22 ~ c(p,p)*1'
+#'
+#' m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0", 
+#'                  measurement=measurement, data=example02lv)
+#' print(m1)
+#' 
+#'\dontrun{
+#' ## Example with cluster variable and sampling weights
+#' m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+#'                     syntax.only=F, data=example_multilevel, 
+#'                     ids=~cid, weights=~weights)
+#' print(m1)
+#' }
 #' @export
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
@@ -326,7 +349,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     
     ## check for empty cells
     if(any(table(d$kstar, d[,x]) == 0)){
-      stop("Empty cells are currently not allowed.")
+      stop("EffectLiteR error: Empty cells are currently not allowed.")
     }    
     stopifnot(length(levels(d$kstar)) <= 10)    
     
@@ -373,6 +396,12 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   
   complexsurvey <- list(ids=ids, weights=weights)
   
+  ## non-standard se only work with fixed group sizes
+  if(se != "standard" & fixed.cell==FALSE){
+        
+    stop("EffectLiteR error: Non-standard SEs currently only work with fixed cell sizes. Please use fixed.cell==TRUE.")
+    
+  }
   
   res <- new("input",
              vnames=vnames, 
@@ -567,7 +596,7 @@ createLavaanSyntax <- function(obj) {
     if(!is.null(obj@input@complexsurvey$weights)){
       weights <- model.matrix(obj@input@complexsurvey$weights,
                               obj@input@data)
-      if(ncol(weights) > 2){stop("ELR Error: Currently only support for one
+      if(ncol(weights) > 2){stop("EffectLiteR error: Currently only support for one
                                  weights variable")}
       weights <- weights[,-1]
       observed.freq <- tapply(weights,obj@input@data$cell,sum)
@@ -930,7 +959,6 @@ createLavaanSyntax <- function(obj) {
 
 computeResults <- function(obj){
   
-  ## this is necessary for lavaan.survey to work -- talk to Daniel and Yves
   sem.call <- call("sem", model=obj@lavaansyntax@model,
                    group="cell", missing=obj@input@missing,
                    se=obj@input@se, bootstrap=obj@input@bootstrap,
@@ -939,12 +967,7 @@ computeResults <- function(obj){
                    mimic="mplus")
   
   m1 <- eval(sem.call)
-      
-#   m1 <- sem(model=obj@lavaansyntax@model, group="cell", missing=obj@input@missing,
-#             se=obj@input@se, bootstrap=obj@input@bootstrap,
-#             group.label=obj@input@vlevels$cell, data=obj@input@data,
-#             fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, mimic="mplus") 
-  
+        
   ## lavaan.survey -- complex survey designs
   ids <- obj@input@complexsurvey$ids
   weights <- obj@input@complexsurvey$weights
@@ -1210,7 +1233,7 @@ computePropensityScore <- function(input){
     mprop <- nnet::multinom(form, data=d, na.action="na.omit", trace=FALSE)
     dprop <- fitted(mprop)
     if(input@ng > 2){dprop <- dprop[,-1]}
-    dprop <- apply(dprop,2,logit)       
+    dprop <- apply(dprop,2,car::logit)       
     
     if(any(diag(var(dprop)) < 0.05)){
       warning(paste("very small variance of propensity scores \n ",
@@ -1231,34 +1254,6 @@ computePropensityScore <- function(input){
 }
 
 
-## adopted from John Fox car::logit package
-logit <- function (p, percents = range.p[2] > 1, adjust){
-  
-  range.p <- range(p, na.rm = TRUE)
-  if (percents) {
-    if (range.p[1] < 0 || range.p[1] > 100) 
-      stop("p must be in the range 0 to 100")
-    p <- p/100
-    range.p <- range.p/100
-  }
-  else if (range.p[1] < 0 || range.p[1] > 1) 
-    stop("p must be in the range 0 to 1")
-  a <- if (missing(adjust)) {
-    if (isTRUE(all.equal(range.p[1], 0)) || isTRUE(all.equal(range.p[2], 
-                                                             1))) 
-      0.025
-    else 0
-  }
-  else adjust
-  if (missing(adjust) && a != 0) 
-    warning(paste("proportions remapped to (", a, ", ", 1 - 
-                    a, ")", sep = ""))
-  a <- 1 - 2 * a
-  log((0.5 + a * (p - 0.5))/(1 - (0.5 + a * (p - 0.5))))
-  
-  
-}
-
 
 ############ shiny ##############
 
@@ -1276,12 +1271,12 @@ effectLiteGUI <- function(launch.browser=TRUE){
 
 #' Generate measurement model
 #' 
-#' This function automatically generates the measurement model for a call to effectLite(). It is currently only used in the shiny interface.
+#' This function automatically generates \code{lavaan} syntax for the measurement model for a call to \code{\link[EffectLiteR]{effectLite}}. It is currently also used in the shiny interface.
 #'
 #' @param names A vector of character strings with names of latent variables.
 #' @param indicators A list of vectors of character strings to specify indicators of latent variables (see example).
 #' @param ncells Number of groups/cells.
-#' @param model A vector of character strings of the same length as names. It is used to specify the measurement model for each of the latent variables. Each element can be one of c("parallel","tau-equi","tau-cong").
+#' @param model A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used.
 #' @examples
 #' names <- c("etay", "etaz1", "etaz2")
 #' indicators <- list("etay" = c("y1","y2","y3"), 
@@ -1364,12 +1359,12 @@ NULL
 
 #' Dataset nonortho.
 #' 
-#' A simulated dataset. The variables are as follows:
+#' A simulated dataset. The variables are:
 #' 
 #' \itemize{
-#'   \item y. coninuous dependent variable depression
-#'   \item x. treatment variable with values 0 (control), 1 (treat1), and 2 (treat2)
-#'   \item z. categorical covariate with values 0 (low neediness), 1 (medium neediness) and 2 (high neediness)
+#'   \item y. Continuous dependent variable depression.
+#'   \item x. Treatment variable with values 0 (control), 1 (treat1), and 2 (treat2).
+#'   \item z. Categorical covariate with values 0 (low neediness), 1 (medium neediness) and 2 (high neediness).
 #' }
 #' 
 #' @docType data
@@ -1382,19 +1377,19 @@ NULL
 
 #' Dataset example01.
 #' 
-#' A simulated dataset. The variables are as follows:
+#' A simulated dataset. The variables are:
 #' 
 #' \itemize{
-#'   \item x. treatment variable with values control, treat1, and treat2
-#'   \item k1. categorical covariate with values male and female
-#'   \item kateg2. categorical covariate with values 1 and 2
-#'   \item z1-z3. continuous covariates
-#'   \item dv. coninuous dependent variable
+#'   \item x. Treatment variable with values control, treat1, and treat2.
+#'   \item k1. Categorical covariate with values male and female.
+#'   \item kateg2. Categorical covariate with values 1 and 2.
+#'   \item z1-z3. Continuous covariates.
+#'   \item dv. Coninuous dependent variable.
 #' }
 #' 
 #' @docType data
 #' @keywords datasets
-#' @format A data frame with 2000 rows and 7 variables
+#' @format A data frame with 2000 rows and 7 variables.
 #' @name example01
 NULL
 
@@ -1402,40 +1397,40 @@ NULL
 
 #' Dataset example02lv.
 #' 
-#' A simulated dataset with latent variables. The variables are as follows:
+#' A simulated dataset with latent variables. The variables are:
 #' 
 #' \itemize{
-#'   \item CPM11. first indicator of latent covariate
-#'   \item CPM21. second indicator of latent covariate
-#'   \item CPM12. first indicator of latent outcome
-#'   \item CPM22. second indicator of latent outcome
-#'   \item x. dichotomous treatment variable with values 0 (control), and 1 (treatment)
-#'   \item k. categorical covariate with values first, second, and third
+#'   \item CPM11. First indicator of latent covariate.
+#'   \item CPM21. Second indicator of latent covariate.
+#'   \item CPM12. First indicator of latent outcome.
+#'   \item CPM22. Second indicator of latent outcome.
+#'   \item x. Dichotomous treatment variable with values 0 (control), and 1 (treatment).
+#'   \item k. Categorical covariate with values first, second, and third.
 #' }
 #' 
 #' @docType data
 #' @keywords datasets
-#' @format A data frame with 300 rows and 6 variables
+#' @format A data frame with 300 rows and 6 variables.
 #' @name example02lv
 NULL
 
 
 #' Dataset example_multilevel.
 #' 
-#' A simulated dataset. The variables are as follows:
+#' A simulated dataset with a cluster ID and sampling weights to test multilevel options. The variables are:
 #' 
 #' \itemize{
-#'   \item y. coninuous dependent variable
-#'   \item x. treatment variable with values 0, 1
-#'   \item z. continuous covariate
-#'   \item xz. product of x and z
-#'   \item cid. cluster ID
-#'   \item weights. sampling weights
+#'   \item y. Coninuous dependent variable.
+#'   \item x. Treatment variable with values 0, 1.
+#'   \item z. Continuous covariate.
+#'   \item xz. Product of x and z.
+#'   \item cid. Cluster ID.
+#'   \item weights. Sampling weights.
 #' }
 #' 
 #' @docType data
 #' @keywords datasets
-#' @format A data frame with 800 rows and 6 variables
+#' @format A data frame with 800 rows and 6 variables.
 #' @name example_multilevel
 NULL
 

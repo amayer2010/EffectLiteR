@@ -9,3 +9,4 @@ inst/elrshiny/shinyapps
 .gitignore
 .gitattributes
 TODO.txt
+README.md

@@ -1,21 +1,23 @@
 Package: EffectLiteR
-Title: EffectLiteR
-Version: 0.3-1.420
+Title: Average and Conditional Effects
+Version: 0.3-1.421
 Author: Axel Mayer <amayer2010@gmail.com>, Lisa Dietzfelbinger
     <Lisa.Dietzfelbinger@uni-jena.de>
 Maintainer: Axel Mayer <amayer2010@gmail.com>
-Description: Analysis of average and conditional causal effects
+Description: Analysis of average and conditional causal effects based on structural equation modeling
 Depends:
     R (>= 3.1.0),
-    lavaan (>= 0.5-17)
+    lavaan (>= 0.5-18)
 Imports:
     methods,
     shiny (>= 0.11),
     foreign,
     ggplot2,
     nnet,
-    lavaan.survey
+    survey,
+    lavaan.survey,
+    car
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
-Packaged: 2014-03-11
+Packaged: 2015-04-15

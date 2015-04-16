@@ -4,18 +4,18 @@
 \name{example02lv}
 \alias{example02lv}
 \title{Dataset example02lv.}
-\format{A data frame with 300 rows and 6 variables}
+\format{A data frame with 300 rows and 6 variables.}
 \description{
-A simulated dataset with latent variables. The variables are as follows:
+A simulated dataset with latent variables. The variables are:
 }
 \details{
 \itemize{
-  \item CPM11. first indicator of latent covariate
-  \item CPM21. second indicator of latent covariate
-  \item CPM12. first indicator of latent outcome
-  \item CPM22. second indicator of latent outcome
-  \item x. dichotomous treatment variable with values 0 (control), and 1 (treatment)
-  \item k. categorical covariate with values first, second, and third
+  \item CPM11. First indicator of latent covariate.
+  \item CPM21. Second indicator of latent covariate.
+  \item CPM12. First indicator of latent outcome.
+  \item CPM22. Second indicator of latent outcome.
+  \item x. Dichotomous treatment variable with values 0 (control), and 1 (treatment).
+  \item k. Categorical covariate with values first, second, and third.
 }
 }
 \keyword{datasets}

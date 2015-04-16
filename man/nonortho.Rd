@@ -6,13 +6,13 @@
 \title{Dataset nonortho.}
 \format{A data frame with 500 rows and 3 variables}
 \description{
-A simulated dataset. The variables are as follows:
+A simulated dataset. The variables are:
 }
 \details{
 \itemize{
-  \item y. coninuous dependent variable depression
-  \item x. treatment variable with values 0 (control), 1 (treat1), and 2 (treat2)
-  \item z. categorical covariate with values 0 (low neediness), 1 (medium neediness) and 2 (high neediness)
+  \item y. Continuous dependent variable depression.
+  \item x. Treatment variable with values 0 (control), 1 (treat1), and 2 (treat2).
+  \item z. Categorical covariate with values 0 (low neediness), 1 (medium neediness) and 2 (high neediness).
 }
 }
 \keyword{datasets}

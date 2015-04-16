@@ -261,13 +261,17 @@ d <- example01
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="boot", bootstrap=5L, control="control")
 
-# ## 2 K; 1 Z
-# m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
-#                  se="first.order", control="control")
-# 
-# ## 2 K; 1 Z
-# m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
-#                  se="robust", control="control")
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="first.order", control="control", fixed.cell=TRUE)
+
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="robust.sem", control="control", fixed.cell=TRUE)
+
+## 2 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 se="robust.huber.white", control="control", fixed.cell=TRUE)
 
 
 ## TODO: Why can SE not be computed for first.order and robust?
@@ -334,15 +338,6 @@ res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgk,
                               m1@results@Egxgxk))
 
-############ Test with constraints (NOT RUN) ################
-# 
-# lavsyntax <- m1@lavaansyntax@model
-# lavsyntax <- paste(lavsyntax,"\n", "g101 == 0")
-# testdata <- m1@input@data
-# 
-# 
-# m1star <- sem(lavsyntax, group="cell", data=testdata,
-#           fixed.x=FALSE, group.w.free = TRUE, mimic="mplus") 
 
 
 ############ Test with empty cell ################
