@@ -173,7 +173,7 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
 
 ################ methods #############################
 
-
+#' @importMethodsFrom methods show
 setMethod("show", "effectlite", function(object) {
   
   ng <- object@input@ng
@@ -399,7 +399,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   ## non-standard se only work with fixed group sizes
   if(se != "standard" & fixed.cell==FALSE){
         
-    stop("EffectLiteR error: Non-standard SEs currently only work with fixed cell sizes. Please use fixed.cell==TRUE.")
+    stop("EffectLiteR error: Non-standard SEs currently only work with fixed cell sizes. Please use fixed.cell=TRUE.")
     
   }
   
@@ -914,13 +914,13 @@ createLavaanSyntax <- function(obj) {
       }
     }
   if(inp@interactions == "X:K"){
-    if(nk>1 & nz>0){
+    if(nz>0){
       gammas <- parnames@gammas[2:(nz+1), , 2:ng]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
     }
   }
   if(inp@interactions == "X:Z"){
-    if(nk>1 & nz>0){
+    if(nk>1){
       gammas <- parnames@gammas[, 2:nk, 2:ng]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
     }
@@ -975,7 +975,7 @@ computeResults <- function(obj){
   if((ids != ~0) | (!is.null(weights))){
         
     if(!obj@input@fixed.cell){## currently only works for fixed cell sizes
-      stop("EffectLiteR error: The complex survey functionality currently only works for fixed cell sizes. Please specify this option.")
+      stop("EffectLiteR error: The complex survey functionality currently only works for fixed cell sizes. Please use fixed.cell=TRUE.")
     } 
     survey.design <- survey::svydesign(ids=ids, weights=weights, 
                                        data=obj@input@data)
@@ -1257,11 +1257,11 @@ computePropensityScore <- function(input){
 
 ############ shiny ##############
 
-#' Shiny interface for effectLite()
+#' Shiny interface for effectLite
 #' 
-#' This function calls a shiny interface for effectLite().
+#' This function calls a shiny interface for effectLite.
 #' 
-#' @param launch.browser Option will be passed on to shiny::runApp()
+#' @param launch.browser Option will be passed on to \code{\link[shiny]{runApp}}
 #' @export
 effectLiteGUI <- function(launch.browser=TRUE){  
   shiny::runApp(system.file('elrshiny', package='EffectLiteR'),

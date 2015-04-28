@@ -237,7 +237,7 @@ br()
 tabPanel('Complex Survey',
          img(src='effectliter_logo.png', align = "right"),
          br(),
-         helpText('The lavaan.survey package is called to account for cluster variables and sampling weights.'),        
+         helpText('The lavaan.survey package is called to account for cluster variables and sampling weights. This is an experimental feature.'),        
          br(),
          selectizeInput("ids", "Cluster Variable", "",
                         multiple=FALSE, selected="",

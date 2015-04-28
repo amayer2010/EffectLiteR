@@ -65,6 +65,8 @@ res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgk,
                               m1@results@Egxgxk))
 
+m1 <- effectLite(data=d, y="dv", k=c("k1"), x="x", control="control",
+                 interactions="X:Z")
 
 ## 1 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k="k1", x="x", control="control")
@@ -162,9 +164,24 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 
 
 m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0", 
-                 measurement=mmtest, data=example02lv, fixed.cell=FALSE,
+                 measurement=mmtest, data=example02lv, fixed.cell=TRUE,
                  missing="fiml", syntax.only=FALSE,
                  se="boot", bootstrap=5L)
+
+
+############ Kirchmann Example with latent variable ############
+
+kirch <- foreign::read.spss("private/data/kirchmann.sav", to.data.frame=T)
+
+mmtest <- generateMeasurementModel(names=c("eta2", "eta1"),
+                                   indicators=list("eta2"=c("CESD_13","CESD_23"),
+                                                   "eta1"=c("CESD_11","CESD_21")),
+                                   ncells=2,
+                                   model=c("parallel","parallel"))
+
+m1 <- effectLite(y="eta2", x="con_pat", z=c("eta1"), control="controls", 
+                 measurement=mmtest, data=kirch, fixed.cell=FALSE,
+                 missing="fiml", syntax.only=FALSE)
 
 
 ############ Example 01a with method factor ################## 
@@ -259,7 +276,7 @@ d <- example01
 
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
-                 se="boot", bootstrap=5L, control="control")
+                 se="boot", bootstrap=5L, control="control", fixed.cell=TRUE)
 
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
