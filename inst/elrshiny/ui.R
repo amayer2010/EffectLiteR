@@ -21,9 +21,33 @@ shinyUI(fluidPage(
         tryCatch(
           fileInput("file1", "Data File", 
                     accept=c(".csv", ".txt", ".sav", ".xpt", 
-                              ".CSV", ".TXT", ".SAV", ".XPT"))
+                              ".CSV", ".TXT", ".SAV", ".XPT",
+                             ".DAT", ".dat"))
         ),
-        helpText('Select either a .csv, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. To read in data from inside R into the shiny interface, it is easiest to save your dataset using write.csv with the default settings. If reading your SPSS file does not work, please try saving it in SAS Transport format with file ending .xpt. Causes for errors may be special characters in file names and/or path names.')
+        helpText('Select either a .csv, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. Some default arguments can be overwritten (see additional options below). To read in data from inside R into the shiny interface, it is easiest to save your dataset using write.csv with the default settings. If reading your SPSS file does not work, please try saving it in SAS Transport format with file ending .xpt. Causes for errors may be special characters in file names and/or path names.'),
+        br(),
+        h5(strong("Additional Options to Read Data")),
+        br(),
+        selectizeInput(inputId="vallabels", 
+                       label=h5("Use value labels (SPSS data)"), 
+                       selected="default",
+                       choices= c("default","yes","no")),
+        selectizeInput(inputId="header", 
+                       label=h5("File contains variable names (txt and csv data)"), 
+                       selected="default",
+                       choices= c("default","yes","no")),
+        selectizeInput(inputId="sep", 
+                       label=h5("Character separating columns (txt and csv data)"), 
+                       selected="default",
+                       choices= c("default","semicolon","white space")),
+        selectizeInput(inputId="dec", 
+                       label=h5("Decimal character (txt and csv data)"), 
+                       selected="default",
+                       choices= c("default","decimal point","decimal comma")),
+        textInput(inputId="na.strings", 
+                  label=h5("Missing value code"), 
+                  value = "NA"),
+        br()
       ),
       ########## Manifest Variables ############
       tabPanel('Manifest Variables',
@@ -190,8 +214,7 @@ br()
         br(),
         h5("Additional Options"),
         checkboxInput("homoscedasticity", "Homoscedastic residual variances", 
-                      value=FALSE),
-        checkboxInput("vallabels", "Use value labels from SPSS", TRUE)
+                      value=FALSE)
     ),
 ########## Interactions #############
     tabPanel('Interactions',
