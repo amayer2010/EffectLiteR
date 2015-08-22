@@ -1172,7 +1172,8 @@ computeResults <- function(obj){
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
   ## conditional effects
-  condeffects <- computeConditionalEffects(obj, est)
+  vcov <- computeVcovAdditionalParameters(m1)
+  condeffects <- computeConditionalEffects(obj, est, vcov)
   
   res <- new("results",
              lavresults=m1,
@@ -1191,7 +1192,7 @@ computeResults <- function(obj){
 
 
 
-computeConditionalEffects <- function(obj, est){
+computeConditionalEffects <- function(obj, est, vcov){
   
   current.na.action <- options('na.action')
   on.exit(options(current.na.action))
@@ -1241,16 +1242,25 @@ computeConditionalEffects <- function(obj, est){
     }
     
     estimates <- est[paste0("g1",kz)]
+    vcov_est <- vcov[paste0("g1",kz),paste0("g1",kz)]
     condeffects <- cbind(modmat %*% estimates)
+    condeffects <- cbind(condeffects,
+              apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
+    
     
     if(ng > 2){
       for(i in 3:ng){
         estimates <- est[paste0("g",i-1,kz)]
+        vcov_est <- vcov[paste0("g",i-1,kz),paste0("g",i-1,kz)]
         condeffects <- cbind(condeffects, modmat %*% estimates)
+        condeffects <- cbind(condeffects,
+              apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
       }      
     }  
     condeffects <- as.data.frame(condeffects)
-    names(condeffects) <- paste0("g",2:ng-1)
+    names(condeffects) <- paste0(rep(c("","se_"), times=ng-1),
+                                 "g",
+                                 rep(2:ng-1, each=2))
     condeffects <- cbind(dsub,condeffects)
     
     
@@ -1302,6 +1312,42 @@ computePropensityScore <- function(input){
   
   return(input)
   
+}
+
+
+
+## helper function to compute the vcov matrix of additional paramers
+## this is needed to compute the standard errors for conditional effects
+## remove as soon as Yves has this functionality in lavaan
+computeVcovAdditionalParameters <- function(object){
+  
+  ## free parameters only
+  theta <- object@Fit@x
+  
+  # remove == constraints from parTable
+  PT <- as.data.frame(object@ParTable, stringsAsFactors = FALSE)
+  eq.idx <- which(PT$op == "==")
+  if(length(eq.idx) > 0L) {
+    PT <- PT[-eq.idx,]
+  }
+  partable <- as.list(PT)
+  
+  ## names new parameters
+  def.idx <- which(partable$op == ":=")
+  lhs.names <- partable$lhs[def.idx]
+  
+  ## def_function
+  def.function <- lavaan:::lav_partable_constraints_def(partable)
+  
+  ## compute Jacobian
+  JAC <- lav_func_jacobian_complex(func = def.function, x = theta)
+  
+  ## compute vcov of new parameters
+  VCOV <- vcov(object, labels = FALSE)
+  VCOV_np  <- JAC %*% VCOV %*% t(JAC)
+  row.names(VCOV_np) <- colnames(VCOV_np) <- lhs.names
+  
+  return(VCOV_np)
 }
 
 

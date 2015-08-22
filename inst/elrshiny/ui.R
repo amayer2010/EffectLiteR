@@ -24,7 +24,7 @@ shinyUI(fluidPage(
                               ".CSV", ".TXT", ".SAV", ".XPT",
                              ".DAT", ".dat"))
         ),
-        helpText('Select either a .csv, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. Some default arguments can be overwritten (see additional options below). To read in data from inside R into the shiny interface, it is easiest to save your dataset using write.csv with the default settings. If reading your SPSS file does not work, please try saving it in SAS Transport format with file ending .xpt. Causes for errors may be special characters in file names and/or path names.'),
+        helpText('Select either a .csv, .txt, .dat, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. Some default arguments can be overwritten (see additional options below).'),
         br(),
         h5(strong("Additional Options to Read Data")),
         br(),
