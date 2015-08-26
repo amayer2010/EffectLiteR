@@ -24,7 +24,7 @@ setClass("input", representation(
   interactions="character", ## type of interaction (all, 2-way, no)
   complexsurvey="list",
   homoscedasticity="logical",
-  outprop="character" ## output from propensity score model
+  outprop="list" ## output from propensity score model
 )
 )
 
@@ -254,7 +254,17 @@ setMethod("show", "effectlite", function(object) {
     tmp <- paste0(tmp, paste(gammas[,,i], gammalabels2, sep=" * ", collapse=" + "))
     tmp <- gsub("*  ", "", tmp, fixed=TRUE)
     if(length(gammalabels2)==1){tmp <- gsub("*", "", tmp, fixed=TRUE)}
-    cat(tmp, "\n")
+    
+    if(nchar(tmp) > 80){
+      ## split g function over several lines
+      tmp <- unlist(strsplit(tmp, " + ", fixed=TRUE))
+      tmp <- capture.output(cat(tmp, sep=" + ", fill=80))
+      tmp[2:length(tmp)] <- paste0("            + ",tmp[2:length(tmp)])
+      cat(tmp, sep="\n")
+    } else{
+      cat(tmp, "\n")
+    }
+    
   }
   
     
@@ -279,6 +289,12 @@ setMethod("show", "effectlite", function(object) {
     print(hypotheses, digits=3, print.gap=3)
   }
   
+  cat("\n\n --------------------- Adjusted Means --------------------- \n\n")
+  namesadjmeans <- paste0("Adj.Mean",0:(ng-1))
+  adjmeans <- object@results@adjmeans
+  row.names(adjmeans) <- namesadjmeans
+  print(adjmeans, digits=3, print.gap=3)
+  
   
   cat("\n\n --------------------- Average Effects --------------------- \n\n")
   namesEgx <- paste0("E[g",1:(ng-1),label.g.function,"]")
@@ -286,13 +302,6 @@ setMethod("show", "effectlite", function(object) {
   row.names(Egx) <- namesEgx
   print(Egx, digits=3, print.gap=3)
   
-  
-  cat("\n\n --------------------- Adjusted Means --------------------- \n\n")
-  namesadjmeans <- paste0("Adj.Mean",0:(ng-1))
-  adjmeans <- object@results@adjmeans
-  row.names(adjmeans) <- namesadjmeans
-  print(adjmeans, digits=3, print.gap=3)
-
   
   if(!(nz==0 & nk==1)){
     cat("\n\n --------------------- Effects given a Treatment Condition --------------------- \n\n")
@@ -327,7 +336,13 @@ setMethod("show", "effectlite", function(object) {
   propscore <- object@input@vnames$propscore
   if(!is.null(propscore)){
     cat("\n\n --------------------- Output Propensity Score Model --------------------- \n\n")
-    cat(object@input@outprop)
+    cat(object@input@outprop$formula, "\n")
+    cat("\nEstimate\n")
+    print(object@input@outprop$coef, digits=3, print.gap=3)
+    cat("\nStandard Errors\n")
+    print(object@input@outprop$se, digits=3, print.gap=3)
+    cat("\nEst./SE\n")
+    print(object@input@outprop$tval, digits=3, print.gap=3)
   }
     
 
@@ -1342,11 +1357,14 @@ computePropensityScore <- function(input){
     
     mprop <- nnet::multinom(form, data=d, na.action="na.omit", trace=FALSE)
     
-    ## save output as character
-    outprop <- capture.output(summary(mprop, digits=3))
-    outprop <- outprop[-(1:3)]
-    outprop <- c("Formula for Propensity Score Model",deparse(form), outprop)
-    outprop <- paste(outprop, collapse="\n")
+    ## save output
+    resprop <- summary(mprop)
+    outprop <- list()
+    outprop$formula <- paste("Formula for Propensity Score Model",
+                             deparse(form), sep="\n")
+    outprop$coef <- resprop$coefficients
+    outprop$se <- resprop$standard.errors
+    outprop$tval <- resprop$coefficients/resprop$standard.errors
     input@outprop <- outprop
     
     ## fitted values
