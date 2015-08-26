@@ -23,7 +23,8 @@ setClass("input", representation(
   bootstrap="numeric", ## number of bootstrap draws
   interactions="character", ## type of interaction (all, 2-way, no)
   complexsurvey="list",
-  homoscedasticity="logical"
+  homoscedasticity="logical",
+  outprop="character" ## output from propensity score model
 )
 )
 
@@ -181,13 +182,15 @@ setMethod("show", "effectlite", function(object) {
   nz <- object@input@nz
   vnames <- object@input@vnames    
   vlevels <- object@input@vlevels
+  gammas <- object@parnames@gammas
+  gammalabels <- object@parnames@gammalabels
   
-  label.g.function <- "(K,Z)"
-  if(nk==1 & nz==0){label.g.function <- "()"}
-  if(nk>1 & nz==0){label.g.function <- "(K)"}
-  if(nk==1 & nz>0){label.g.function <- "(Z)"}
+  label.g.function <- "(K,Z)"; label.covs <- ",K,Z"
+  if(nk==1 & nz==0){label.g.function <- "()"; label.covs <- ""}
+  if(nk>1 & nz==0){label.g.function <- "(K)"; label.covs <- ",K"}
+  if(nk==1 & nz>0){label.g.function <- "(Z)"; label.covs <- ",Z"}
   
-  cat("\n\n------------------ Variables and Descriptive Statistics ------------------ \n\n")
+  cat("\n\n--------------------- Variables and Descriptive Statistics --------------------- \n\n")
   
   cat("Variable Names \n\n")
   cat("Outcome variable Y: ", paste0(vnames$y), "\n")
@@ -203,20 +206,20 @@ setMethod("show", "effectlite", function(object) {
     tmp <- expand.grid(tmp)
     tmp$K <- vlevels$kstar
     tmp <- tmp[,ncol(tmp):1]
-    print(tmp, row.names=F)
+    print(tmp, row.names=F, print.gap=3)
     
     cat("\n")
     cat("Cells \n")
     tmp <- expand.grid(K=vlevels$kstar, X=vlevels$levels.x.original)[,2:1]
     tmp$Cell <- vlevels$cell
-    print(tmp)
+    print(tmp, print.gap=3)
     
   }
   
   if(nk==1){
     cat("Cells \n")
     tmp <- data.frame(X=vlevels$levels.x.original)
-    print(tmp, row.names=F)
+    print(tmp, row.names=F, print.gap=3)
     
   }
   
@@ -227,79 +230,107 @@ setMethod("show", "effectlite", function(object) {
   cat("actually used in the analysis. \n\n")
   
   if(nk==1){
-    print(ftable(object@input@data[vnames$x]))
+    print(ftable(object@input@data[vnames$x]), print.gap=3)
   }else{
     cellcounts <- as.formula(paste0(paste(vnames$k, collapse="+"), 
                                     "~", vnames$x))
-    print(ftable(cellcounts, data=object@input@data))
+    print(ftable(cellcounts, data=object@input@data), print.gap=3)
   }
-
-#  cat("\n\n------------------ Parameterization of Regression ------------------ \n\n")  
-
+ 
   
-  cat("\n\n------------------ Main Hypotheses ------------------ \n\n")
-  if(object@input@se != "standard"){
-    cat(paste0("Wald tests for main hypotheses are not computed for se=",
-               object@input@se))
-  }else{
-    print(object@results@hypotheses, digits=3)
+  cat("\n\n --------------------- Regression Model --------------------- \n")
+  
+  tmp <- paste0("E(Y|X",label.covs,") = ")
+  tmp <- paste0(tmp, "g0",label.g.function," + ")
+  tmp <- paste0(tmp, paste0("g",1:(ng-1),label.g.function,"*I_X=",1:(ng-1), 
+                            collapse=" + "))
+  cat("\n",tmp, "\n")
+
+  gammalabels2 <- gammalabels[,,1]
+  gammalabels2[1] <- ""
+  
+  for(i in 1:ng){
+    tmp <- paste0("  g",i-1,label.g.function," = ")
+    tmp <- paste0(tmp, paste(gammas[,,i], gammalabels2, sep=" * ", collapse=" + "))
+    tmp <- gsub("*  ", "", tmp, fixed=TRUE)
+    if(length(gammalabels2)==1){tmp <- gsub("*", "", tmp, fixed=TRUE)}
+    cat(tmp, "\n")
   }
   
-  
-  cat("\n\n ------------------ Average Effects ------------------ \n\n")
-  namesEgx <- paste0("E[g",1:(ng-1),label.g.function,"]")
-  Egx <- object@results@Egx
-  row.names(Egx) <- namesEgx
-  print(Egx, digits=3)
-  
-  
-  cat("\n\n ------------------ Adjusted Means ------------------ \n\n")
-  namesadjmeans <- paste0("Adj.Mean",0:(ng-1))
-  adjmeans <- object@results@adjmeans
-  row.names(adjmeans) <- namesadjmeans
-  print(adjmeans, digits=3)
-  
-  if(!(nz==0 & nk==1)){
-    cat("\n\n ------------------ Effects given a Treatment Condition ------------------ \n\n")
-    tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1))
-    namesEgxgx <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x, "]")
-    Egxgx <- object@results@Egxgx
-    row.names(Egxgx) <- namesEgxgx
-    print(Egxgx, digits=3)
     
-  }
-  
-  if(nk>1){
-    cat("\n\n ------------------ Effects given K=k ------------------ \n\n")
-    tmp <- expand.grid(g=1:(ng-1), k=0:(nk-1))
-    namesEgxgk <- paste0("E[g",tmp$g,label.g.function,"|K=",tmp$k,"]")
-    Egxgk <- object@results@Egxgk
-    row.names(Egxgk) <- namesEgxgk
-    print(Egxgk, digits=3)    
-  }
-
-  if(nk>1 & nz>0){
-    cat("\n\n ------------------ Effects given X=x, K=k ------------------ \n\n")
-    Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)    
-    tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
-    namesEgxgxk <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x,", K=",tmp$k,"]")
-    Egxgxk <- object@results@Egxgxk
-    row.names(Egxgxk) <- namesEgxgxk
-    print(Egxgxk, digits=3)    
-  }
-  
-  
-  cat("\n\n ------------------ Intercept and Effect Functions ------------------ \n")
-  
   for(i in 1:ng){
     tmp <- paste0("g",i-1,label.g.function," Function")
     cat("\n",tmp, "\n\n")
     
     tmp <- object@results@gx[[i]]
     tmp[,2:5] <- round(tmp[,2:5], digits=3)
-    print(tmp)
+    print(tmp, print.gap=3, row.names=FALSE)
   }
   
+  
+  
+  
+  cat("\n\n--------------------- Main Hypotheses --------------------- \n\n")
+  if(object@input@se != "standard" || object@input@interactions != "all"){
+    cat("Wald tests for main hypotheses are currently not available for models with \n non-standard SEs and for models with restrictions on interactions.")
+  }else{
+    hypotheses <- object@results@hypotheses
+    names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
+    print(hypotheses, digits=3, print.gap=3)
+  }
+  
+  
+  cat("\n\n --------------------- Average Effects --------------------- \n\n")
+  namesEgx <- paste0("E[g",1:(ng-1),label.g.function,"]")
+  Egx <- object@results@Egx
+  row.names(Egx) <- namesEgx
+  print(Egx, digits=3, print.gap=3)
+  
+  
+  cat("\n\n --------------------- Adjusted Means --------------------- \n\n")
+  namesadjmeans <- paste0("Adj.Mean",0:(ng-1))
+  adjmeans <- object@results@adjmeans
+  row.names(adjmeans) <- namesadjmeans
+  print(adjmeans, digits=3, print.gap=3)
+
+  
+  if(!(nz==0 & nk==1)){
+    cat("\n\n --------------------- Effects given a Treatment Condition --------------------- \n\n")
+    tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1))
+    namesEgxgx <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x, "]")
+    Egxgx <- object@results@Egxgx
+    row.names(Egxgx) <- namesEgxgx
+    print(Egxgx, digits=3, print.gap=3)
+    
+  }
+  
+  if(nk>1){
+    cat("\n\n --------------------- Effects given K=k --------------------- \n\n")
+    tmp <- expand.grid(g=1:(ng-1), k=0:(nk-1))
+    namesEgxgk <- paste0("E[g",tmp$g,label.g.function,"|K=",tmp$k,"]")
+    Egxgk <- object@results@Egxgk
+    row.names(Egxgk) <- namesEgxgk
+    print(Egxgk, digits=3, print.gap=3)    
+  }
+
+  if(nk>1 & nz>0){
+    cat("\n\n --------------------- Effects given X=x, K=k --------------------- \n\n")
+    Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)    
+    tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
+    namesEgxgxk <- paste0("E[g",tmp$g,label.g.function,"|X=",tmp$x,", K=",tmp$k,"]")
+    Egxgxk <- object@results@Egxgxk
+    row.names(Egxgxk) <- namesEgxgxk
+    print(Egxgxk, digits=3, print.gap=3)    
+  }
+  
+  
+  propscore <- object@input@vnames$propscore
+  if(!is.null(propscore)){
+    cat("\n\n --------------------- Output Propensity Score Model --------------------- \n\n")
+    cat(object@input@outprop)
+  }
+    
+
 })
 
 
@@ -1160,7 +1191,7 @@ computeResults <- function(obj){
                       se[gammas[,i]],
                       tval[gammas[,i]],
                       pval[gammas[,i]])
-    names(tmp) <- c("Coef", "Estimate", "SE", "Est./SE", "p-value")
+    names(tmp) <- c("Coefficient", "Estimate", "SE", "Est./SE", "p-value")
     rownames(tmp) <- gammalabels[,i]
     gx[[i]] <- tmp 
   }
@@ -1172,7 +1203,7 @@ computeResults <- function(obj){
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
   ## conditional effects
-  vcov <- computeVcovAdditionalParameters(m1)
+  if(obj@input@se != "boot"){vcov <- computeVcovAdditionalParameters(m1)}
   condeffects <- computeConditionalEffects(obj, est, vcov)
   
   res <- new("results",
@@ -1209,7 +1240,7 @@ computeConditionalEffects <- function(obj, est, vcov){
   nk <- obj@input@nk
   ng <- obj@input@ng  
 
-  if(length(mm) == 0){
+  if(length(mm) == 0 & obj@input@se != "boot"){
     
     if(nz==0 & nk==1){
       formula <- as.formula(" ~ 1")
@@ -1263,6 +1294,23 @@ computeConditionalEffects <- function(obj, est, vcov){
                                  rep(2:ng-1, each=2))
     condeffects <- cbind(dsub,condeffects)
     
+    ## add variables used in the propscore model
+    propscore <- obj@input@vnames$propscore
+    if(!is.null(propscore)){
+      
+      d <- obj@input@data
+      
+      if(is(propscore, "formula")){      
+        form <- propscore
+      }else{
+        form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
+      }
+      
+      dsub <- model.frame(form,data=d)
+      condeffects <- condeffects[,-1]
+      condeffects <- cbind(dsub, condeffects)
+      
+    }
     
   }else{
     condeffects <- data.frame()
@@ -1286,12 +1334,22 @@ computePropensityScore <- function(input){
     
     if(is(propscore, "formula")){      
       form <- propscore
+      environment(form) <- environment()
       
     }else{
       form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
     }
     
     mprop <- nnet::multinom(form, data=d, na.action="na.omit", trace=FALSE)
+    
+    ## save output as character
+    outprop <- capture.output(summary(mprop, digits=3))
+    outprop <- outprop[-(1:3)]
+    outprop <- c("Formula for Propensity Score Model",deparse(form), outprop)
+    outprop <- paste(outprop, collapse="\n")
+    input@outprop <- outprop
+    
+    ## fitted values
     dprop <- fitted(mprop)
     if(input@ng > 2){dprop <- dprop[,-1]}
     dprop <- apply(dprop,2,car::logit)       
