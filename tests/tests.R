@@ -183,6 +183,12 @@ m1 <- effectLite(y="eta2", x="con_pat", z=c("eta1"), control="controls",
                  measurement=mmtest, data=kirch, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+m1 <- effectLite(y="CESD_3", x="con_pat", z=c("CESD_1"), k=c("sex"),
+                 control="controls", 
+                 data=kirch, fixed.cell=FALSE, 
+                 propscore=c("GAQA_1","RSQA_1","RSQV_1"),
+                 missing="fiml", syntax.only=FALSE)
+
 
 ############ Example 01a with method factor ################## 
 
@@ -448,6 +454,36 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 
 
 
+############ Bettinas Example ############
+
+
+d <- foreign::read.spss("private/data/Gesamtdatei_Klasse 2 mit Erstsprache.sav", to.data.frame=T)
+m1 <- effectLite(data=d, y="b_ELFE_Text", x="Gruppe", 
+                 control="KG", propscore=c("Rolle","a_ELFE_Text","a_ELFE_Wort",
+                                           "a_ELFE_Speed", "a_ELFE_Satz"))
+
+
+########## Example with add command ###########
+
+d <- example01
+
+## test with additional conditional effects
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
+                 control="control", add="newpar := g200 + g100 \n newpar2 := g100")
+
+# cat(m1@lavaansyntax@model)
+
+## test with equality constraints
+m1 <- effectLite(data=d, y="dv", z=c("z1"), x="x", 
+                 control="control", add="g101 == 0 \n g201 == 0 ",
+                 syntax.only=F)
+
+## test with inequality constraint
+
+m1 <- effectLite(data=d, y="dv", z=c("z1"), x="x", 
+                 control="control", add="g101 > 0",
+                 syntax.only=F)
+
 
 ############# check with results from previous lavaan version ###########
 
@@ -461,5 +497,4 @@ stopifnot(all.equal(res_list,res_list_save))
 for(i in 1:70){
   print(paste0("entry ", i, ": ", all.equal(res_list[i],res_list_save[i])))
 }
-
 

@@ -8,7 +8,7 @@ effectLite(y, x, k = NULL, z = NULL, control = "0",
   measurement = character(), data, fixed.cell = FALSE,
   missing = "listwise", se = "standard", bootstrap = 1000L,
   syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
-  weights = NULL, homoscedasticity = FALSE, ...)
+  weights = NULL, homoscedasticity = FALSE, add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -47,6 +47,8 @@ will not be estimated.}
 \item{weights}{Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.}
 
 \item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
+
+\item{add}{Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.}
 
 \item{...}{Further arguments passed to \code{\link[lavaan]{sem}}.}
 }

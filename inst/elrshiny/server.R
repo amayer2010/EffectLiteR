@@ -7,8 +7,6 @@
 # library(nnet)
 # library(lavaan.survey)
 
-source("shiny_helper.R")
-
 shinyServer(function(input, output, session) {
   
   ####### New analysis / reload button ########
@@ -39,7 +37,7 @@ shinyServer(function(input, output, session) {
     
     if(!is.null(inFile)){
       
-      return(myReadData(file=inFile$datapath,
+      return(elrReadData(file=inFile$datapath,
                         name=inFile$name,
                         header=input$header,
                         sep=input$sep,
@@ -82,6 +80,12 @@ shinyServer(function(input, output, session) {
     
     homoscedasticity <- input$homoscedasticity
     
+    if(input$add.syntax == ""){
+      add <- character()
+    }else{
+      add <- input$add.syntax
+    }
+    
     tryCatch(
       effectLite(y=dv, 
                  x=x,
@@ -98,7 +102,8 @@ shinyServer(function(input, output, session) {
                  propscore=propscore,                 
                  ids=ids,
                  weights=weights,
-                 homoscedasticity=homoscedasticity)
+                 homoscedasticity=homoscedasticity,
+                 add=add)
     )  
   })
 
@@ -131,14 +136,28 @@ shinyServer(function(input, output, session) {
   
   ######## Reactive zselect2 for Plot 3 ########
   zSelect2 <- reactive({
-    zselect <- c(input$variablez, input$variablek, input$variablex)
+    
+    kstar <- NULL
+    if(!is.null(input$variablek)){kstar <- "K"}
+    zselect <- c(input$variablez, input$variablek, kstar, input$variablex)
+    
+    d <- dataInput()
+    x <- d[[input$variablex]]    
+    ng <- length(unique(x))
     
     if(!is.null(input$propscore)){
-      d <- dataInput()
-      x <- d[[input$variablex]]    
-      ng <- length(unique(x))
+      zselect <- c(zselect, input$propscore)
       zselect <- c(zselect, paste0("logprop",1:(ng-1)))
     }
+    if(input$prop.formula != "" & input$propscoreformula){
+      try({
+        propscore <- as.formula(input$prop.formula)
+        zselect <- c(zselect, all.vars(propscore[[3]]))
+      }, silent=TRUE)
+      zselect <- c(zselect, paste0("logprop",1:(ng-1)))
+    }
+    
+    zselect <- c(zselect, paste0("g",1:(ng-1)))
     
     return(zselect)
   })
@@ -150,12 +169,23 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect3 <- c("", input$variablek, kstar, input$variablex, input$variablez)
     
+    d <- dataInput()
+    x <- d[[input$variablex]]    
+    ng <- length(unique(x))
+      
     if(!is.null(input$propscore)){
-      d <- dataInput()
-      x <- d[[input$variablex]]    
-      ng <- length(unique(x))
+      zselect3 <- c(zselect3, input$propscore)
       zselect3 <- c(zselect3, paste0("logprop",1:(ng-1)))
     }
+    if(input$prop.formula != "" & input$propscoreformula){
+      try({
+        propscore <- as.formula(input$prop.formula)
+        zselect3 <- c(zselect3, all.vars(propscore[[3]]))
+      }, silent=TRUE)
+      zselect3 <- c(zselect3, paste0("logprop",1:(ng-1)))
+    }
+    
+    zselect3 <- c(zselect3, paste0("g",1:(ng-1)))
     
     return(zselect3)
   })
@@ -399,13 +429,12 @@ shinyServer(function(input, output, session) {
       dp <- na.omit(data.frame(y,cell))
       binwidth <- (range(y, na.rm=TRUE)[2]-range(y, na.rm=TRUE)[1])/30
 
-      require(ggplot2)
-      p <- qplot(y, data=dp, geom="histogram",
+      p <- ggplot2::qplot(y, data=dp, geom="histogram",
                  binwidth=binwidth,
                  xlab=input$variabley,
                  main=paste0("Distribution of ", input$variabley, " in cells"))
-      p <- p + facet_wrap( ~ cell)
-      p <- p + theme_bw()
+      p <- p + ggplot2::facet_wrap( ~ cell)
+      p <- p + ggplot2::theme_bw()
       print(p)
     }  
         
@@ -443,15 +472,14 @@ shinyServer(function(input, output, session) {
       
       dp <- data.frame(y,cell,zselected)
       
-      require(ggplot2)
-      p <- qplot(y=y, x=zselected, data=dp, 
+      p <- ggplot2::qplot(y=y, x=zselected, data=dp, 
                  ylab=input$variabley,
                  xlab=input$zselect,                 
                  main=paste0("Regression of ", input$variabley, " on ", 
                              input$zselect, " in cells"))
-      p <- p + facet_wrap( ~ cell)
-      p <- p + geom_smooth(method = "lm")
-      p <- p + theme_bw()
+      p <- p + ggplot2::facet_wrap( ~ cell)
+      p <- p + ggplot2::geom_smooth(method = "lm")
+      p <- p + ggplot2::theme_bw()
       print(p)                  
     }
         
@@ -491,38 +519,24 @@ shinyServer(function(input, output, session) {
       g1label <- "(K,Z)"
       if(length(input$variablek) == 0){g1label <- "(Z)"}
       
-      require(ggplot2)
-      p <- qplot(y=yselected, x=zselected, 
+      p <- ggplot2::qplot(y=yselected, x=zselected, 
                  data=condeffects,
                  ylab=paste0(input$gxselect,g1label),
                  xlab=input$zselect2,                 
                  main=paste0("Estimated regression of ",
                              paste0(input$gxselect,g1label), " on ", 
                              input$zselect2))
-      p <- p + geom_smooth(method="loess")
-      p <- p + geom_point(aes(colour=colourselected))
-      p <- p + guides(colour = guide_legend(input$zselect3))            
-      p <- p + theme_bw()
+      p <- p + ggplot2::geom_smooth(method="loess")
+      p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected))
+      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(input$zselect3))            
+      p <- p + ggplot2::theme_bw()
       
       print(p)
+      
     }
     
   })
 
-#   ###### Output Path Diagram #########
-#   output$plotpd <- renderPlot({    
-#     
-#     if(input$variabley == "" || input$variablex == ""){
-#       return(NULL)
-#     }else{
-#       
-#       m1 <- model()
-#       lavresults <- m1@results@lavresults
-#       semPaths(lavresults)
-#     }  
-#     
-#   })
-  
   
   ###### Output EffectLiteR Summary #########
   output$summary <- renderPrint({
@@ -537,20 +551,130 @@ shinyServer(function(input, output, session) {
       m1
     }
   })
-    
-  ###### Output Lavaan Syntax #########
-  output$lavsyntax <- renderPrint({      
-    
-    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){            
-      
+  
+  ###### Output ELR call #########
+  output$elrcall <- renderPrint({
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){    
       cat("Please specify the outcome variable and the treatment variable")
-      
     }else{
-          
+      dv <- depv()
+      x <- input$variablex
+      
+      mm <- mm()
+      printmm <- "character()"
+      if(length(mm) != 0){printmm <- "mm"}
+      
+      printk <- "NULL"
+      if(length(input$variablek) != 0){
+        printk <- paste0("c(\"",
+                         paste(input$variablek, collapse="\",\""), 
+                         "\")")
+      }
+      
+      
+      fixed.cell <- FALSE; if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+      
+      z <- NULL
+      printz <- "NULL"
+      if(length(input$variablez) != 0){z <- input$variablez}
+      if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
+      if(!is.null(z)){
+        printz <- paste0("c(\"",
+                         paste(z, collapse="\",\""), 
+                         "\")")
+      }
+      
+      propscore <- NULL 
+      printpropscore <- "NULL"
+      if(length(input$propscore) != 0 & !input$propscoreformula){
+        propscore <- input$propscore
+        printpropscore <- paste0("c(\"",
+                                 paste(propscore, collapse="\",\""), 
+                                 "\")")
+      }
+      if(input$prop.formula != "" & input$propscoreformula){
+        printpropscore <- input$prop.formula
+      }
+      
+      interactions <- input$interactions
+      
+      printids <- "~0"
+      if(input$ids != ""){
+        printids <- paste0(" ~ ", input$ids)
+      }
+      
+      printweights="NULL"
+      if(input$weights != ""){
+        printweights <- paste0(" ~ ", input$weights)
+        }
+      
+      homoscedasticity <- input$homoscedasticity
+      
+      printadd <- "character()"
+      if(input$add.syntax != ""){printadd <- "add"}
+      
+      tmp <- paste0("#### Call for effectLite #### \n\n",
+                    "effectLite(",
+                    "y=\"", dv, "\", ",
+                    "x=\"", x, "\", ",
+                    "k=", printk, ", ",
+                    "z=", printz, ", ",
+                    "data=data, ",
+                    "control=\"", input$control, "\", ",
+                    "measurement=", printmm, ", ",
+                    "missing=\"", input$missing, "\", ",
+                    "se=\"", input$se, "\", ",
+                    "bootstrap=", input$bootstrap, ", ",
+                    "fixed.cell=", fixed.cell, ", ",
+                    "interactions=\"", interactions, "\", ",
+                    "propscore=", printpropscore, ", ",
+                    "ids=", printids, ", ",
+                    "weights=", printweights, ", ",
+                    "homoscedasticity=", homoscedasticity, ", ",
+                    "add=", printadd,
+                    ")")
+      
+      cat(tmp)  
+    }  
+  })
+  
+
+  ###### Output lavaan call #########
+  output$lavcall <- renderPrint({
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){    
+      cat("")
+    }else{
+      m1 <- model()
+      cellabel <- paste0("c(\"",
+                         paste(m1@input@vlevels$cell, collapse="\",\""), 
+                         "\")")
+      tmp <- paste0("#### Call for lavaan::sem #### \n\n",
+                  "sem(", "model=model, ",
+                  "group=\"", "cell", "\", ", 
+                  "missing=\"", m1@input@missing, "\", ",
+                  "se=\"", m1@input@se, "\", ", 
+                  "bootstrap=\"", m1@input@bootstrap, "\", ",
+                  "group.label=", cellabel, ", ",
+                  "data=data, ", 
+                  "fixed.x=FALSE, ",
+                  "group.w.free=", !m1@input@fixed.cell, ", ",
+                  "mimic=\"", "mplus", "\") ")
+      cat(tmp, "\n")  
+    }  
+  })
+  
+  
+      
+  ###### Output Lavaan Syntax #########
+  output$lavsyntax <- renderPrint({
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){    
+      cat("")
+    }else{
       m1 <- model()
       cat(m1@lavaansyntax@model)  
     }  
   })
+  
 
   ###### Output Lavaan Results #########
   output$lavresults <- renderPrint({      
@@ -566,5 +690,30 @@ shinyServer(function(input, output, session) {
       ## maybe there was a reason I set fit.measures=FALSE in prior versions...
     }  
   })
-
+  
+  
+  ###### Download Data (Conditional Effects Table) #######
+  output$downloadConditionalEffects <- downloadHandler(
+    filename = function() {
+      paste('ELR-ConditionalEffects-', Sys.Date(), '.txt', sep='')
+    },
+    content = function(con) {
+      m1 <- model()
+      write.table(m1@results@condeffects, con, row.names=F, col.names=T, 
+                  quote=F)
+    }
+  )
+  
+  ###### Download (transformed) Input Data #######
+  output$downloadLavData <- downloadHandler(
+    filename = function() {
+      paste('ELR-data-', Sys.Date(), '.txt', sep='')
+    },
+    content = function(con) {
+      m1 <- model()
+      write.table(m1@input@data, con, row.names=F, col.names=T, 
+                  quote=F)
+    }
+  )
+  
 })

@@ -17,6 +17,7 @@ setClass("input", representation(
   nk="integer", ## number of unfolded categories of K  
   data="data.frame", 
   measurement="character",
+  add="character",
   fixed.cell ="logical",
   missing="character",
   se="character", ## lavaan standard errors
@@ -75,6 +76,7 @@ setClass("results", representation(
 
 
 setClass("effectlite", representation(
+  call="call",
   input="input",
   parnames="parnames",
   lavaansyntax="lavsyntax",
@@ -114,6 +116,7 @@ setClass("effectlite", representation(
 #' @param ids Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
 #' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
+#' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
 #' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
 #' @examples
@@ -151,12 +154,14 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
                        missing="listwise", se="standard", bootstrap=1000L,
                        syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
-                       homoscedasticity=FALSE, ...){
+                       homoscedasticity=FALSE, add=character(),...){
   
-  obj <- new("effectlite")  
+  obj <- new("effectlite")
+  obj@call <- match.call()
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, missing, se, bootstrap,
-                           interactions, ids, weights, homoscedasticity)
+                           interactions, ids, weights, homoscedasticity,
+                           add)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
@@ -191,13 +196,15 @@ setMethod("show", "effectlite", function(object) {
   if(nk==1 & nz>0){label.g.function <- "(Z)"; label.covs <- ",Z"}
   
   cat("\n\n--------------------- Variables and Descriptive Statistics --------------------- \n\n")
-  
   cat("Variable Names \n\n")
   cat("Outcome variable Y: ", paste0(vnames$y), "\n")
   cat("Treatment variable X: ", paste0(vnames$x), "\n")
   cat("Reference group (Control group): ", paste0(object@input@control), "\n")
   cat("Categorical covariates K: ", paste0(vnames$k), "\n")
-  cat("Continuous covariates Z: ", paste0(vnames$z), "\n\n")
+  cat("Continuous covariates Z: ", paste0(vnames$z), "\n")
+  v <- vnames$propscore
+  if(is(v, "formula")){v <- all.vars(v[[3]])}  
+  cat("Covariates for propensity score V: ", paste0(v), "\n\n")
   
   if(nk>1){
     cat("Levels of Unfolded Categorical Covariate K \n")
@@ -264,25 +271,29 @@ setMethod("show", "effectlite", function(object) {
     } else{
       cat(tmp, "\n")
     }
-    
   }
   
-    
+  ## print coefficients of g-Functions  
   for(i in 1:ng){
-    tmp <- paste0("g",i-1,label.g.function," Function")
-    cat("\n",tmp, "\n\n")
-    
+    if(i==1){
+      tmp <- paste0("Intercept Function g",i-1,label.g.function)
+      cat("\n",tmp, "\n\n")
+    }else{
+      tmp <- paste0("Effect Function g",i-1,label.g.function)
+      tmp <- paste0(tmp, "   [", object@input@vnames$x, 
+                    ": ", object@input@vlevels$levels.x.original[i],
+                    " vs. ",object@input@vlevels$levels.x.original[1], "]")
+      cat("\n",tmp, "\n\n")
+    }
     tmp <- object@results@gx[[i]]
     tmp[,2:5] <- round(tmp[,2:5], digits=3)
     print(tmp, print.gap=3, row.names=FALSE)
   }
   
   
-  
-  
   cat("\n\n--------------------- Main Hypotheses --------------------- \n\n")
-  if(object@input@se != "standard" || object@input@interactions != "all"){
-    cat("Wald tests for main hypotheses are currently not available for models with \n non-standard SEs and for models with restrictions on interactions.")
+  if(nrow(object@results@hypotheses)==0){
+    cat("Wald tests for main hypotheses are currently not available for models with \n non-standard SEs and for models with (in-)equality constraints (e.g., on interactions).")
   }else{
     hypotheses <- object@results@hypotheses
     names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
@@ -335,11 +346,20 @@ setMethod("show", "effectlite", function(object) {
   
   propscore <- object@input@vnames$propscore
   if(!is.null(propscore)){
-    cat("\n\n --------------------- Output Propensity Score Model --------------------- \n\n")
-    cat(object@input@outprop$formula, "\n")
+    cat("\n\n --------------------- Propensity Score Model --------------------- \n\n")
+    cat("Model equation: log[P(X=1|V)/P(X=0|V)] = h1(V)", "\n")
+    if(ng > 2){
+      for(i in 3:ng){
+        tmp <- paste0("                ", 
+                      "log[P(X=", (i-1), "|V)/P(X=0|V)] = h",(i-1),"(V)",
+                      "\n")
+        cat(tmp)
+      }
+    }
+    cat("R formula for nnet::multinom: ", object@input@outprop$formula, "\n")
     cat("\nEstimate\n")
     print(object@input@outprop$coef, digits=3, print.gap=3)
-    cat("\nStandard Errors\n")
+    cat("\nStandard Error\n")
     print(object@input@outprop$se, digits=3, print.gap=3)
     cat("\nEst./SE\n")
     print(object@input@outprop$tval, digits=3, print.gap=3)
@@ -405,7 +425,8 @@ conditionalEffectsPlot <- function(obj, zsel, gxsel="g1", colour=""){
 
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
                         fixed.cell, missing, se, bootstrap,
-                        interactions, ids, weights, homoscedasticity){
+                        interactions, ids, weights, homoscedasticity,
+                        add){
   
   d <- data
   vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore)  
@@ -509,6 +530,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              control=control,
              data=d, 
              measurement=measurement,
+             add=add,
              fixed.cell=fixed.cell,
              missing=missing,
              se=se,
@@ -638,12 +660,18 @@ createLavaanSyntax <- function(obj) {
   gammas <- parnames@gammas
   
   
-  ## measurement model
-  model <- inp@measurement
+  model <- "#### lavaan Syntax for EffectLiteR Model ####"
   
-  ## syntax intercepts  
+  ## measurement model
+  if(length(inp@measurement) != 0){
+    model <- paste0(model, "\n\n## Measurement Model \n")
+    model <- paste0(model, inp@measurement)
+  }
+  
+  ## syntax intercepts
+  model <- paste0(model, "\n\n## Structural Model \n")
   tmp <- paste0(y," ~ c(", paste(alphas[1,,],collapse=","), ")*1")
-  model <- paste(model, tmp, sep="\n")
+  model <- paste0(model, tmp)
   
   ## syntax regression coefficients in each cell
   if (nz>0) {
@@ -683,6 +711,7 @@ createLavaanSyntax <- function(obj) {
   }
     
   ## compute relative frequencies
+  model <- paste0(model, "\n\n## Relative Group Frequencies \n")
   relfreq <- obj@parnames@relfreq    
   
   if(fixed.cell){
@@ -702,12 +731,12 @@ createLavaanSyntax <- function(obj) {
     
     
     tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
-    model <- paste0(model, "\n", tmp)        
+    model <- paste0(model, tmp)        
   }else{
     
     ## syntax group weights
     tmp <- paste0("group % c(", paste(parnames@groupw, collapse=","), ")*w")
-    model <- paste0(model, "\n", tmp)
+    model <- paste0(model, tmp)
     
     groupw <- obj@parnames@groupw
     
@@ -748,12 +777,16 @@ createLavaanSyntax <- function(obj) {
     }
   }
   
-  model <- paste0(model, "\n", paste(beta, collapse="\n"))  
+  model <- paste0(model, "\n\n## beta Coefficients")
+  model <- paste0(model, "\n", paste(beta, collapse="\n"))
+  
+  model <- paste0(model, "\n\n## gamma Coefficients")
   model <- paste0(model, "\n", paste(gamma, collapse="\n"))
   
   
-  ## compute unconditional means of z  
+  ## compute unconditional means of z
   if (nz>0) {
+    model <- paste0(model, "\n\n## Unconditional Expectations E(Z)")
     meanz <- parnames@meanz
     cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
     relfreq <- parnames@relfreq
@@ -765,6 +798,7 @@ createLavaanSyntax <- function(obj) {
   
   ## compute unconditional probabilities of K*=k
   if (nk>1) {
+    model <- paste0(model, "\n\n## Unconditional Probabilities P(K=k)")
     pk <- parnames@pk
     relfreq <- matrix(parnames@relfreq, nrow=nk)
     for (i in 1:nk) {
@@ -774,6 +808,7 @@ createLavaanSyntax <- function(obj) {
   }
   
   ## compute unconditional probabilities of X=x
+  model <- paste0(model, "\n\n## Unconditional Probabilities P(X=x)")
   px <- parnames@px
   relfreq <- matrix(parnames@relfreq, nrow=nk)
   for (i in 1:ng) {
@@ -784,6 +819,7 @@ createLavaanSyntax <- function(obj) {
   ## compute unconditional means of Z*K 
   if (nk>1 & nz>0) {
     
+    model <- paste0(model, "\n\n## Unconditional Expectations E(Z*I_K=k)")
     Ezk <- array(parnames@Ezk, dim=c(nk,nz))
     cellmeanz <- array(parnames@cellmeanz, dim=c(nz,nk,ng))
     relfreq <- array(parnames@relfreq, dim=c(nk,ng))
@@ -799,6 +835,7 @@ createLavaanSyntax <- function(obj) {
   }
   
   ## create vector of unconditional expectations of Z, K, Z*K
+  model <- paste0(model, "\n\n## Average Effects")
   pk <- parnames@pk[-1]
   meanz <- Ezk <- pkEzk <- character()
   
@@ -816,12 +853,15 @@ createLavaanSyntax <- function(obj) {
   }
   
   ## adjusted means
+  model <- paste0(model, "\n\n## Adjusted Means")
   for(i in 1:ng){
     tmp <- paste0(parnames@adjmeans[i]," := ",
                   paste(betas[,,i],expectations, sep="*", collapse=" + "))
     model <- paste0(model, "\n", tmp)
   }
   
+  
+  model <- paste0(model, "\n\n## Conditional Probabilities P(K=k|X=x)")
   ## conditional probabilities of K=k given X=x (Pkgx)
   relfreq <- matrix(parnames@relfreq, nrow=nk)
   Pkgx <- matrix(parnames@Pkgx, nrow=nk)
@@ -835,6 +875,7 @@ createLavaanSyntax <- function(obj) {
   
   ## conditional probabilities of X=x given K=k (Pxgk)
   if(nk>1){
+    model <- paste0(model, "\n\n## Conditional Probabilities P(X=x|K=k)")
     relfreq <- matrix(parnames@relfreq, nrow=nk)
     Pxgk <- matrix(parnames@Pxgk, nrow=ng)
     pk <- parnames@pk
@@ -849,6 +890,7 @@ createLavaanSyntax <- function(obj) {
   ## conditional expectations of Z given X=x (Ezgx)
   Ezgx <- character()
   if(nz!=0){
+    model <- paste0(model, "\n\n## Conditional Expectations E(Z|X=x)")
     cellmeanz <- array(parnames@cellmeanz, dim=c(nz,nk,ng))
     Ezgx <- matrix(parnames@Ezgx, nrow=nz)
     Pkgx <- matrix(parnames@Pkgx, nrow=nk)
@@ -857,14 +899,16 @@ createLavaanSyntax <- function(obj) {
         Ezgx[q,i] <- paste0(Ezgx[q,i], " := ", 
                             paste(cellmeanz[q,1:nk,i], Pkgx[,i], sep="*", collapse=" + "))
       }
-    }    
+    }
+    model <- paste0(model, "\n", paste(Ezgx, collapse="\n"))
   }
-  model <- paste0(model, "\n", paste(Ezgx, collapse="\n"))  
+  
   
   
   ## conditional expectations of Z given K=k (Ezgk)
   Ezgk <- character()
   if(nz>0 & nk>1){
+    model <- paste0(model, "\n\n## Conditional Expectations E(Z|K=k)")
     cellmeanz <- array(parnames@cellmeanz, dim=c(nz,nk,ng))
     Ezgk <- matrix(parnames@Ezgk, nrow=nz)
     Pxgk <- matrix(parnames@Pxgk, nrow=ng)
@@ -882,6 +926,7 @@ createLavaanSyntax <- function(obj) {
   ## conditional expectations of Z*K given X=x (Ezkgx)
   Ezkgx <- character()
   if(nz>0 & nk>1){
+    model <- paste0(model, "\n\n## Conditional Expectations E(Z*I_K=k|X=x)")
     Ezkgx <- array(parnames@Ezkgx, dim=c(nz,nk,ng))
     cellmeanz <- array(parnames@cellmeanz, dim=c(nz,nk,ng))
     Pkgx <- array(parnames@Pkgx, dim=c(nk,ng))
@@ -893,9 +938,10 @@ createLavaanSyntax <- function(obj) {
                                  "*", Pkgx[k,i])
         }
       }
-    }    
+    }
+    model <- paste0(model, "\n", paste(Ezkgx, collapse="\n"))  
   }
-  model <- paste0(model, "\n", paste(Ezkgx, collapse="\n"))  
+  
   
   
   ## create matrix of conditional expectations of Z, K, Z*K given X=x
@@ -935,7 +981,8 @@ createLavaanSyntax <- function(obj) {
   }
   
   
-  ## Effects given a treatment condition  
+  ## Effects given a treatment condition
+  model <- paste0(model, "\n\n## Effects given X=x")
   Egxgx <- matrix(parnames@Egxgx, ncol=ng)
   
   for(gx in 1:ng){
@@ -954,7 +1001,7 @@ createLavaanSyntax <- function(obj) {
   Ezgk <- rbind("1", Ezgk)
   
   if(nk>1){
-    
+    model <- paste0(model, "\n\n## Effects given K=k")
     for(i in 2:ng){     ## effects given K=0
       tmp <- paste0(Egxgk[i-1,1], " := ", 
                     paste(gammas[,1,i], Ezgk[,1], sep="*", collapse=" + ")) 
@@ -976,6 +1023,7 @@ createLavaanSyntax <- function(obj) {
   Egxgxk <- array(parnames@Egxgxk, dim=c(ng-1,ng,nk))
   
   if(nk>1 & nz>0){
+    model <- paste0(model, "\n\n## Effects given X=x, K=k")
     
     for(t in 2:ng){
       for(x in 1:ng){
@@ -1000,29 +1048,39 @@ createLavaanSyntax <- function(obj) {
   
     ##Constraints about 2 and 3 way interactions
     stopifnot(inp@interactions %in% c("all","none","2-way","X:K","X:Z"))
-    if(inp@interactions == "none"){      
+    if(inp@interactions == "none"){
+      model <- paste0(model, "\n\n## Equality Constraints")
       gammas <- matrix(c(parnames@gammas), ncol=ng)[-1,-1]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
     } 
     if(inp@interactions == "2-way"){
       if(nk>1 & nz>0){
+        model <- paste0(model, "\n\n## Equality Constraints")
         gammas <- parnames@gammas[2:(nz+1), 2:nk, 2:ng]
         model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
       }
     }
   if(inp@interactions == "X:K"){
     if(nz>0){
+      model <- paste0(model, "\n\n## Equality Constraints")
       gammas <- parnames@gammas[2:(nz+1), , 2:ng]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
     }
   }
   if(inp@interactions == "X:Z"){
     if(nk>1){
+      model <- paste0(model, "\n\n## Equality Constraints")
       gammas <- parnames@gammas[, 2:nk, 2:ng]
       model <- paste0(model, "\n", paste(gammas, "== 0", collapse="\n"))
     }
   }
-  
+    
+  ## additional syntax
+  if(length(inp@add) != 0){
+    model <- paste0(model, "\n\n## Additional User Defined Syntax \n")
+    model <- paste0(model, inp@add)
+  }
+    
   
   ## Hypothesis 1: No average treatment effects
   hypothesis1 <- paste(parnames@Egx, "== 0", collapse="\n")
@@ -1092,10 +1150,11 @@ computeResults <- function(obj){
   nz <- obj@input@nz
   nk <- obj@input@nk  
   
+  # obj@input@interactions != "all"
   ## main hypotheses
-  if(obj@input@se != "standard" | obj@input@interactions != "all"){ 
+  if(obj@input@se != "standard" | any(partable(m1)$op %in% c("==",">","<"))){ 
     ## no Wald Test for robust, bootstrapped SE...
-    ## no Wald Test for interaction constraints (ask Yves to adjust...)
+    ## no Wald Test for models with equality constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
     hypotheses <- data.frame()
   }else{
@@ -1360,8 +1419,7 @@ computePropensityScore <- function(input){
     ## save output
     resprop <- summary(mprop)
     outprop <- list()
-    outprop$formula <- paste("Formula for Propensity Score Model",
-                             deparse(form), sep="\n")
+    outprop$formula <- paste0(deparse(form))
     outprop$coef <- resprop$coefficients
     outprop$se <- resprop$standard.errors
     outprop$tval <- resprop$coefficients/resprop$standard.errors
@@ -1392,38 +1450,72 @@ computePropensityScore <- function(input){
 
 
 
-## helper function to compute the vcov matrix of additional paramers
-## this is needed to compute the standard errors for conditional effects
-## remove as soon as Yves has this functionality in lavaan
-computeVcovAdditionalParameters <- function(object){
+
+#' Read Data File
+#' 
+#' Tries to determine the format of the data by the file ending and
+#' chooses the appropriate function to read data. Currently supports .csv,
+#' .dat, .txt, .sav, and .xpt and calls \code{\link[utils]{read.csv}},
+#' \code{\link[utils]{read.table}}, \code{\link[foreign]{read.spss}},
+#' \code{\link[foreign]{read.xport}} accordingly. The default values for
+#' arguments depend on the function used to read data.
+#' 
+#' @param file Name of the file to read.
+#' @param name Pure file name (without path to file) to read. 
+#' If \code{file} includes a lengthy path name with many special characters, 
+#' specifying this argument in addition to \code{file} may help the function 
+#' to find the file ending.
+#' @param header See \code{\link[utils]{read.table}}.
+#' @param sep See \code{\link[utils]{read.table}}.
+#' @param dec See \code{\link[utils]{read.table}}.
+#' @param use.value.labels See \code{\link[foreign]{read.spss}}.
+#' @param na.strings See \code{\link[foreign]{read.spss}}.
+#' @return Object of class \code{"data.frame"}.
+#' @export
+elrReadData <- function(file, name=NULL, header="default", sep="default",
+                       dec="default", use.value.labels="default",
+                       na.strings="NA"){
   
-  ## free parameters only
-  theta <- object@Fit@x
-  
-  # remove == constraints from parTable
-  PT <- as.data.frame(object@ParTable, stringsAsFactors = FALSE)
-  eq.idx <- which(PT$op == "==")
-  if(length(eq.idx) > 0L) {
-    PT <- PT[-eq.idx,]
+  ptn <- "\\.[[:alnum:]]{1,5}$"
+  if(is.null(name)){
+    suf <- tolower(regmatches(file, regexpr(ptn, file)))
+  }else{
+    suf <- tolower(regmatches(name, regexpr(ptn, name))) 
   }
-  partable <- as.list(PT)
   
-  ## names new parameters
-  def.idx <- which(partable$op == ":=")
-  lhs.names <- partable$lhs[def.idx]
+  ## convert arguments from shiny ui
+  if(header=="yes"){header <- TRUE}
+  if(header=="no"){header <- FALSE}
+  if(sep=="semicolon"){sep <- ";"}
+  if(sep=="white space"){sep <- ""}
+  if(dec=="decimal point"){dec <- "."}
+  if(dec=="decimal comma"){dec <- ","}
+  if(use.value.labels=="yes"){use.value.labels <- TRUE}
+  if(use.value.labels=="no"){use.value.labels <- FALSE}
   
-  ## def_function
-  def.function <- lavaan:::lav_partable_constraints_def(partable)
+  if(suf == ".csv"){
+    if(header=="default"){header <- TRUE}
+    if(sep=="default"){sep <- ","}
+    if(dec=="default"){dec <- "."}
+    return(read.csv(file, header=header, sep=sep, dec=dec,
+                    na.strings=na.strings))
+    
+  }else if(suf == ".txt" || suf==".dat"){
+    if(header=="default"){header <- FALSE}
+    if(sep=="default"){sep <- ""}
+    if(dec=="default"){dec <- "."}
+    return(read.table(file, header=header, sep=sep, dec=dec,
+                      na.strings=na.strings))
+    
+  }else if(suf == ".sav"){
+    if(use.value.labels=="default"){use.value.labels <- TRUE}
+    return(foreign::read.spss(file, to.data.frame=TRUE,
+                              use.value.labels=use.value.labels))
+    
+  }else if(suf == ".xpt"){
+    return(foreign::read.xport(file))
+  }
   
-  ## compute Jacobian
-  JAC <- lav_func_jacobian_complex(func = def.function, x = theta)
-  
-  ## compute vcov of new parameters
-  VCOV <- vcov(object, labels = FALSE)
-  VCOV_np  <- JAC %*% VCOV %*% t(JAC)
-  row.names(VCOV_np) <- colnames(VCOV_np) <- lhs.names
-  
-  return(VCOV_np)
 }
 
 
