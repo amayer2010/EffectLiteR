@@ -469,17 +469,34 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     if(any(table(d$kstar, d[,x]) == 0)){
       stop("EffectLiteR error: Empty cells are currently not allowed.")
     }    
-    stopifnot(length(levels(d$kstar)) <= 10)    
     
   }else{
     d$kstar <- NULL
   }
   
+  ## nk
+  nk <- 1L
+  if(!is.null(k)){
+    nk <- length(levels(d$kstar))
+  }
+  
+  ## ng
+  ng <- length(levels(d[,x]))  
+  
+  ## nz
+  nz <- length(vnames$z)
+  
+  ## check for too many cells
+  if((nk>10 & ng>10) || (nk>10 & nz>10) || (ng>10 & nz>10)){
+    stop("EffectLiteR error: Too many cells")
+  }
+    
+  
   ## cell variable (xk-cells)
   if(!is.null(k)){
     cell <- expand.grid(k=levels(d$kstar), x=levels(d[,x]))
     cell <- with(cell, paste0(x,k))
-    dsub <- cbind(d[,x],d$kstar)
+    dsub <- cbind(d[,x],d$kstar) - 1 # use x=0,1,2... and k=0,1,2,... as labels
     d$cell <- apply(dsub, 1, function(x){
       missing_ind <- sum(is.na(x)) > 0
       if(missing_ind){
@@ -503,14 +520,6 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
                   cell=levels(d$cell))
   
   
-  ## nk
-  nk <- 1L
-  if(!is.null(k)){
-    nk <- length(levels(d$kstar))
-  }
-    
-  ## ng
-  ng <- length(levels(d[,x]))  
   
   complexsurvey <- list(ids=ids, weights=weights)
   
@@ -525,7 +534,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              vnames=vnames, 
              vlevels=vlevels,
              ng=ng,
-             nz=length(vnames$z),
+             nz=nz,
              nk=nk,
              control=control,
              data=d, 
@@ -567,14 +576,14 @@ createParNames <- function(obj){
   gammalabels[1] <- "Intercept"
   gammalabels <- array(gammalabels, dim=c(nz+1,nk,ng))
   
-  pk <- paste0("Pk",1:nk)
+  pk <- paste0("Pk",0:(nk-1))
   px <- paste0("Px",0:(ng-1))
   if(nz>0){
     tmp <- expand.grid(z=1:nz, k=0:(nk-1), x=0:(ng-1))
     cellmeanz <- with(tmp, paste0("mz",x,k,z))
     meanz <- paste0("Ez",1:nz)  
-    tmp <- expand.grid(k=0:(nk-1), z=inp@vnames$z)
-    Ezk <- with(tmp, paste0("E",z,"K",k))    
+    tmp <- expand.grid(k=0:(nk-1), z=1:nz)
+    Ezk <- with(tmp, paste0("Ez",z,"k",k))    
   }else{
     cellmeanz <- meanz <- Ezk <- character()
   }

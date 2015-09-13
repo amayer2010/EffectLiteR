@@ -462,6 +462,9 @@ m1 <- effectLite(data=d, y="b_ELFE_Text", x="Gruppe",
                  control="KG", propscore=c("Rolle","a_ELFE_Text","a_ELFE_Wort",
                                            "a_ELFE_Speed", "a_ELFE_Satz"))
 
+m1 <- effectLite(y="b_ELFE_Text", x="Gruppe", k="Rolle", z="a_ELFE_Text",
+                 data=d, control="KG")
+
 
 ########## Example with add command ###########
 
