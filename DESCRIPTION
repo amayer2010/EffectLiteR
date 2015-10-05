@@ -1,5 +1,5 @@
 Package: EffectLiteR
-Version: 0.3-7
+Version: 0.3-8
 Date: 2015-08-26
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
@@ -12,7 +12,7 @@ Maintainer: Axel Mayer <amayer2010@gmail.com>
 Description: Use structural equation modeling to estimate average and conditional effects of a treatment variable
 	on an outcome variable, taking into account multiple continuous and categorical covariates.
 Depends:
-    R (>= 3.1.0), lavaan (>= 0.5-18), methods
+    R (>= 3.1.0), lavaan (>= 0.5-19), methods
 Imports:
     shiny (>= 0.11),
     foreign,

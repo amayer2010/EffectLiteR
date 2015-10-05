@@ -1286,7 +1286,14 @@ computeResults <- function(obj){
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
   ## conditional effects
-  if(obj@input@se != "boot"){vcov <- computeVcovAdditionalParameters(m1)}
+  #TODO change bootstrap restriction in computeConditionalEffects
+  # and add dependency for lavaan 0.5.19 as soon as it is on CRAN
+  if(packageVersion("lavaan") >= '0.5.19.887'){
+    vcov <- lavInspect(m1, "vcov.def", add.class = FALSE)
+  }else{
+    if(obj@input@se != "boot"){vcov <- computeVcovAdditionalParameters(m1)}
+  }
+  
   condeffects <- computeConditionalEffects(obj, est, vcov)
   
   res <- new("results",
