@@ -1159,9 +1159,11 @@ computeResults <- function(obj){
   nz <- obj@input@nz
   nk <- obj@input@nk  
   
-  # obj@input@interactions != "all"
+  # any(partable(m1)$op %in% c("==",">","<"))
   ## main hypotheses
-  if(obj@input@se != "standard" | any(partable(m1)$op %in% c("==",">","<"))){ 
+  if(obj@input@se != "standard" | obj@input@interactions != "all" |
+     any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
+     any(grepl("<", obj@input@add))){ 
     ## no Wald Test for robust, bootstrapped SE...
     ## no Wald Test for models with equality constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
@@ -1286,14 +1288,7 @@ computeResults <- function(obj){
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
   ## conditional effects
-  #TODO change bootstrap restriction in computeConditionalEffects
-  # and add dependency for lavaan 0.5.19 as soon as it is on CRAN
-  if(packageVersion("lavaan") >= '0.5.19.887'){
-    vcov <- lavInspect(m1, "vcov.def", add.class = FALSE)
-  }else{
-    if(obj@input@se != "boot"){vcov <- computeVcovAdditionalParameters(m1)}
-  }
-  
+  vcov <- lavInspect(m1, "vcov.def", add.class = FALSE)
   condeffects <- computeConditionalEffects(obj, est, vcov)
   
   res <- new("results",
@@ -1330,7 +1325,7 @@ computeConditionalEffects <- function(obj, est, vcov){
   nk <- obj@input@nk
   ng <- obj@input@ng  
 
-  if(length(mm) == 0 & obj@input@se != "boot"){
+  if(length(mm) == 0){
     
     if(nz==0 & nk==1){
       formula <- as.formula(" ~ 1")

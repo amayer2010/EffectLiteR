@@ -222,6 +222,13 @@ m1 <- effectLite(y="eta2", x="x", k="k", z=c("eta1"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+
+# lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis1)
+# lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis2)
+# lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis3)
+# lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis4)
+
+
 res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgx,
                               m1@results@Egxgk,
