@@ -412,8 +412,10 @@ conditionalEffectsPlot <- function(obj, zsel, gxsel="g1", colour=""){
                          paste0(gxsel,g1label), " on ", 
                          zsel))
   p <- p + ggplot2::geom_smooth(method="loess")
-  p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected))
-  p <- p + ggplot2::guides(colour = ggplot2::guide_legend(colour))            
+  if(!is.null(colourselected)){
+    p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected))
+    p <- p + ggplot2::guides(colour = ggplot2::guide_legend(colour))
+  }
   p <- p + ggplot2::theme_bw()
   
   return(p)

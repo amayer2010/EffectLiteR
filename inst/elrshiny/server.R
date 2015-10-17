@@ -527,8 +527,11 @@ shinyServer(function(input, output, session) {
                              paste0(input$gxselect,g1label), " on ", 
                              input$zselect2))
       p <- p + ggplot2::geom_smooth(method="loess")
-      p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected),size=2.5)
-      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(input$zselect3))            
+      if(is.null(colourselected)){
+        p <- p + ggplot2::geom_point(size=2.5)
+      }else{
+        p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected),size=2.5)
+        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(input$zselect3))         }    
       p <- p + ggplot2::theme_bw()
       
       print(p)
