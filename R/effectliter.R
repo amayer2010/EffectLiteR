@@ -179,7 +179,6 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
 
 ################ methods #############################
 
-#' @importMethodsFrom methods show
 setMethod("show", "effectlite", function(object) {
   
   ng <- object@input@ng
@@ -1627,6 +1626,21 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
 }
 
 
+############## namespace ###########
+
+#' @importFrom methods new is
+NULL
+
+#' @importMethodsFrom methods show 
+NULL
+
+#' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var
+NULL
+
+#' @importFrom utils capture.output read.csv read.table
+NULL
+
+
 
 ############## documentation ######################
 
@@ -1635,6 +1649,7 @@ generateMeasurementModel <- function(names, indicators, ncells, model){
 #' @name EffectLiteR
 #' @docType package
 NULL
+
 
 #' Dataset nonortho.
 #' 
