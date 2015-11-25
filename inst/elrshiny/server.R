@@ -141,6 +141,13 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect <- c(input$variablez, input$variablek, kstar, input$variablex)
     
+    if(input$latentz & input$nlatentz > 0){
+      nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
+                        input$name.etaz4, input$name.etaz5)
+      nameslatentz <- nameslatentz[1:input$nlatentz]
+      zselect <- c(nameslatentz, zselect)
+    }
+    
     d <- dataInput()
     x <- d[[input$variablex]]    
     ng <- length(unique(x))
@@ -381,20 +388,18 @@ shinyServer(function(input, output, session) {
 
   ###### Output Conditional Effects Table #########
   output$helptextcondeffects <- renderPrint({
-    if(input$variabley == "" || input$variablex == "" || 
-         input$latenty || input$latentz){
-      
-      cat("Conditional effects are only shown if you have specified the dependent variable and the treatment variable. Conditional effects are not available if there are latent variables in the analysis.")
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+           
+      cat("Conditional effects are only shown if you have specified the dependent variable and the treatment variable.")
       
     }else{
       
-      cat("This datatable shows the values and standard errors of the effect function for given values of the categorical and continuous covariates.")
+      cat("This datatable shows the values and standard errors of the effect function for given values of the categorical and continuous covariates. Regression factor scores are used for latent covariates.")
     }
   })
     
   output$condeffs = renderDataTable({
-    if(input$variabley == "" || input$variablex == "" || 
-         input$latenty || input$latentz){
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
       return(NULL)
     }else{            
       m1 <- model()
@@ -489,11 +494,11 @@ shinyServer(function(input, output, session) {
   ###### Output Plot 3 #########
   output$helptextplot3 <- renderPrint({
     if(input$variabley == "" || input$variablex == "" || 
-         (is.null(input$variablez) & is.null(input$variablek) & 
+         (is.null(input$variablez) & is.null(input$variablek) & !input$latentz & 
             is.null(input$propscore))  || 
          input$latenty || input$latentz){
       
-      cat("Plot 3 only works for a manifest dependent variable, a treatment variable, at least one covariate, and no latent covariates.")
+      cat("Plot 3 is only shown if a dependent variable, a treatment variable, and at least one covariate is specified.")
       
     }else{
       
@@ -503,10 +508,9 @@ shinyServer(function(input, output, session) {
   
   output$plot3 <- renderPlot({    
     
-    if(input$variabley == "" || input$variablex == "" || 
-         (is.null(input$variablez) & is.null(input$variablek) & 
-            is.null(input$propscore)) || 
-         input$latenty || input$latentz){
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" || 
+         (is.null(input$variablez) & is.null(input$variablek) & !input$latentz & 
+            is.null(input$propscore))){
       return(NULL)
     }else{
       

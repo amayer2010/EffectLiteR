@@ -114,7 +114,7 @@ setClass("effectlite", representation(
 #' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z")} and indicates the type of interaction used in the parameterization of the regression.
 #' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
 #' @param ids Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
-#' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
+#' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
 #' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
@@ -1290,7 +1290,7 @@ computeResults <- function(obj){
   
   ## conditional effects
   vcov <- lavInspect(m1, "vcov.def", add.class = FALSE)
-  condeffects <- computeConditionalEffects(obj, est, vcov)
+  condeffects <- computeConditionalEffects(obj, est, vcov, m1)
   
   res <- new("results",
              lavresults=m1,
@@ -1309,7 +1309,7 @@ computeResults <- function(obj){
 
 
 
-computeConditionalEffects <- function(obj, est, vcov){
+computeConditionalEffects <- function(obj, est, vcov, m1){
   
   current.na.action <- options('na.action')
   on.exit(options(current.na.action))
@@ -1324,84 +1324,89 @@ computeConditionalEffects <- function(obj, est, vcov){
   mm <- obj@input@measurement 
   nz <- obj@input@nz
   nk <- obj@input@nk
-  ng <- obj@input@ng  
-
-  if(length(mm) == 0){
-    
-    if(nz==0 & nk==1){
-      formula <- as.formula(" ~ 1")
-      modmat <- model.matrix(formula, data=data)
-      kz <- "00"
-      dsub <- data.frame(matrix(vector(),nrow=nrow(data),ncol=0))
-      
-    }else if(nz>0 & nk==1){
-      formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
-      modmat <- model.matrix(formula, data=data)
-      kz <- paste0("0",0:nz)
-      dsub <- data[,c(x,z)]
-      
-    }else if(nz==0 & nk>1){      
-      formula <- as.formula(" ~ kstar")
-      modmat <- model.matrix(formula, data=data)      
-      kz <- paste0(1:nk-1,"0")
-      dsub <- data[,c(x,"kstar",k)]
-      names(dsub)[2] <- "K"
-      
-    }else if(nz>0 & nk>1){ 
-      formula <- as.formula(paste0(" ~ ", 
-                                   paste("kstar", z, sep="*", collapse=" + ")))
-      modmat <- model.matrix(formula, data=data)            
-      kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
-      kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
-      dsub <- data[,c(x,"kstar",k,z)]
-      names(dsub)[2] <- "K"
-      
-    }
-    
-    estimates <- est[paste0("g1",kz)]
-    vcov_est <- vcov[paste0("g1",kz),paste0("g1",kz)]
-    condeffects <- cbind(modmat %*% estimates)
-    condeffects <- cbind(condeffects,
-              apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
-    
-    
-    if(ng > 2){
-      for(i in 3:ng){
-        estimates <- est[paste0("g",i-1,kz)]
-        vcov_est <- vcov[paste0("g",i-1,kz),paste0("g",i-1,kz)]
-        condeffects <- cbind(condeffects, modmat %*% estimates)
-        condeffects <- cbind(condeffects,
-              apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
-      }      
-    }  
-    condeffects <- as.data.frame(condeffects)
-    names(condeffects) <- paste0(rep(c("","se_"), times=ng-1),
-                                 "g",
-                                 rep(2:ng-1, each=2))
-    condeffects <- cbind(dsub,condeffects)
-    
-    ## add variables used in the propscore model
-    propscore <- obj@input@vnames$propscore
-    if(!is.null(propscore)){
-      
-      d <- obj@input@data
-      
-      if(is(propscore, "formula")){      
-        form <- propscore
-      }else{
-        form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
-      }
-      
-      dsub <- model.frame(form,data=d)
-      condeffects <- condeffects[,-1]
-      condeffects <- cbind(dsub, condeffects)
-      
-    }
-    
-  }else{
-    condeffects <- data.frame()
-  }
+  ng <- obj@input@ng
   
+  data$id <- 1:nrow(data)
+  latentz <- z[which(!z %in% names(data))]
+  
+  if(length(latentz) > 0){
+    fscores <- data.frame(do.call("rbind", lavPredict(m1)))
+    fscores <- subset(fscores, select=latentz)
+    fscores$id <- unlist(lavInspect(m1, "case.idx"))
+    data <- merge(data,fscores)
+  }
+    
+  if(nz==0 & nk==1){
+    formula <- as.formula(" ~ 1")
+    modmat <- model.matrix(formula, data=data)
+    kz <- "00"
+    dsub <- data.frame(matrix(vector(),nrow=nrow(data),ncol=0))
+      
+  }else if(nz>0 & nk==1){
+    formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
+    modmat <- model.matrix(formula, data=data)
+    kz <- paste0("0",0:nz)
+    dsub <- data[,c(x,z)]
+      
+  }else if(nz==0 & nk>1){      
+    formula <- as.formula(" ~ kstar")
+    modmat <- model.matrix(formula, data=data)      
+    kz <- paste0(1:nk-1,"0")
+    dsub <- data[,c(x,"kstar",k)]
+    names(dsub)[2] <- "K"
+      
+  }else if(nz>0 & nk>1){ 
+    formula <- as.formula(paste0(" ~ ", 
+                                paste("kstar", z, sep="*", collapse=" + ")))
+    modmat <- model.matrix(formula, data=data)            
+    kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
+    kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
+    dsub <- data[,c(x,"kstar",k,z)]
+    names(dsub)[2] <- "K"
+      
+  }
+    
+  estimates <- est[paste0("g1",kz)]
+  vcov_est <- vcov[paste0("g1",kz),paste0("g1",kz)]
+  condeffects <- cbind(modmat %*% estimates)
+  condeffects <- cbind(condeffects,
+          apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
+    
+    
+  if(ng > 2){
+    for(i in 3:ng){
+      estimates <- est[paste0("g",i-1,kz)]
+      vcov_est <- vcov[paste0("g",i-1,kz),paste0("g",i-1,kz)]
+      condeffects <- cbind(condeffects, modmat %*% estimates)
+      condeffects <- cbind(condeffects,
+            apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
+    }      
+  }  
+  
+  condeffects <- as.data.frame(condeffects)
+  names(condeffects) <- paste0(rep(c("","se_"), times=ng-1),
+                              "g",
+                              rep(2:ng-1, each=2))
+  condeffects <- cbind(dsub,condeffects)
+    
+  ## add variables used in the propscore model
+  propscore <- obj@input@vnames$propscore
+  if(!is.null(propscore)){
+      
+    d <- obj@input@data
+      
+    if(is(propscore, "formula")){      
+      form <- propscore
+    }else{
+      form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
+    }
+      
+    dsub <- model.frame(form,data=d)
+    condeffects <- condeffects[,-1]
+    condeffects <- cbind(dsub, condeffects)
+      
+  }
+
   return(condeffects)
   
 }
@@ -1720,11 +1725,12 @@ NULL
 #'   \item xz. Product of x and z.
 #'   \item cid. Cluster ID.
 #'   \item weights. Sampling weights.
+#'   \item iptw. Classic inverse probability of treatment weights based on a logistic regression of x on z. Use with care (only for average effects).
 #' }
 #' 
 #' @docType data
 #' @keywords datasets
-#' @format A data frame with 800 rows and 6 variables.
+#' @format A data frame with 800 rows and 7 variables.
 #' @name example_multilevel
 NULL
 

@@ -225,7 +225,7 @@ br()
     tabPanel('Interactions',
          img(src='effectliter_logo.png', align = "right"),
          br(),
-         helpText('Constraints on interactions are currently under development and require a development version of lavaan to work properly.'),        
+         helpText('Below you find some pre-defined sets of constraints on interactions. You can consult the regression model in the main output to see which coefficients are fixed to zero. In addition, you can use the additional options input to specify customized constraints.'),        
          br(),
          radioButtons("interactions", "Interactions", 
                       choices=c("Full model"="all",
@@ -272,7 +272,8 @@ tabPanel('Complex Survey',
                         options = list(placeholder = 'select cluster ID')),
          selectizeInput("weights", "Sampling Weights", "",
                         multiple=FALSE, selected="",
-                        options = list(placeholder = 'select sampling weights'))
+                        options = list(placeholder = 'select sampling weights')),
+         helpText('Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.')
          
       )
   )),

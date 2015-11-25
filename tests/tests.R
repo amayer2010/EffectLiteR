@@ -442,9 +442,16 @@ m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 # ujy <- rnorm(Nc, 0, sqrt(0.2))[cid]
 # eij <- rnorm(N, 0, sqrt(2))
 # y <- 0 + 1*x + 0.6*z + 0.4*xz + ujy + eij
-# weights <- plogis(rnorm(N))
+# weights <- plogis(rnorm(N)) ## random weights
 # 
-# example_multilevel <- data.frame(y, z, x, xz, cid, weights)
+# ## inverse probability of treatment weighting (IPTW)
+# propmodel <- glm(x ~ z, family=binomial)
+# propensity <- predict(propmodel, type="response")
+# iptw <- numeric(N)
+# iptw[x==0] <- 1/(1-propensity)[x==0]
+# iptw[x==1]<- 1/propensity[x==1]
+# 
+# example_multilevel <- data.frame(y, z, x, xz, cid, weights, iptw)
 # 
 # save(example_multilevel, file="example_multilevel.RData")
 
@@ -452,6 +459,27 @@ m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
                     syntax.only=F, data=example_multilevel, 
                     ids=~cid, weights=~weights)
+
+
+########### propensity score weighting ##############
+
+## lavaan.survey only works if there is at least one covariate
+## otherwise lavaan.survey:::get.stats.design produces an error, because
+## sample.cov.g does not have a var attribute..
+m1w <- effectLite(y="y", x="x", z="weights", fixed.cell=TRUE, control="0", 
+                 weights=~iptw, data=example_multilevel)
+
+
+m1c <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+                 data=example_multilevel)
+
+## Notice that IPTW only gives unbiased effects for average effects
+# m1w@results@Egx
+# m1c@results@Egx
+
+## but not for the effects on the treated !!!!
+# m1w@results@Egxgx
+# m1c@results@Egxgx
 
 
 ################ homoscedastic residual variances ##############
@@ -464,7 +492,7 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 ############ Bettinas Example ############
 
 
-d <- foreign::read.spss("private/data/Gesamtdatei_Klasse 2 mit Erstsprache.sav", to.data.frame=T)
+d <- elrReadData("private/data/Gesamtdatei_Klasse 2 mit Erstsprache.sav")
 m1 <- effectLite(data=d, y="b_ELFE_Text", x="Gruppe", 
                  control="KG", propscore=c("Rolle","a_ELFE_Text","a_ELFE_Wort",
                                            "a_ELFE_Speed", "a_ELFE_Satz"))
