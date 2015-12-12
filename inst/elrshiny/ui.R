@@ -299,13 +299,30 @@ tabPanel('Complex Survey',
       ######### lavaan Results ##########
       tabPanel("lavaan Results", verbatimTextOutput("lavresults")),
       
-      ######### Conditional Effects ##########
-      tabPanel('Conditional Effects', 
+      ######### Conditional Effects I ##########
+      tabPanel('Conditional Effects I', 
                verbatimTextOutput("helptextcondeffects"),
                downloadLink('downloadConditionalEffects', 'Download Conditional Effects Data'),
                br(),
                br(),
                dataTableOutput("condeffs")),
+      
+      ######### Conditional Effects II ##########
+      tabPanel("Conditional Effects II", 
+          verbatimTextOutput("helptextcondeffects2"),
+          br(),
+          br(),
+          column(3, wellPanel(
+            h5("Values of Covariates"),
+            uiOutput("ui")
+          )) ,
+          column(9, wellPanel(
+            h5("Conditional Effects"),
+            verbatimTextOutput("outputcondeffect2")
+          ))
+               
+      ),
+      
       
       ######### Plot 1 ##########
       tabPanel("Plot 1", 
@@ -341,11 +358,8 @@ tabPanel('Complex Survey',
                           "", 
                           multiple=FALSE,
                           selectize=TRUE),
-               plotOutput("plot3")) #,
-#       
-#       ######### Path Diagram ##########
-#       tabPanel("Path Diagram", plotOutput("plotpd"))
-            
+               plotOutput("plot3"))
+      
     )    
   ))
 

@@ -523,6 +523,25 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), x="x",
                  syntax.only=F)
 
 
+############ elrPredict examples ########################
+
+d <- example01
+
+m1 <- effectLite(y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
+                 control="control", data=d)
+newdata <- data.frame(k1="male", kateg2="1", z1=2)
+pred <- elrPredict(m1, newdata)
+
+m1 <- effectLite(y="dv", z=c("z1"), x="x", control="control", data=d)
+newdata <- data.frame(z1=2)
+pred <- elrPredict(m1, newdata)
+
+m1 <- effectLite(y="dv", z=c("z1","z2"), 
+                 k=c("k1", "kateg2"), x="x", control="control", data=d)
+newdata <- data.frame(z1=2, z2=3, k1="male", kateg2="2")
+pred <- elrPredict(m1, newdata)
+
+
 ############# check with results from previous lavaan version ###########
 
 # res_list_save <- res_list

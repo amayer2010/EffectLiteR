@@ -723,4 +723,88 @@ shinyServer(function(input, output, session) {
     }
   )
   
+  ##### Conditional effects II
+  output$ui <- renderUI({
+    
+    m1 <- model()
+    condeffects <- m1@results@condeffects
+    vnamesk <- m1@input@vnames$k
+    vlevelsk <- m1@input@vlevels$levels.k.original
+    vnamesz <- m1@input@vnames$z
+    numberks <- length(vnamesk)
+    numberzs <- length(vnamesz)
+    covnames <- c(vnamesk,vnamesz)
+    uilist <- vector("list", length(covnames))
+    
+    if(numberks==0 & numberzs==0){return(NULL)}
+    
+    if(numberks>0){
+    for(i in 1:numberks){
+      uilist[[i]] <- selectInput(inputId = paste0('valk',i), 
+                                 label = vnamesk[i], 
+                                 choices = vlevelsk[i],
+                                 width='90%')
+    }}
+    
+    if(numberzs>0){
+    for(i in 1:numberzs){
+      uilist[[numberks+i]] <- numericInput(inputId = paste0('valz',i),
+                label = vnamesz[i],
+                value = round(mean(condeffects[[vnamesz[i]]], na.rm=T),3),
+                width='90%')
+    }}
+    
+    uilist
+    
+  })
+  
+  
+  ## help text conditional effects 2
+  output$helptextcondeffects2 <- renderPrint({
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+      
+      cat("Conditional effects are only available if you have specified the dependent variable and the treatment variable.")
+      
+    }else{
+      
+      cat("Conditional effects for user specified values of categorical and continuous covariates.")
+    }
+  })
+  
+  
+  ## output conditional effects 2
+  output$outputcondeffect2 <- renderPrint({
+    
+    m1 <- model()
+    vnamesk <- m1@input@vnames$k
+    vnamesz <- m1@input@vnames$z
+    numberks <- length(vnamesk)
+    numberzs <- length(vnamesz)
+    covnames <- c(vnamesk,vnamesz)
+    
+    valuesk <- list()
+    valuesz <- list()
+
+    if(numberks>0){
+      for(i in 1:numberks){
+        valuesk <- c(valuesk, input[[paste0('valk',i)]])
+      }}
+    
+    if(numberzs>0){
+      for(i in 1:numberzs){
+        valuesz <- c(valuesz, input[[paste0('valz',i)]])
+    }}
+    
+    
+    newdata <- data.frame(c(valuesk, valuesz))
+    try({names(newdata) <- covnames}, silent=TRUE)
+    
+    try({indeff <- round(elrPredict(m1, newdata),3)}, silent=TRUE)
+    try({print(indeff, row.names=F, print.gap=3)}, silent=TRUE)
+    
+  })
+  
+  
+    
+  
 })

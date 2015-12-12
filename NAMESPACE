@@ -3,6 +3,7 @@
 export(conditionalEffectsPlot)
 export(effectLite)
 export(effectLiteGUI)
+export(elrPredict)
 export(elrReadData)
 export(generateMeasurementModel)
 import(lavaan)
