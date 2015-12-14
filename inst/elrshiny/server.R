@@ -205,6 +205,7 @@ shinyServer(function(input, output, session) {
       
     }else if(input$latenty | input$nlatentz > 0){
       
+      ## determine number of cells
       d <- dataInput()
       ng <- length(unique(d[[input$variablex]]))
       nk <- 1
@@ -214,6 +215,7 @@ shinyServer(function(input, output, session) {
           nk <- nk*length(levels(tmpvar))
         }        
       }
+      ncells <- ng*nk
       
       names <- NULL
       indicators <- NULL
@@ -253,10 +255,13 @@ shinyServer(function(input, output, session) {
       names <- unlist(names)
       mmodel <- unlist(mmodel)
       
+      ## switch to default options if custom mmodel is not specified
+      if(!input$custommeasmodels){mmodel <- NULL}
+      
       mm <- generateMeasurementModel(
         names=names,
         indicators=indicators,
-        ncells=ng*nk,
+        ncells=ncells,
         model=mmodel
       )
       

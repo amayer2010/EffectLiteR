@@ -4,7 +4,7 @@
 \alias{generateMeasurementModel}
 \title{Generate measurement model}
 \usage{
-generateMeasurementModel(names, indicators, ncells, model)
+generateMeasurementModel(names, indicators, ncells, model = NULL)
 }
 \arguments{
 \item{names}{A vector of character strings with names of latent variables.}
@@ -13,20 +13,28 @@ generateMeasurementModel(names, indicators, ncells, model)
 
 \item{ncells}{Number of groups/cells.}
 
-\item{model}{A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used.}
+\item{model}{A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("default","parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used. If "default", the function tries to guess a reasonable measurement model: Congeneric for latent variables with three or more indicators, essentially tau-equivalent for latent variables with less than three indicators and for latent variables with cross-loadings (e.g., method factors), and parallel for single-indicator latent variables. If NULL, "default" is assumed for all latent variables.}
 }
 \description{
 This function automatically generates \code{lavaan} syntax for the measurement model for a call to \code{\link[EffectLiteR]{effectLite}}. It is currently also used in the shiny interface.
 }
 \examples{
-names <- c("etay", "etaz1", "etaz2")
-indicators <- list("etay" = c("y1","y2","y3"), 
-                   "etaz1" = c("z1","z2"),
-                   "etaz2" = c("z12","z22","z32","z42"))
+## Example with three latent variables
+names <- c("eta", "xi1", "xi2")
+indicators <- list("eta" = c("y1","y2","y3"), 
+                   "xi1" = c("z1","z2"),
+                   "xi2" = c("z12","z22","z32","z42"))
 ncells = 6
 model = c("parallel","tau-equi","tau-cong")
-
 cat(generateMeasurementModel(names, indicators, ncells, model))
+
+## Example with method factor
+names <- c("eta", "xi", "mf")
+indicators <- list("eta" = c("y12","y22"), 
+                   "xi" = c("y11","y21"),
+                   "mf" = c("y12","y22"))
+ncells = 2
+cat(generateMeasurementModel(names, indicators, ncells))
 
 }
 
