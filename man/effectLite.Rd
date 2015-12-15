@@ -5,7 +5,7 @@
 \title{Estimate average and conditional effects}
 \usage{
 effectLite(y, x, k = NULL, z = NULL, control = "0",
-  measurement = character(), data, fixed.cell = FALSE,
+  measurement = character(), data, fixed.cell = FALSE, fixed.z = FALSE,
   missing = "listwise", se = "standard", bootstrap = 1000L,
   syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
   weights = NULL, homoscedasticity = FALSE, add = character(), ...)
@@ -26,6 +26,8 @@ effectLite(y, x, k = NULL, z = NULL, control = "0",
 \item{data}{A data frame.}
 
 \item{fixed.cell}{logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.}
+
+\item{fixed.z}{logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z}
 
 \item{missing}{Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.}
 

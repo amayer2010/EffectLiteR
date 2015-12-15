@@ -97,8 +97,10 @@ br()
         checkboxInput("latenty", "Latent dependent variable", FALSE),        
         conditionalPanel(
           condition = "input.latenty",
-          selectInput("indicatorsy", "Indicators of Latent Dependent Variable", "",
-                      multiple=TRUE, selectize=TRUE)
+          selectizeInput("indicatorsy", 
+                        "Indicators of Latent Dependent Variable", 
+                        "", multiple=TRUE,
+                        options = list(placeholder = 'select indicators'))
         ),
         checkboxInput("latentz", "Add latent covariates", FALSE),
         conditionalPanel(
@@ -111,32 +113,42 @@ br()
           ### Cov 1
           conditionalPanel(
             condition = "input.nlatentz > 0",
-            selectInput("indicatorsz1", "Indicators of Latent Covariate 1", "",
-                        multiple=TRUE, selectize=TRUE)
+            selectizeInput("indicatorsz1", 
+                           "Indicators of Latent Covariate 1", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
           ),
           ### Cov 2
           conditionalPanel(
             condition = "input.nlatentz > 1",
-            selectInput("indicatorsz2", "Indicators of Latent Covariate 2", "",
-                        multiple=TRUE, selectize=TRUE)
+            selectizeInput("indicatorsz2", 
+                           "Indicators of Latent Covariate 2", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
           ),  
           ### Cov 3
           conditionalPanel(
             condition = "input.nlatentz > 2",
-            selectInput("indicatorsz3", "Indicators of Latent Covariate 3", "",
-                        multiple=TRUE, selectize=TRUE)
+            selectizeInput("indicatorsz3", 
+                           "Indicators of Latent Covariate 3", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
           ),  
           ### Cov 4
           conditionalPanel(
             condition = "input.nlatentz > 3",
-            selectInput("indicatorsz4", "Indicators of Latent Covariate 4", "",
-                        multiple=TRUE, selectize=TRUE)
+            selectizeInput("indicatorsz4", 
+                           "Indicators of Latent Covariate 4", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
           ),  
           ### Cov 5
           conditionalPanel(
             condition = "input.nlatentz > 4",
-            selectInput("indicatorsz5", "Indicators of Latent Covariate 5", "",
-                        multiple=TRUE, selectize=TRUE)
+            selectizeInput("indicatorsz5", 
+                           "Indicators of Latent Covariate 5", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
           ),
           helpText("Latent covariates will be added to the list of continuous manifest covariates (if specified).")
         ),
@@ -278,8 +290,10 @@ br()
         radioButtons("missing", "Missing Data", 
                      choices=c("listwise","fiml"), 
                      selected = "listwise"),
-        radioButtons("fixed.cell", "Cell Sizes", 
-                     choices=c("stochastic","fixed"), 
+        radioButtons("fixed.cell", "Sampling Model", 
+                     choices=c("stochastic"="stochastic",
+                               "fixed cell sizes"="fixed",
+                               "fixed cell sizes and fixed means of Z"="fixed+e"), 
                      selected = "stochastic"),
         radioButtons("se", "Standard Errors", 
                      choices=c("standard","boot","first.order",

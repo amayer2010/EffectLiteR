@@ -19,6 +19,7 @@ setClass("input", representation(
   measurement="character",
   add="character",
   fixed.cell ="logical",
+  fixed.z ="logical",
   missing="character",
   se="character", ## lavaan standard errors
   bootstrap="numeric", ## number of bootstrap draws
@@ -104,6 +105,7 @@ setClass("effectlite", representation(
 #' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
 #' @param data A data frame. 
 #' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
+#' @param fixed.z logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z 
 #' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.
 #' @param se Type of standard errors. Will be 
 #' passed on to \code{\link[lavaan]{sem}}.
@@ -151,15 +153,15 @@ setClass("effectlite", representation(
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
-                       missing="listwise", se="standard", bootstrap=1000L,
-                       syntax.only=FALSE, interactions="all", 
+                       fixed.z=FALSE, missing="listwise", se="standard", 
+                       bootstrap=1000L, syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
                        homoscedasticity=FALSE, add=character(),...){
   
   obj <- new("effectlite")
   obj@call <- match.call()
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
-                           fixed.cell, missing, se, bootstrap,
+                           fixed.cell, fixed.z, missing, se, bootstrap,
                            interactions, ids, weights, homoscedasticity,
                            add)
   obj@input <- computePropensityScore(obj@input)
@@ -425,12 +427,13 @@ conditionalEffectsPlot <- function(obj, zsel, gxsel="g1", colour=""){
 ################ constructor functions #########################
 
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
-                        fixed.cell, missing, se, bootstrap,
+                        fixed.cell, fixed.z, missing, se, bootstrap,
                         interactions, ids, weights, homoscedasticity,
                         add){
   
   d <- data
-  vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore)  
+  latentz <- z[which(!z %in% names(data))]
+  vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore,latentz=latentz)  
     
   ## treatment variable
   if(!is.factor(d[,x])){    
@@ -531,6 +534,16 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     
   }
   
+  ## fixed.z only works with manifest covariates and fixed.cell
+  if(fixed.z){
+    if(!fixed.cell){
+      stop("EffectLiteR error: fixed.z=TRUE is only allowed in combination with fixed.cell=TRUE")
+    }
+    if(!identical(latentz, character(0))){
+      stop("EffectLiteR error: fixed.z=TRUE is not allowed in models with latent covariates.")
+    }
+  }
+  
   res <- new("input",
              vnames=vnames, 
              vlevels=vlevels,
@@ -542,6 +555,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              measurement=measurement,
              add=add,
              fixed.cell=fixed.cell,
+             fixed.z=fixed.z,
              missing=missing,
              se=se,
              bootstrap=bootstrap,
@@ -665,6 +679,7 @@ createLavaanSyntax <- function(obj) {
   nz <- inp@nz
   nk <- inp@nk
   fixed.cell <- inp@fixed.cell
+  fixed.z <- inp@fixed.z
   alphas <- parnames@alphas
   betas <- parnames@betas
   gammas <- parnames@gammas
@@ -691,23 +706,38 @@ createLavaanSyntax <- function(obj) {
     }
   }
   
-  ## syntax mean z in each cell
-  if (nz>0) {
-    cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
-    for (i in 1:nz) {
-      tmp <- paste0(z[i]," ~ c(", paste(cellmeanz[i,],collapse=","), ")*1")
-      model <- paste0(model, "\n", tmp)
+  if(!fixed.z){
+    ## syntax mean z in each cell
+    if (nz>0) {
+      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
+      for (i in 1:nz) {
+        tmp <- paste0(z[i]," ~ c(", paste(cellmeanz[i,],collapse=","), ")*1")
+        model <- paste0(model, "\n", tmp)
+      }
     }
-  }
   
-  ## syntax covariances between z in each cell
-  if(nz > 1){
-    for(i in 1:nz){
-      for(k in nz:1){
-        if(i < k){
-          tmp <- paste0(z[i]," ~~ ", z[k])
-          model <- paste0(model, "\n", tmp)
+    ## syntax covariances between z in each cell
+    if(nz > 1){
+      for(i in 1:nz){
+        for(k in nz:1){
+          if(i < k){
+            tmp <- paste0(z[i]," ~~ ", z[k])
+            model <- paste0(model, "\n", tmp)
+          }
         }
+      }
+    }
+  }else if(fixed.z){
+    ## syntax mean z in each cell
+    if (nz>0) {
+      model <- paste0(model, "\n\n## Fixed Means of Z")
+      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
+      for (i in 1:nz) {
+        namez <- obj@input@vnames$z[i]
+        sampmeanz <- tapply(obj@input@data[[namez]], obj@input@data$cell, 
+                            function(x){mean(x, na.rm=TRUE)})
+        tmp <- paste0(cellmeanz[i,], " := ",  sampmeanz, collapse="\n")
+        model <- paste0(model, "\n", tmp)
       }
     }
   }
@@ -1128,7 +1158,7 @@ computeResults <- function(obj){
                    group="cell", missing=obj@input@missing,
                    se=obj@input@se, bootstrap=obj@input@bootstrap,
                    group.label=obj@input@vlevels$cell, data=obj@input@data,
-                   fixed.x=FALSE, group.w.free = !obj@input@fixed.cell, 
+                   fixed.x=obj@input@fixed.z, group.w.free = !obj@input@fixed.cell, 
                    mimic="mplus")
   
   m1 <- eval(sem.call)

@@ -59,7 +59,9 @@ shinyServer(function(input, output, session) {
     x <- input$variablex
     
     k <- NULL; if(length(input$variablek) != 0){k <- input$variablek}
-    fixed.cell <- FALSE; if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+    fixed.cell <- FALSE; fixed.z <- FALSE
+    if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+    if(input$fixed.cell == "fixed+e"){fixed.cell <- TRUE; fixed.z=TRUE}
     
     z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
     if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
@@ -98,6 +100,7 @@ shinyServer(function(input, output, session) {
                  se=input$se,
                  bootstrap=input$bootstrap,
                  fixed.cell=fixed.cell,
+                 fixed.z=fixed.z,
                  interactions=interactions,
                  propscore=propscore,                 
                  ids=ids,
@@ -583,8 +586,9 @@ shinyServer(function(input, output, session) {
                          "\")")
       }
       
-      
-      fixed.cell <- FALSE; if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+      fixed.cell <- FALSE; fixed.z <- FALSE
+      if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+      if(input$fixed.cell == "fixed+e"){fixed.cell <- TRUE; fixed.z=TRUE}
       
       z <- NULL
       printz <- "NULL"
@@ -625,6 +629,10 @@ shinyServer(function(input, output, session) {
       printadd <- "character()"
       if(input$add.syntax != ""){printadd <- "add"}
       
+      printbootstrap <- ""
+      if(input$se == "boot"){
+        printbootstrap <- paste0("bootstrap=",input$bootstrap, ", ")}
+      
       tmp <- paste0("#### Call for effectLite #### \n\n",
                     "effectLite(",
                     "y=\"", dv, "\", ",
@@ -636,8 +644,9 @@ shinyServer(function(input, output, session) {
                     "measurement=", printmm, ", ",
                     "missing=\"", input$missing, "\", ",
                     "se=\"", input$se, "\", ",
-                    "bootstrap=", input$bootstrap, ", ",
+                    printbootstrap,
                     "fixed.cell=", fixed.cell, ", ",
+                    "fixed.z=", fixed.z, ", ",
                     "interactions=\"", interactions, "\", ",
                     "propscore=", printpropscore, ", ",
                     "ids=", printids, ", ",
@@ -660,15 +669,19 @@ shinyServer(function(input, output, session) {
       cellabel <- paste0("c(\"",
                          paste(m1@input@vlevels$cell, collapse="\",\""), 
                          "\")")
+      printbootstrap <- ""
+      if(input$se == "boot"){
+        printbootstrap <- paste0("bootstrap=",m1@input@bootstrap, ", ")}
+      
       tmp <- paste0("#### Call for lavaan::sem #### \n\n",
                   "sem(", "model=model, ",
                   "group=\"", "cell", "\", ", 
                   "missing=\"", m1@input@missing, "\", ",
                   "se=\"", m1@input@se, "\", ", 
-                  "bootstrap=\"", m1@input@bootstrap, "\", ",
+                  printbootstrap,
                   "group.label=", cellabel, ", ",
                   "data=data, ", 
-                  "fixed.x=FALSE, ",
+                  "fixed.x=", m1@input@fixed.z, ", ",
                   "group.w.free=", !m1@input@fixed.cell, ", ",
                   "mimic=\"", "mplus", "\") ")
       cat(tmp, "\n")  

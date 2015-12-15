@@ -377,6 +377,13 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 # m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
 #                  missing="fiml")
 
+############ Test with fixed.z ################
+
+## 2 K; 2 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1","z2"), fixed.cell=TRUE, syntax.only=FALSE,
+                 k=c("k1","kateg2"), x="x", fixed.z=TRUE, control="control")
+
+
 
 ############ Tests with interaction option ########################
 # 
