@@ -1410,10 +1410,21 @@ elrPredict <- function(obj, newdata=NULL){
                                "g",
                                rep(2:ng-1, each=2))
   
+  ## add true-outcomes
+  estimates <- est[paste0("b0",kz)]
+  trueoutcomes <- cbind(modmat %*% estimates)
+  for(i in 1:(ng-1)){
+    estimates <- est[paste0("b",i,kz)]
+    trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
+  }
+  trueoutcomes <- as.data.frame(trueoutcomes)
+  names(trueoutcomes) <- paste0("tau",0:(ng-1))
+  individualeffects <- cbind(individualeffects,trueoutcomes)
+  
   return(individualeffects)
 }
 
-
+## maybe add an option that true outcomes and orginal data is included...
 computeConditionalEffects <- function(obj, est, vcov, m1){
   
   current.na.action <- options('na.action')
@@ -1495,7 +1506,19 @@ computeConditionalEffects <- function(obj, est, vcov, m1){
                               "g",
                               rep(2:ng-1, each=2))
   condeffects <- cbind(dsub,condeffects)
+  
+  ## add true-outcomes
+  estimates <- est[paste0("b0",kz)]
+  trueoutcomes <- cbind(modmat %*% estimates)
+  for(i in 1:(ng-1)){
+    estimates <- est[paste0("b",i,kz)]
+    trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
+  }
+  trueoutcomes <- as.data.frame(trueoutcomes)
+  names(trueoutcomes) <- paste0("tau",0:(ng-1))
+  condeffects <- cbind(condeffects,trueoutcomes)
     
+  
   ## add variables used in the propscore model
   propscore <- obj@input@vnames$propscore
   if(!is.null(propscore)){
