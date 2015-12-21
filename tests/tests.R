@@ -68,6 +68,12 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 m1 <- effectLite(data=d, y="dv", k=c("k1"), x="x", control="control",
                  interactions="X:Z")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 1 K; 0 Z
 m1 <- effectLite(data=d, y="dv", z=NULL, k="k1", x="x", control="control")
 
@@ -162,11 +168,16 @@ res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgk,
                               m1@results@Egxgxk))
 
-
+set.seed(142424)
 m1 <- effectLite(y="eta2", x="x", z=c("eta1"), control="0", 
                  measurement=mmtest, data=example02lv, fixed.cell=TRUE,
                  missing="fiml", syntax.only=FALSE,
                  se="boot", bootstrap=5L)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ Kirchmann Example with latent variable ############
@@ -183,11 +194,22 @@ m1 <- effectLite(y="eta2", x="con_pat", z=c("eta1"), control="controls",
                  measurement=mmtest, data=kirch, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(y="CESD_3", x="con_pat", z=c("CESD_1"), k=c("sex"),
                  control="controls", 
                  data=kirch, fixed.cell=FALSE, 
                  propscore=c("GAQA_1","RSQA_1","RSQV_1"),
                  missing="fiml", syntax.only=FALSE)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ Example 01a with method factor ################## 
@@ -204,6 +226,10 @@ m1 <- effectLite(y="eta2", x="x", z=c("eta1","mf"), control="0",
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ Example 02 with latent variable and K ################## 
@@ -221,7 +247,6 @@ CPM22 ~ c(p,p,p,p,p,p)*1
 m1 <- effectLite(y="eta2", x="x", k="k", z=c("eta1"), control="0", 
                  measurement=mmtest, data=example02lv, fixed.cell=FALSE,
                  missing="fiml", syntax.only=FALSE)
-
 
 # lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis1)
 # lavTestWald(m1@results@lavresults,m1@lavaansyntax@hypotheses$hypothesis2)
@@ -288,20 +313,44 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 d <- example01
 
 ## 2 K; 1 Z
+set.seed(02847)
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="boot", bootstrap=5L, control="control", fixed.cell=TRUE)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="first.order", control="control", fixed.cell=TRUE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="robust.sem", control="control", fixed.cell=TRUE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## 2 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  se="robust.huber.white", control="control", fixed.cell=TRUE)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 
 ## TODO: Why can SE not be computed for first.order and robust?
@@ -332,6 +381,11 @@ d$k1[2] <- NA
 ## 1 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 #### missing in z
 d <- example01
@@ -339,6 +393,11 @@ d$z1[10] <- NA
 
 ## 1 K; 1 Z
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 #### missing in both k and z
@@ -383,6 +442,10 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 m1 <- effectLite(data=d, y="dv", z=c("z1","z2"), fixed.cell=TRUE, syntax.only=FALSE,
                  k=c("k1","kateg2"), x="x", fixed.z=TRUE, control="control")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ Tests with interaction option ########################
@@ -394,19 +457,43 @@ m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
                  control="control",  syntax.only=FALSE,
                  interactions="none")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control",  syntax.only=FALSE,
                  interactions="2-way")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1","z2"), 
                  k=c("k1","kateg2"), x="x", 
                  control="control",  syntax.only=FALSE,
                  interactions="X:K")
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(fixed.cell = TRUE, data=d, y="dv", z=c("z1","z2"), 
                  k=c("k1","kateg2"), x="x", 
                  control="control",  syntax.only=FALSE,
                  interactions="X:Z")
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 ############ Tests with propensity score ########################
 # 
@@ -421,10 +508,28 @@ d <- example01
 d <- nonortho
 m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 d$z[15] <- NA
 m1 <- effectLite(y="y", x="x", propscore=c("z"), control="0",data=d)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 
 ########## complex survey design #################
@@ -463,9 +568,14 @@ m1 <- effectLite(y="y", x="x", propscore=x~z, control="0", data=d)
 # save(example_multilevel, file="example_multilevel.RData")
 
 
-model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
-                    syntax.only=F, data=example_multilevel, 
-                    ids=~cid, weights=~weights)
+m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+                syntax.only=F, data=example_multilevel, 
+                ids=~cid, weights=~weights)
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ########### propensity score weighting ##############
@@ -473,12 +583,24 @@ model <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
 ## lavaan.survey only works if there is at least one covariate
 ## otherwise lavaan.survey:::get.stats.design produces an error, because
 ## sample.cov.g does not have a var attribute..
-m1w <- effectLite(y="y", x="x", z="weights", fixed.cell=TRUE, control="0", 
+m1 <- effectLite(y="y", x="x", z="weights", fixed.cell=TRUE, control="0", 
                  weights=~iptw, data=example_multilevel)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
-m1c <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+
+m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
                  data=example_multilevel)
+
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 ## Notice that IPTW only gives unbiased effects for average effects
 # m1w@results@Egx
@@ -494,6 +616,10 @@ d <- example01
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control", homoscedasticity=TRUE)
 
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ Bettinas Example ############
@@ -504,8 +630,22 @@ m1 <- effectLite(data=d, y="b_ELFE_Text", x="Gruppe",
                  control="KG", propscore=c("Rolle","a_ELFE_Text","a_ELFE_Wort",
                                            "a_ELFE_Speed", "a_ELFE_Satz"))
 
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 m1 <- effectLite(y="b_ELFE_Text", x="Gruppe", k="Rolle", z="a_ELFE_Text",
                  data=d, control="KG")
+
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 
 ########## Example with add command ###########
@@ -518,16 +658,36 @@ m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x",
 
 # cat(m1@lavaansyntax@model)
 
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
+
 ## test with equality constraints
 m1 <- effectLite(data=d, y="dv", z=c("z1"), x="x", 
                  control="control", add="g101 == 0 \n g201 == 0 ",
                  syntax.only=F)
+
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
+
 
 ## test with inequality constraint
 
 m1 <- effectLite(data=d, y="dv", z=c("z1"), x="x", 
                  control="control", add="g101 > 0",
                  syntax.only=F)
+
+
+res_list <- c(res_list, rbind(m1@results@Egx,
+                              m1@results@Egxgx,
+                              m1@results@Egxgk,
+                              m1@results@Egxgxk))
 
 
 ############ elrPredict examples ########################
@@ -558,7 +718,7 @@ load("private/res_list_save.RData")
 
 stopifnot(all.equal(res_list,res_list_save))
 
-for(i in 1:70){
+for(i in 1:length(res_list)){
   print(paste0("entry ", i, ": ", all.equal(res_list[i],res_list_save[i])))
 }
 

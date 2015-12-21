@@ -119,7 +119,7 @@ setClass("effectlite", representation(
 #' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
-#' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
+#' @param ... Further arguments passed to \code{\link[lavaan]{sem}}. Currently not used.
 #' @return Object of class effectlite.
 #' @examples
 #' ## Example with one categorical covariate

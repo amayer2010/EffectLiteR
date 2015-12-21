@@ -52,7 +52,7 @@ will not be estimated.}
 
 \item{add}{Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.}
 
-\item{...}{Further arguments passed to \code{\link[lavaan]{sem}}.}
+\item{...}{Further arguments passed to \code{\link[lavaan]{sem}}. Currently not used.}
 }
 \value{
 Object of class effectlite.
