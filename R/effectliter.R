@@ -1448,7 +1448,7 @@ elrPredict <- function(obj, newdata=NULL){
     trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
   }
   trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("tau",0:(ng-1))
+  names(trueoutcomes) <- paste0("Eygx", 0:(ng-1), "kz")
   individualeffects <- cbind(individualeffects,trueoutcomes)
   
   return(individualeffects)
@@ -1545,7 +1545,7 @@ computeConditionalEffects <- function(obj, est, vcov, m1){
     trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
   }
   trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("tau",0:(ng-1))
+  names(trueoutcomes) <- paste0("Eygx", 0:(ng-1), "kz")
   condeffects <- cbind(condeffects,trueoutcomes)
     
   
