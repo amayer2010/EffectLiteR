@@ -9,7 +9,14 @@ This R package can be used to estimate average and conditional effects of a trea
 Installation
 =========
 
-`EffectLiteR` can be installed directly from this GitHub repository using the additional package `devtools`. Under Windows, please make sure Rtools (http://cran.r-project.org/bin/windows/Rtools/) are installed and no older version of `EffectLiteR` is currently loaded): 
+`EffectLiteR` is on CRAN (https://cran.r-project.org/web/packages/EffectLiteR) and the latest stable version can be installed as usual: 
+
+```
+install.packages("EffectLiteR")
+```
+
+
+For testing purposes, the development version of `EffectLiteR` can be installed directly from this GitHub repository using the additional package `devtools`. Under Windows, please make sure Rtools (http://cran.r-project.org/bin/windows/Rtools/) are installed and no older version of `EffectLiteR` is currently loaded): 
 
 ```
 install.packages("devtools")
@@ -30,7 +37,7 @@ install.packages(c("shiny","foreign","ggplot2"))
 Run EffectLiteR
 =========
 
-The main function of the package is `effectLite()`. Type `example(effectLite)` for an example. The `shiny` interface can be called by `effectLiteGUI()` after having loaded the package `EffectLiteR`:
+The main function of the package is `effectLite()`. Type `example(effectLite)` for some examples. The `shiny` interface can be called by `effectLiteGUI()` after having loaded the package `EffectLiteR`:
 
 ```
 library(EffectLiteR)
