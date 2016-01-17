@@ -88,6 +88,34 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     d$cell <- d[,x]
   }  
   
+
+  ## observed sample means for manifest covariates (fixed.z only)
+  if(nz==0){
+    sampmeanz <- matrix(nrow=0, ncol=0)
+    
+  }else if(!fixed.z){
+    sampmeanz <- matrix(nrow=0, ncol=0)
+    
+  }else if(fixed.z){
+      
+    if(!fixed.cell){
+      stop("EffectLiteR error: fixed.z=TRUE requires fixed.cell=TRUE")
+      
+    }else if(!identical(latentz, character(0))){
+      stop("EffectLiteR error: fixed.z=TRUE does not work with latent covariates.")
+    }
+    
+    sampmeanz <- NULL
+    for (i in 1:nz) {
+      namez <- z[i]
+      tmp <- tapply(d[[namez]], d$cell, function(x){mean(x, na.rm=TRUE)})
+      sampmeanz <- rbind(sampmeanz, tmp)
+    }
+    row.names(sampmeanz) <- z
+    
+  }
+  
+  
   ## add vlevels for created variables
   vlevels <- list(levels.x.original=levels.x.original,
                   levels.k.original=levels.k.original,
@@ -107,15 +135,6 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     
   }
   
-  ## fixed.z only works with manifest covariates and fixed.cell
-  if(fixed.z){
-    if(!fixed.cell){
-      stop("EffectLiteR error: fixed.z=TRUE is only allowed in combination with fixed.cell=TRUE")
-    }
-    if(!identical(latentz, character(0))){
-      stop("EffectLiteR error: fixed.z=TRUE is not allowed in models with latent covariates.")
-    }
-  }
   
   res <- new("input",
              vnames=vnames, 
@@ -130,6 +149,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              fixed.cell=fixed.cell,
              fixed.z=fixed.z,
              missing=missing,
+             sampmeanz=sampmeanz,
              se=se,
              bootstrap=bootstrap,
              interactions=interactions,

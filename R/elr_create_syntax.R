@@ -55,7 +55,11 @@
 # 
 # 
 # create_syntax_covz <- function(z, cellmeanz, nz, fixed.z){
-#   
+# 
+#   ## much nicer:
+# #   tmp <- combn(z,2)
+# #   res <- paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n")
+#     
 #   res <- NULL
 #   if(!fixed.z){
 #     ## syntax covariances between z in each cell
@@ -136,14 +140,10 @@ createLavaanSyntax <- function(obj) {
     ## syntax mean z in each cell
     if (nz>0) {
       model <- paste0(model, "\n\n## Fixed Means of Z")
-      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
-      for (i in 1:nz) {
-        namez <- obj@input@vnames$z[i]
-        sampmeanz <- tapply(obj@input@data[[namez]], obj@input@data$cell, 
-                            function(x){mean(x, na.rm=TRUE)})
-        tmp <- paste0(cellmeanz[i,], " := ",  sampmeanz, collapse="\n")
-        model <- paste0(model, "\n", tmp)
-      }
+      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)
+      sampmeanz <- inp@sampmeanz
+      tmp <- paste0(cellmeanz, " := ",  sampmeanz, collapse="\n")
+      model <- paste0(model, "\n", tmp)
     }
   }
   

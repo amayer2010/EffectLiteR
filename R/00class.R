@@ -19,6 +19,7 @@ setClass("input", representation(
   fixed.cell ="logical",
   fixed.z ="logical",
   missing="character",
+  sampmeanz="array", ## manifest sample means for continuous covriates
   se="character", ## lavaan standard errors
   bootstrap="numeric", ## number of bootstrap draws
   interactions="character", ## type of interaction (all, 2-way, no)

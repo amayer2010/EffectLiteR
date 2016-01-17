@@ -262,7 +262,6 @@ res_list <- c(res_list, rbind(m1@results@Egx,
 
 ######### Example with latent z and manifest y #############
 
-
 mmtest <- '
 eta1 =~ 1*CPM11 + 1*CPM21
 CPM11~ 0*1
@@ -277,6 +276,8 @@ res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgx,
                               m1@results@Egxgk,
                               m1@results@Egxgxk))
+
+
 
 
 
