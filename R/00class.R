@@ -19,6 +19,7 @@ setClass("input", representation(
   fixed.cell ="logical",
   fixed.z ="logical",
   missing="character",
+  observed.freq="numeric", ## observed group frequencies (fixed.cell only)
   sampmeanz="array", ## manifest sample means for continuous covriates
   se="character", ## lavaan standard errors
   bootstrap="numeric", ## number of bootstrap draws

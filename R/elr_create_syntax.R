@@ -160,24 +160,11 @@ createLavaanSyntax <- function(obj) {
   relfreq <- obj@parnames@relfreq    
   
   if(fixed.cell){
-    N <- nrow(obj@input@data)
-    observed.freq <- table(obj@input@data$cell)/N
-    
-    # change observed frequencies if we have sampling weights
-    if(!is.null(obj@input@complexsurvey$weights)){
-      weights <- model.matrix(obj@input@complexsurvey$weights,
-                              obj@input@data)
-      if(ncol(weights) > 2){stop("EffectLiteR error: Currently only support for one
-                                 weights variable")}
-      weights <- weights[,-1]
-      observed.freq <- tapply(weights,obj@input@data$cell,sum)
-      observed.freq <- observed.freq/sum(observed.freq) ## rescale to sum to one
-      }
-    
-    
+    observed.freq <- inp@observed.freq
     tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
-    model <- paste0(model, tmp)        
-  }else{
+    model <- paste0(model, tmp)       
+    
+  }else if(!fixed.cell){
     
     ## syntax group weights
     tmp <- paste0("group % c(", paste(parnames@groupw, collapse=","), ")*w")

@@ -86,7 +86,27 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   }else{
     cell <- levels(d[,x])
     d$cell <- d[,x]
-  }  
+  }
+  
+  
+  ## observed cell frequencies (fixed.cell only)
+  if(!fixed.cell){
+    observed.freq <- numeric(0)
+    
+  }else if(fixed.cell){
+    N <- nrow(d)
+    observed.freq <- c(table(d$cell)/N)
+    
+    if(!is.null(weights)){
+      message("EffectLiteR message: The observed frequencies have been re-computed taking into account the survey weights.")
+      weights_vector <- model.matrix(weights, d)
+      if(ncol(weights_vector) > 2){stop("EffectLiteR error: Currently only support for one weights variable")}
+      weights_vector <- weights_vector[,-1]
+      observed.freq <- c(tapply(weights_vector, d$cell, sum))
+      observed.freq <- observed.freq/sum(observed.freq) ## rescale to sum to one
+    }
+  }
+    
   
 
   ## observed sample means for manifest covariates (fixed.z only)
@@ -149,6 +169,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              fixed.cell=fixed.cell,
              fixed.z=fixed.z,
              missing=missing,
+             observed.freq=observed.freq,
              sampmeanz=sampmeanz,
              se=se,
              bootstrap=bootstrap,
