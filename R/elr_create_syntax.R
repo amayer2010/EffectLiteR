@@ -1,87 +1,178 @@
 
 
 
+create_syntax_intercepts <- function(y, alphas){
 
-# 
-# create_syntax_intercepts <- function(y, alphas){
-# 
-#   res <- paste0(y," ~ c(", paste(alphas[1,,],collapse=","), ")*1")
-#   return(res)
-#   
-# }
-# 
-# 
-# create_syntax_regcoef <- function(y, z, nz, alphas){
-#   
-#   res <- NULL
-#   if (nz>0) {
-#     for (i in 1:nz) {
-#       tmp <- paste0(y," ~ c(", paste(alphas[i+1,,],collapse=","), ")*",z[i])
-#       res <- paste0(res, "\n", tmp)
-#     }
-#   }
-#   return(res)
-#   
-# }
-# 
-# 
-# create_syntax_meanz <- function(z, cellmeanz, nz, fixed.z, sampmeanz){
-#   
-#   res <- NULL
-#   ## syntax mean z in each cell
-#   if(!fixed.z){
-#     if (nz>0) {
-#       cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
-#       for (i in 1:nz) {
-#         tmp <- paste0(z[i]," ~ c(", paste(cellmeanz[i,],collapse=","), ")*1")
-#         res <- paste0(res, "\n", tmp)
-#       }
-#     }
-#   }else if(fixed.z){
-#     if (nz>0) {
-#       res <- paste0(res, "\n\n## Fixed Means of Z")
-#       cellmeanz <- matrix(cellmeanz, nrow=nz)    
-#       for (i in 1:nz) {
-#         namez <- z[i]
-#         sampmeanz <- tapply(obj@input@data[[namez]], obj@input@data$cell, 
-#                             function(x){mean(x, na.rm=TRUE)})
-#         tmp <- paste0(cellmeanz[i,], " := ",  sampmeanz, collapse="\n")
-#         model <- paste0(model, "\n", tmp)
-#       }
-#     }
-#   }
-#   return(res)
-# }
-# 
-# 
-# create_syntax_covz <- function(z, cellmeanz, nz, fixed.z){
-# 
-#   ## much nicer:
-# #   tmp <- combn(z,2)
-# #   res <- paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n")
-#     
-#   res <- NULL
-#   if(!fixed.z){
-#     ## syntax covariances between z in each cell
-#     if(nz > 1){
-#       for(i in 1:nz){
-#         for(k in nz:1){
-#           if(i < k){
-#             tmp <- paste0(z[i]," ~~ ", z[k])
-#             res <- paste0(res, "\n", tmp)
-#           }
-#         }
-#       }
-#     }
-#   }
-#   return(res)
-# }
+  res <- paste0(y," ~ c(", paste(alphas[1,,],collapse=","), ")*1")
+  return(res)
+  
+}
+
+
+create_syntax_regcoef <- function(y, z, nz, alphas){
+  
+  res <- NULL
+  if (nz>0) {
+    for (i in 1:nz) {
+      tmp <- paste0(y," ~ c(", paste(alphas[i+1,,],collapse=","), ")*",z[i])
+      res <- paste0(res, "\n", tmp)
+    }
+  }
+  return(res)
+  
+}
+
+
+create_syntax_cellmeanz <- function(z, nz, fixed.z, cellmeanz, sampmeanz){
+  
+  res <- NULL
+  if(!fixed.z){
+    ## stochastic z
+    if (nz>0) {
+      cellmeanz <- matrix(cellmeanz, nrow=nz)    
+      for (i in 1:nz) {
+        tmp <- paste0(z[i]," ~ c(", paste(cellmeanz[i,],collapse=","), ")*1")
+        res <- paste0(res, "\n", tmp)
+      }
+    }
+    
+  }else if(fixed.z){
+    ## fixed z
+    if (nz>0) {
+      res <- paste0(res, "\n\n## Fixed Means of Z")
+      cellmeanz <- matrix(cellmeanz, nrow=nz)
+      tmp <- paste0(cellmeanz, " := ",  sampmeanz, collapse="\n")
+      res <- paste0(res, "\n", tmp)
+    }
+  }
+
+  return(res)
+}
+
+
+create_syntax_covz <- function(z, nz, fixed.z){
+
+  ## TODO: much nicer:
+#   tmp <- combn(z,2)
+#   res <- paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n")
+    
+  res <- NULL
+  if(!fixed.z){
+    ## syntax covariances between z in each cell
+    if(nz > 1){
+      for(i in 1:nz){
+        for(k in nz:1){
+          if(i < k){
+            tmp <- paste0(z[i]," ~~ ", z[k])
+            res <- paste0(res, "\n", tmp)
+          }
+        }
+      }
+    }
+  }
+  return(res)
+}
+  
+
+create_syntax_homoscedasticity <- function(y, ng, nk, homoscedasticity){
+
+  res <- NULL
+  if(homoscedasticity){
+    tmp <- paste0(y, " ~~ c(", 
+                  paste(rep("veps", times=ng*nk),collapse=","),
+                  ")*", y)
+    res <- paste0(res, "\n", tmp)
+  }
+  
+  return(res)
+}
+
+
+create_syntax_group_freq <- function(fixed.cell, relfreq, observed.freq, groupw){
   
   
+  res <- "\n\n## Relative Group Frequencies \n"
+  
+  if(fixed.cell){
+    tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
+    res <- paste0(res, tmp)       
+    
+  }else if(!fixed.cell){
+    
+    ## syntax group weights
+    tmp <- paste0("group % c(", paste(groupw, collapse=","), ")*w")
+    res <- paste0(res, tmp)
+    
+    tmp <- paste(paste0("exp(", groupw, ")"), collapse=" + ")
+    tmp <- paste0("N := ",tmp)
+    res <- paste0(res, "\n", tmp)
+    
+    tmp <- paste(paste0(relfreq, " := exp(", groupw, ")/N"), collapse="\n")
+    res <- paste0(res, "\n", tmp)    
+  }
+  
+  return(res)
+}
+
+
+
+create_syntax_betas <- function(betas, alphas, ng, nk, nz){
+  
+  res <- "\n\n## beta Coefficients"
+  
+  ## create temporary beta array (to be overwritten in next step)
+  beta <- betas
+  
+  ## compute betas based on alphas
+  for(q in 1:(nz+1)){
+    for(x in 1:ng){
+      beta[q,1,x] <- paste(betas[q,1,x], alphas[q,1,x], sep=" := ")
+      if(nk>1){
+        for(k in 2:nk){
+          beta[q,k,x] <- paste0(betas[q,k,x], " := ", 
+                                alphas[q,k,x], "-", alphas[q,1,x])
+        }        
+      }
+    }
+  }
+  res <- paste0(res, "\n", paste(beta, collapse="\n"))
+  
+  return(res)
+}
+
+
+
+create_syntax_gammas <- function(gammas, betas, ng, nk, nz){
+
+  res <- "\n\n## gamma Coefficients"
+  
+  ## create temporary gamma array (to be overwritten in next step)
+  gamma <- gammas
+  
+  ## compute gammas based on betas
+  for(q in 1:(nz+1)){
+    for(k in 1:nk){
+      gamma[q,k,1] <- paste(gammas[q,k,1], betas[q,k,1], sep=" := ")
+      for(x in 2:ng){
+        gamma[q,k,x] <- paste0(gammas[q,k,x], " := ", 
+                               betas[q,k,x], "-", betas[q,k,1])
+      }
+    }
+  }
+  res <- paste0(res, "\n", paste(gamma, collapse="\n"))
+  
+  return(res)
+}
+  
+
+
+
 createLavaanSyntax <- function(obj) {
+  
   inp <- obj@input
   parnames <- obj@parnames
   
+  ## input information
   y <- inp@vnames$y
   z <- inp@vnames$z  
   ng <- inp@ng
@@ -89,9 +180,17 @@ createLavaanSyntax <- function(obj) {
   nk <- inp@nk
   fixed.cell <- inp@fixed.cell
   fixed.z <- inp@fixed.z
+  sampmeanz <- inp@sampmeanz
+  homoscedasticity <- inp@homoscedasticity
+  observed.freq <- inp@observed.freq
+  
+  ## parnames
   alphas <- parnames@alphas
   betas <- parnames@betas
   gammas <- parnames@gammas
+  cellmeanz <- parnames@cellmeanz
+  relfreq <- parnames@relfreq
+  groupw <- parnames@groupw
   
   
   model <- "#### lavaan Syntax for EffectLiteR Model ####"
@@ -104,118 +203,32 @@ createLavaanSyntax <- function(obj) {
   
   ## syntax intercepts
   model <- paste0(model, "\n\n## Structural Model \n")
-  tmp <- paste0(y," ~ c(", paste(alphas[1,,],collapse=","), ")*1")
-  model <- paste0(model, tmp)
-  
+  model <- paste0(model, create_syntax_intercepts(y,alphas))
+
   ## syntax regression coefficients in each cell
-  if (nz>0) {
-    for (i in 1:nz) {
-      tmp <- paste0(y," ~ c(", paste(alphas[i+1,,],collapse=","), ")*",z[i])
-      model <- paste0(model, "\n", tmp)
-    }
-  }
+  model <- paste0(model, create_syntax_regcoef(y,z,nz,alphas))
   
-  if(!fixed.z){
-    ## syntax mean z in each cell
-    if (nz>0) {
-      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)    
-      for (i in 1:nz) {
-        tmp <- paste0(z[i]," ~ c(", paste(cellmeanz[i,],collapse=","), ")*1")
-        model <- paste0(model, "\n", tmp)
-      }
-    }
-    
-    ## syntax covariances between z in each cell
-    if(nz > 1){
-      for(i in 1:nz){
-        for(k in nz:1){
-          if(i < k){
-            tmp <- paste0(z[i]," ~~ ", z[k])
-            model <- paste0(model, "\n", tmp)
-          }
-        }
-      }
-    }
-  }else if(fixed.z){
-    ## syntax mean z in each cell
-    if (nz>0) {
-      model <- paste0(model, "\n\n## Fixed Means of Z")
-      cellmeanz <- matrix(parnames@cellmeanz, nrow=nz)
-      sampmeanz <- inp@sampmeanz
-      tmp <- paste0(cellmeanz, " := ",  sampmeanz, collapse="\n")
-      model <- paste0(model, "\n", tmp)
-    }
-  }
+  ## mean z in each cell
+  model <- paste0(model, create_syntax_cellmeanz(z, nz, fixed.z, cellmeanz, 
+                                                 sampmeanz))
   
+  ## covariances between stochastic z
+  model <- paste0(model, create_syntax_covz(z, nz, fixed.z))
+
   ## homoscedastic residual variances
-  if(inp@homoscedasticity){
-    tmp <- paste0(y, " ~~ c(", 
-                  paste(rep("veps", times=ng*nk),collapse=","),
-                  ")*", y)
-    model <- paste0(model, "\n", tmp)
-  }
+  model <- paste0(model, create_syntax_homoscedasticity(y,ng,nk,homoscedasticity))
   
-  ## compute relative frequencies
-  model <- paste0(model, "\n\n## Relative Group Frequencies \n")
-  relfreq <- obj@parnames@relfreq    
-  
-  if(fixed.cell){
-    observed.freq <- inp@observed.freq
-    tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
-    model <- paste0(model, tmp)       
-    
-  }else if(!fixed.cell){
-    
-    ## syntax group weights
-    tmp <- paste0("group % c(", paste(parnames@groupw, collapse=","), ")*w")
-    model <- paste0(model, tmp)
-    
-    groupw <- obj@parnames@groupw
-    
-    tmp <- paste(paste0("exp(", groupw, ")"), collapse=" + ")
-    tmp <- paste0("N := ",tmp)
-    model <- paste0(model, "\n", tmp)
-    
-    tmp <- paste(paste0(relfreq, " := exp(", groupw, ")/N"), collapse="\n")
-    model <- paste0(model, "\n", tmp)    
-  }
-  
-  
-  ## create temporary beta and gamma arrays (to be overwritten in next step)
-  beta <- parnames@betas
-  gamma <- parnames@gammas
-  
-  ## compute gammas based on betas
-  for(q in 1:(nz+1)){
-    for(k in 1:nk){
-      gamma[q,k,1] <- paste(gamma[q,k,1], beta[q,k,1], sep=" := ")
-      for(x in 2:ng){
-        gamma[q,k,x] <- paste0(gamma[q,k,x], " := ", 
-                               beta[q,k,x], "-", beta[q,k,1])
-      }
-    }
-  }
+  ## compute relative group frequencies
+  model <- paste0(model, create_syntax_group_freq(fixed.cell, relfreq, 
+                                                  observed.freq, groupw))
   
   ## compute betas based on alphas
-  for(q in 1:(nz+1)){
-    for(x in 1:ng){
-      beta[q,1,x] <- paste(beta[q,1,x], alphas[q,1,x], sep=" := ")
-      if(nk>1){
-        for(k in 2:nk){
-          beta[q,k,x] <- paste0(beta[q,k,x], " := ", 
-                                alphas[q,k,x], "-", alphas[q,1,x])
-        }        
-      }
-    }
-  }
+  model <- paste0(model, create_syntax_betas(betas, alphas, ng, nk, nz))
   
-  model <- paste0(model, "\n\n## beta Coefficients")
-  model <- paste0(model, "\n", paste(beta, collapse="\n"))
+  ## compute gammas based on betas
+  model <- paste0(model, create_syntax_gammas(gammas, betas, ng, nk, nz))
   
-  model <- paste0(model, "\n\n## gamma Coefficients")
-  model <- paste0(model, "\n", paste(gamma, collapse="\n"))
-  
-  
+
   ## compute unconditional means of z
   if (nz>0) {
     model <- paste0(model, "\n\n## Unconditional Expectations E(Z)")
