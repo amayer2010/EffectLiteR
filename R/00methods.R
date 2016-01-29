@@ -14,53 +14,31 @@ setMethod("show", "effectlite", function(object) {
   if(nk>1 & nz==0){label.g.function <- "(K)"; label.covs <- ",K"}
   if(nk==1 & nz>0){label.g.function <- "(Z)"; label.covs <- ",Z"}
   
-  cat("\n\n--------------------- Variables and Descriptive Statistics --------------------- \n\n")
-  cat("Variable Names \n\n")
+  cat("\n\n--------------------- Variables  --------------------- \n\n")
   cat("Outcome variable Y: ", paste0(vnames$y), "\n")
-  cat("Treatment variable X: ", paste0(vnames$x), "\n")
-  cat("Reference group (Control group): ", paste0(object@input@control), "\n")
-  cat("Categorical covariates K: ", paste0(vnames$k), "\n")
-  cat("Continuous covariates Z: ", paste0(vnames$z), "\n")
-  v <- vnames$propscore
-  if(is(v, "formula")){v <- all.vars(v[[3]])}  
-  cat("Covariates for propensity score V: ", paste0(v), "\n\n")
+  cat("Treatment variable X: ", paste0(vnames$x), "  (Reference group: ", 
+      paste0(object@input@control, ")\n"))
+  if(!is.null(vnames$k)){
+    cat("Categorical covariates K: ", paste0(vnames$k), "\n")
+  }
+  if(!is.null(vnames$z)){
+    cat("Continuous covariates Z: ", paste0(vnames$z), "\n")
+  }
+  if(!is.null(vnames$propscore)){
+    v <- vnames$propscore
+    if(is(v, "formula")){v <- all.vars(v[[3]])}  
+    cat("Covariates for propensity score V: ", paste0(v), "\n")
+  }
+
   
   if(nk>1){
-    cat("Levels of Unfolded Categorical Covariate K \n")
+    cat("\nLevels of Unfolded Categorical Covariate K \n")
     tmp <- vlevels$levels.k.original
     tmp <- tmp[length(tmp):1]
     tmp <- expand.grid(tmp)
     tmp$K <- vlevels$kstar
     tmp <- tmp[,ncol(tmp):1]
     print(tmp, row.names=F, print.gap=3)
-    
-    cat("\n")
-    cat("Cells \n")
-    tmp <- expand.grid(K=vlevels$kstar, X=vlevels$levels.x.original)[,2:1]
-    tmp$Cell <- vlevels$cell
-    print(tmp, print.gap=3)
-    
-  }
-  
-  if(nk==1){
-    cat("Cells \n")
-    tmp <- data.frame(X=vlevels$levels.x.original)
-    print(tmp, row.names=F, print.gap=3)
-    
-  }
-  
-  cat("\n")
-  cat("Cell Counts \n\n")
-  cat("This table shows cell counts including missings. \n")
-  cat("See also output under lavaan results for number of observations \n")
-  cat("actually used in the analysis. \n\n")
-  
-  if(nk==1){
-    print(ftable(object@input@data[vnames$x]), print.gap=3)
-  }else{
-    cellcounts <- as.formula(paste0(paste(vnames$k, collapse="+"), 
-                                    "~", vnames$x))
-    print(ftable(cellcounts, data=object@input@data), print.gap=3)
   }
   
   
@@ -107,6 +85,39 @@ setMethod("show", "effectlite", function(object) {
     tmp <- object@results@gx[[i]]
     tmp[,2:5] <- round(tmp[,2:5], digits=3)
     print(tmp, print.gap=3, row.names=FALSE)
+  }
+  
+  
+  cat("\n\n--------------------- Cell Counts  --------------------- \n\n")
+
+  
+  if(nk>1){
+    cat("\nCells \n")
+    tmp <- expand.grid(K=vlevels$kstar, X=vlevels$levels.x.original)[,2:1]
+    tmp$Cell <- vlevels$cell
+    print(tmp, print.gap=3)
+    
+  }
+  
+  if(nk==1){
+    cat("Cells \n")
+    tmp <- data.frame(X=vlevels$levels.x.original)
+    print(tmp, row.names=F, print.gap=3)
+    
+  }
+  
+  cat("\n")
+  cat("Cell Counts \n\n")
+  cat("This table shows cell counts including missings. \n")
+  cat("See also output under lavaan results for number of observations \n")
+  cat("actually used in the analysis. \n\n")
+  
+  if(nk==1){
+    print(ftable(object@input@data[vnames$x]), print.gap=3)
+  }else{
+    cellcounts <- as.formula(paste0(paste(vnames$k, collapse="+"), 
+                                    "~", vnames$x))
+    print(ftable(cellcounts, data=object@input@data), print.gap=3)
   }
   
   
