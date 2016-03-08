@@ -52,13 +52,10 @@ create_syntax_cellmeanz <- function(z, nz, fixed.z, cellmeanz, sampmeanz){
 
 create_syntax_covz <- function(z, nz, fixed.z){
 
-  ## TODO: much nicer:
-#   tmp <- combn(z,2)
-#   res <- paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n")
-    
+  ## covariances between stochastic z
   res <- NULL
+  ## syntax covariances between z in each cell
   if(!fixed.z){
-    ## syntax covariances between z in each cell
     if(nz > 1){
       for(i in 1:nz){
         for(k in nz:1){
@@ -70,6 +67,17 @@ create_syntax_covz <- function(z, nz, fixed.z){
       }
     }
   }
+  
+  
+  
+#   if(!fixed.z){
+#     if(nz > 1){
+#       tmp <- combn(z,2)
+#       res <- paste0("\n", paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n"))
+#     }
+#   }
+  
+  
   return(res)
 }
   

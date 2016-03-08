@@ -232,6 +232,25 @@ res_list <- c(res_list, rbind(m1@results@Egx,
                               m1@results@Egxgxk))
 
 
+## Steffis method factor 2
+mm <- '
+eta2 =~ 1*CPM12 + 1*CPM22
+eta1 =~ 1*CPM11 + 1*CPM21
+mf =~ 1*CPM11 + -1*CPM21 + 1*CPM12 + -1*CPM22
+
+CPM11 + CPM21 + CPM12 + CPM22 ~ 0*1
+'
+
+## Wie im alten EffectLite, mit MF als Kovariate:
+m1 <- effectLite(y="eta2", x="x", z=c("eta1","mf"), control="0", 
+                 measurement=mm, data=example02lv)
+
+## Oder wenn man den MF nicht als Kovariate haben will (sondern nur im Messmodell):
+m1 <- effectLite(y="eta2", x="x", z="eta1", control="0", 
+                 measurement=mm, data=example02lv)
+
+
+
 ############ Example 02 with latent variable and K ################## 
 
 mmtest <- '

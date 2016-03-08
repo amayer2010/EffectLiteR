@@ -163,42 +163,42 @@ br()
           conditionalPanel(
             condition = "input.latenty",
             textInput("name.etay", "Latent Dependent Variable", 
-                      value = "etay",
+                      value = "eta",
                       width='60%')
           ),
           ### Cov 1
           conditionalPanel(
             condition = "input.nlatentz > 0",
             textInput("name.etaz1", "Latent Covariate 1", 
-                      value = "etaz1",
+                      value = "xi1",
                       width='60%')
           ),
           ### Cov 2
           conditionalPanel(
             condition = "input.nlatentz > 1",
             textInput("name.etaz2", "Latent Covariate 2", 
-                      value = "etaz2",
+                      value = "xi2",
                       width='60%')
           ),  
           ### Cov 3
           conditionalPanel(
             condition = "input.nlatentz > 2",
             textInput("name.etaz3", "Latent Covariate 3", 
-                      value = "etaz3",
+                      value = "xi3",
                       width='60%')
           ),  
           ### Cov 4
           conditionalPanel(
             condition = "input.nlatentz > 3",
             textInput("name.etaz4", "Latent Covariate 4", 
-                      value = "etaz4",
+                      value = "xi4",
                       width='60%')
           ),  
           ### Cov 5
           conditionalPanel(
             condition = "input.nlatentz > 4",
             textInput("name.etaz5", "Latent Covariate 5", 
-                      value = "etaz5",
+                      value = "xi5",
                       width='60%')
           )
         ),

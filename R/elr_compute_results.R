@@ -5,8 +5,7 @@ computeResults <- function(obj){
                    group="cell", missing=obj@input@missing,
                    se=obj@input@se, bootstrap=obj@input@bootstrap,
                    group.label=obj@input@vlevels$cell, data=obj@input@data,
-                   fixed.x=obj@input@fixed.z, group.w.free = !obj@input@fixed.cell, 
-                   mimic="mplus")
+                   fixed.x=obj@input@fixed.z, group.w.free = !obj@input@fixed.cell)
   
   m1 <- eval(sem.call)
   
