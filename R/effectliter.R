@@ -24,6 +24,7 @@
 #' passed on to \code{\link[lavaan]{sem}}.
 #' @param bootstrap Number of bootstrap draws, if bootstrapping is used. Will be 
 #' passed on to \code{\link[lavaan]{sem}}.
+#' @param mimic Will be passed on to \code{\link[lavaan]{sem}}.
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
 #' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z")} and indicates the type of interaction used in the parameterization of the regression.
@@ -67,16 +68,17 @@
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        fixed.z=FALSE, missing="listwise", se="standard", 
-                       bootstrap=1000L, syntax.only=FALSE, interactions="all", 
+                       bootstrap=1000L, mimic="lavaan", syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
                        homoscedasticity=FALSE, add=character(),...){
   
   obj <- new("effectlite")
+  ##TODO make use of ldots argument: sem_args <- list(...) and then pass it to sem() 
   ##TODO change such that first class input is generated, then class parnames...
   obj@call <- match.call()
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, fixed.z, missing, se, bootstrap,
-                           interactions, ids, weights, homoscedasticity,
+                           mimic, interactions, ids, weights, homoscedasticity,
                            add)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  

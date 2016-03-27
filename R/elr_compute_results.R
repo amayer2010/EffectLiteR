@@ -4,6 +4,7 @@ computeResults <- function(obj){
   sem.call <- call("sem", model=obj@lavaansyntax@model,
                    group="cell", missing=obj@input@missing,
                    se=obj@input@se, bootstrap=obj@input@bootstrap,
+                   mimic=obj@input@mimic,
                    group.label=obj@input@vlevels$cell, data=obj@input@data,
                    fixed.x=obj@input@fixed.z, group.w.free = !obj@input@fixed.cell)
   

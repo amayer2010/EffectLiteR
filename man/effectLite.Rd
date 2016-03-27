@@ -7,8 +7,9 @@
 effectLite(y, x, k = NULL, z = NULL, control = "0",
   measurement = character(), data, fixed.cell = FALSE, fixed.z = FALSE,
   missing = "listwise", se = "standard", bootstrap = 1000L,
-  syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
-  weights = NULL, homoscedasticity = FALSE, add = character(), ...)
+  mimic = "lavaan", syntax.only = FALSE, interactions = "all",
+  propscore = NULL, ids = ~0, weights = NULL, homoscedasticity = FALSE,
+  add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -36,6 +37,8 @@ passed on to \code{\link[lavaan]{sem}}.}
 
 \item{bootstrap}{Number of bootstrap draws, if bootstrapping is used. Will be 
 passed on to \code{\link[lavaan]{sem}}.}
+
+\item{mimic}{Will be passed on to \code{\link[lavaan]{sem}}.}
 
 \item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model 
 will not be estimated.}

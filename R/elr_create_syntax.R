@@ -54,29 +54,14 @@ create_syntax_covz <- function(z, nz, fixed.z){
 
   ## covariances between stochastic z
   res <- NULL
+  
   ## syntax covariances between z in each cell
   if(!fixed.z){
     if(nz > 1){
-      for(i in 1:nz){
-        for(k in nz:1){
-          if(i < k){
-            tmp <- paste0(z[i]," ~~ ", z[k])
-            res <- paste0(res, "\n", tmp)
-          }
-        }
-      }
+      tmp <- combn(z,2)
+      res <- paste0("\n", paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n"))
     }
   }
-  
-  
-  
-#   if(!fixed.z){
-#     if(nz > 1){
-#       tmp <- combn(z,2)
-#       res <- paste0("\n", paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n"))
-#     }
-#   }
-  
   
   return(res)
 }
