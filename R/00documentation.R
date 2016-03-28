@@ -101,7 +101,7 @@ NULL
 #' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var
 NULL
 
-#' @importFrom utils capture.output read.csv read.table
+#' @importFrom utils capture.output read.csv read.table combn
 NULL
 
 
