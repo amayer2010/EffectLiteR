@@ -3,7 +3,6 @@
 library(EffectLiteR)
 
 
-
 ####################### complex example test ##################
 # 
 # set.seed(664488)

@@ -26,9 +26,9 @@ computeResults <- function(obj){
   }
   
   
-  est <- parameterEstimates(m1)$est ## parameter estimates
-  se <- parameterEstimates(m1)$se ## standard errors
-  names(se) <- names(est) <- parameterEstimates(m1)$label 
+  est <- parameterEstimates(m1, fmi=FALSE)$est ## parameter estimates
+  se <- parameterEstimates(m1, fmi=FALSE)$se ## standard errors
+  names(se) <- names(est) <- parameterEstimates(m1, fmi=FALSE)$label 
   ## Yves: what would be the best way to get (default) parameter names 
   tval <- est/se
   pval <- 2*(1-pnorm(abs(tval)))

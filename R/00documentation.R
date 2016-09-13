@@ -98,7 +98,7 @@ NULL
 #' @importMethodsFrom methods show 
 NULL
 
-#' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var
+#' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var qnorm
 NULL
 
 #' @importFrom utils capture.output read.csv read.table combn

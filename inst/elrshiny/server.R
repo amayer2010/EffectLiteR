@@ -7,6 +7,8 @@
 # library(nnet)
 # library(lavaan.survey)
 
+# options(shiny.maxRequestSize=100*1024^2) 
+
 shinyServer(function(input, output, session) {
   
   ####### New analysis / reload button ########
@@ -199,7 +201,48 @@ shinyServer(function(input, output, session) {
     
     return(zselect3)
   })
+
   
+  ######## Reactive gxselect2 for Plot 4 ########
+  gxSelect2 <- reactive({
+
+    d <- dataInput()
+    x <- d[[input$variablex]]
+    ng <- length(unique(x))
+    res <- paste0("g",2:ng-1)
+
+    return(res)
+  })
+
+
+  ######## Reactive zselect3 (colour) for Plot 4 ########
+  zSelect4 <- reactive({
+    kstar <- NULL
+    if(!is.null(input$variablek)){kstar <- "K"}
+    zselect4 <- c("", input$variablek, kstar, input$variablex, input$variablez)
+
+    d <- dataInput()
+    x <- d[[input$variablex]]
+    ng <- length(unique(x))
+
+    if(!is.null(input$propscore)){
+      zselect4 <- c(zselect4, input$propscore)
+      zselect4 <- c(zselect4, paste0("logprop",1:(ng-1)))
+    }
+    if(input$prop.formula != "" & input$propscoreformula){
+      try({
+        propscore <- as.formula(input$prop.formula)
+        zselect4 <- c(zselect4, all.vars(propscore[[3]]))
+      }, silent=TRUE)
+      zselect4 <- c(zselect4, paste0("logprop",1:(ng-1)))
+    }
+
+    zselect4 <- c(zselect4, paste0("g",1:(ng-1)))
+
+    return(zselect4)
+  })
+  
+    
   
   ######## Reactive measurement model ########
   mm <- reactive({
@@ -371,6 +414,20 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "zselect3", 
                       choices = zsel3)  
   })
+
+  ###### Update gxselect2 for Plot 4 ########
+  observe({
+    gxsel2 <- gxSelect2()
+    updateSelectInput(session, "gxselect2",
+                      choices = gxsel2)
+  })
+
+  ###### Update zselect4 for Plot 4 ########
+  observe({
+    zsel4 <- zSelect4()
+    updateSelectInput(session, "zselect4",
+                      choices = zsel4)
+  })
   
   ###### Update Control Group UI ########
   observe({
@@ -523,36 +580,52 @@ shinyServer(function(input, output, session) {
     }else{
       
       m1 <- model()
-      condeffects <- m1@results@condeffects
-      yselected <- round(condeffects[[input$gxselect]],4)    
-      zselected <- condeffects[[input$zselect2]]
-      colourselected <- condeffects[[input$zselect3]]
-              
-      g1label <- "(K,Z)"
-      if(length(input$variablek) == 0){g1label <- "(Z)"}
-      
-      p <- ggplot2::qplot(y=yselected, x=zselected, 
-                 data=condeffects,
-                 ylab=paste0(input$gxselect,g1label),
-                 xlab=input$zselect2,                 
-                 main=paste0("Estimated regression of ",
-                             paste0(input$gxselect,g1label), " on ", 
-                             input$zselect2))
-      p <- p + ggplot2::geom_smooth(method="loess")
-      if(is.null(colourselected)){
-        p <- p + ggplot2::geom_point(size=2.5)
-      }else{
-        p <- p + ggplot2::geom_point(ggplot2::aes(colour=colourselected),size=2.5)
-        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(input$zselect3))         }    
-      p <- p + ggplot2::theme_bw()
-      
-      print(p)
-      
+      conditionalEffectsPlot(m1,
+                             zsel=input$zselect2, 
+                             colour=input$zselect3, 
+                             gxsel=input$gxselect, 
+                             show.ci=input$show.ci,
+                             regression=input$regline,
+                             regression.ci=input$show.cir)
+
     }
     
   })
 
+
   
+  ###### Output Plot 4 #########
+  output$helptextplot4 <- renderPrint({
+    if((input$variabley == "" & !input$latenty) || input$variablex == ""){
+
+      cat("Plot 4 is only shown if you have specified the dependent variable and the treatment variable.")
+
+    }else{
+
+      cat("Plot 4 shows the estimated conditional effects in the sample.")
+    }
+  })
+
+  output$plot4 <- renderPlot({
+
+    if((input$variabley == "" & !input$latenty) || input$variablex == ""){
+      return(NULL)
+    }else{
+
+      m1 <- model()
+      conditionalEffectsPlot(m1,
+                             zsel="id",
+                             colour=input$zselect4,
+                             gxsel=input$gxselect2,
+                             show.ci=input$show.ci2)
+
+    }
+
+  })
+  
+  
+  
+    
   ###### Output EffectLiteR Summary #########
   output$summary <- renderPrint({
     

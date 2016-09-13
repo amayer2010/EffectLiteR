@@ -454,13 +454,47 @@ tabPanel('Complex Survey',
                         "Colour variable", 
                         "", 
                         multiple=FALSE,
-                        selectize=TRUE)
+                        selectize=TRUE),
+            selectInput("regline",
+                        "Regression Line",
+                        c("default","smooth","linear","none"),
+                        multiple=FALSE,
+                        selectize=TRUE),
+            br(),
+            h5("Confidence Intervals"),
+            checkboxInput("show.ci", "Show CIs", value=FALSE),
+            checkboxInput("show.cir", "Show Regression CI", value=FALSE)
           )) ,
           column(9, 
                  plotOutput("plot3"))
-          )
+      ),
+          
       
-    )    
+      ######### Plot 4 ##########
+      tabPanel("Plot 4",
+              verbatimTextOutput("helptextplot4"),
+              column(3, wellPanel(
+              selectInput("gxselect2",
+                          "Effect function",
+                          "g1(K,Z)",
+                          multiple=FALSE,
+                          selectize=TRUE),
+              selectInput("zselect4",
+                          "Colour variable",
+                          "",
+                          multiple=FALSE,
+                          selectize=TRUE),
+              br(),
+              h5("Confidence Intervals"),
+              checkboxInput("show.ci2", "Show CIs", value=FALSE)
+          )) ,
+          column(9,
+              plotOutput("plot4"))
+
+
+          )
+
+    )
   ))
 
 ))

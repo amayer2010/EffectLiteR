@@ -49,8 +49,8 @@ elrPredict <- function(obj, newdata=NULL){
   }
   
   ## estimates and vcov
-  est <- parameterEstimates(lavresults)$est ## parameter estimates
-  names(est) <- parameterEstimates(lavresults)$label 
+  est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
+  names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
   vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
   
   ## compute formula and model.matrix  
@@ -179,6 +179,11 @@ computeConditionalEffects <- function(obj, est, vcov, m1){
   condeffects <- cbind(modmat %*% estimates)
   condeffects <- cbind(condeffects,
                        apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
+  ##AM We could add confidence intervals here, but currently I prefer to do
+  ## it in conditionalEffectsPlot()
+  # condeffects <- cbind(condeffects,
+  #     condeffects[,ncol(condeffects)-1] + 1.96*condeffects[,ncol(condeffects)],
+  #     condeffects[,ncol(condeffects)-1] - 1.96*condeffects[,ncol(condeffects)])
   
   
   if(ng > 2){

@@ -5,7 +5,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
                         add){
   
   d <- data
-  latentz <- z[which(!z %in% names(data))]
+  latentz <- z[which(!z %in% names(data))] ##TODO fix for interactions between continuous covariates
   vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore,latentz=latentz)  
   
   ## treatment variable
@@ -98,12 +98,12 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
     observed.freq <- c(table(d$cell)/N)
     
     if(!is.null(weights)){
-      message("EffectLiteR message: The observed frequencies have been re-computed taking into account the survey weights.")
       weights_vector <- model.matrix(weights, d)
       if(ncol(weights_vector) > 2){stop("EffectLiteR error: Currently only support for one weights variable")}
       weights_vector <- weights_vector[,-1]
       observed.freq <- c(tapply(weights_vector, d$cell, sum))
       observed.freq <- observed.freq/sum(observed.freq) ## rescale to sum to one
+      message("EffectLiteR message: The observed frequencies have been re-computed taking into account the survey weights.")
     }
   }
     
