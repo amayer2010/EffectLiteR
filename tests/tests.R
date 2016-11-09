@@ -591,10 +591,6 @@ m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
                 syntax.only=F, data=example_multilevel, 
                 ids=~cid, weights=~weights)
 
-res_list <- c(res_list, rbind(m1@results@Egx,
-                              m1@results@Egxgx,
-                              m1@results@Egxgk,
-                              m1@results@Egxgxk))
 
 
 ########### propensity score weighting ##############

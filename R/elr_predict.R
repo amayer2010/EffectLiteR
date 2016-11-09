@@ -36,7 +36,6 @@ elrPredict <- function(obj, newdata=NULL){
   nz <- obj@input@nz
   ng <- obj@input@ng
   
-  
   #compute Kstar values first
   if(nk > 1){
     tmp <- obj@input@vlevels$levels.k.original
@@ -108,14 +107,14 @@ elrPredict <- function(obj, newdata=NULL){
     trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
   }
   trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("Eygx", 0:(ng-1), "kz")
+  names(trueoutcomes) <- paste0("ExpOutc",  0:(ng-1))
   individualeffects <- cbind(individualeffects,trueoutcomes)
   
   return(individualeffects)
 }
 
 ## maybe add an option that true outcomes and orginal data is included...
-computeConditionalEffects <- function(obj, est, vcov, m1){
+computeConditionalEffects <- function(obj, est, vcov, m1, return.modmat=TRUE){
   
   current.na.action <- options('na.action')
   on.exit(options(current.na.action))
@@ -200,7 +199,13 @@ computeConditionalEffects <- function(obj, est, vcov, m1){
   names(condeffects) <- paste0(rep(c("","se_"), times=ng-1),
                                "g",
                                rep(2:ng-1, each=2))
-  condeffects <- cbind(dsub,condeffects)
+  
+  ## return model matrix in condeffects table or just variables as predictors
+  if(return.modmat){
+    condeffects <- cbind(as.data.frame(modmat),condeffects)
+  }else{
+    condeffects <- cbind(dsub,condeffects)
+  }
   
   ## add true-outcomes
   estimates <- est[paste0("b0",kz)]
@@ -210,7 +215,7 @@ computeConditionalEffects <- function(obj, est, vcov, m1){
     trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
   }
   trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("Eygx", 0:(ng-1), "kz")
+  names(trueoutcomes) <- paste0("ExpOutc", 0:(ng-1))
   condeffects <- cbind(condeffects,trueoutcomes)
   
   
