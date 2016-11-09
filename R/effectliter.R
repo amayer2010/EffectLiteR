@@ -89,7 +89,7 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
   }
     
   obj@results <- computeResults(obj)
-  # obj@results@condeffects <- computeConditionalEffects()
+  obj@results@condeffects <- computeConditionalEffects(obj)
   
   return(obj)  
 }

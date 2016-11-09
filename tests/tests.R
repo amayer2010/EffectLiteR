@@ -714,6 +714,9 @@ m1 <- effectLite(y="dv", z=c("z1"), k=c("k1","kateg2"), x="x",
 newdata <- data.frame(k1="male", kateg2="1", z1=2)
 pred <- elrPredict(m1, newdata)
 
+pred <- EffectLiteR:::computeConditionalEffects(m1, newdata=newdata, add.columns=c("prop-covariates","covariates"))
+pred
+
 m1 <- effectLite(y="dv", z=c("z1"), x="x", control="control", data=d)
 newdata <- data.frame(z1=2)
 pred <- elrPredict(m1, newdata)

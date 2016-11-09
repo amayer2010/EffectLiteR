@@ -165,10 +165,6 @@ computeResults <- function(obj){
                          tval[obj@parnames@adjmeans])
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
-  ## conditional effects
-  vcov <- lavInspect(m1, "vcov.def", add.class = FALSE)
-  condeffects <- computeConditionalEffects(obj, est, vcov, m1)
-  
   res <- new("results",
              lavresults=m1,
              hypotheses=hypotheses,
@@ -178,7 +174,7 @@ computeResults <- function(obj){
              Egxgxk=Egxgxk,
              gx=gx,
              adjmeans=adjmeans,
-             condeffects=condeffects
+             condeffects=data.frame() ## we compute conditional effects later using computeConditionalEffects()
   )
   
   return(res)

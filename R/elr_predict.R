@@ -114,7 +114,10 @@ elrPredict <- function(obj, newdata=NULL){
 }
 
 ## maybe add an option that true outcomes and orginal data is included...
-computeConditionalEffects <- function(obj, est, vcov, m1, return.modmat=TRUE){
+## TODO add documentation
+computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates"){
+  
+  stopifnot(inherits(obj, "effectlite"))
   
   current.na.action <- options('na.action')
   on.exit(options(current.na.action))
@@ -125,20 +128,52 @@ computeConditionalEffects <- function(obj, est, vcov, m1, return.modmat=TRUE){
   z <- obj@input@vnames$z
   k <- obj@input@vnames$k
   x <- obj@input@vnames$x
-  data <- obj@input@data  
   mm <- obj@input@measurement 
   nz <- obj@input@nz
   nk <- obj@input@nk
   ng <- obj@input@ng
   
+  if(!is.null(newdata)){
+    
+    stopifnot(all(names(newdata) %in% c(z,k)))
+
+    #compute Kstar values first
+    if(nk > 1){
+      tmp <- obj@input@vlevels$levels.k.original
+      tmp <- tmp[length(tmp):1]
+      tmp <- expand.grid(tmp)
+      tmp$kstar <- factor(obj@input@vlevels$kstar)
+      
+      ## add Kstar values to newdata
+      newdata <- merge(newdata, tmp)
+    }
+    
+    if(!x %in% names(newdata)){
+      newdata[,x] <- NA
+    }
+    
+    data <- newdata
+    
+  }else{
+    
+    data <- obj@input@data  
+  }
+  
+  
+  lavresults <- obj@results@lavresults
+  est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
+  names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
+  vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
+  
   data$id <- 1:nrow(data)
   latentz <- z[which(!z %in% names(data))]
   
   ## add factor scores
+  ## TODO Add newdata to lavPredict...
   if(length(latentz) > 0){
-    fscores <- data.frame(do.call("rbind", lavPredict(m1)))
+    fscores <- data.frame(do.call("rbind", lavPredict(lavresults)))
     fscores <- subset(fscores, select=latentz)
-    fscores$id <- unlist(lavInspect(m1, "case.idx"))
+    fscores$id <- unlist(lavInspect(lavresults, "case.idx"))
     data <- merge(data,fscores)
   }
   
@@ -178,12 +213,6 @@ computeConditionalEffects <- function(obj, est, vcov, m1, return.modmat=TRUE){
   condeffects <- cbind(modmat %*% estimates)
   condeffects <- cbind(condeffects,
                        apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
-  ##AM We could add confidence intervals here, but currently I prefer to do
-  ## it in conditionalEffectsPlot()
-  # condeffects <- cbind(condeffects,
-  #     condeffects[,ncol(condeffects)-1] + 1.96*condeffects[,ncol(condeffects)],
-  #     condeffects[,ncol(condeffects)-1] - 1.96*condeffects[,ncol(condeffects)])
-  
   
   if(ng > 2){
     for(i in 3:ng){
@@ -200,42 +229,48 @@ computeConditionalEffects <- function(obj, est, vcov, m1, return.modmat=TRUE){
                                "g",
                                rep(2:ng-1, each=2))
   
-  ## return model matrix in condeffects table or just variables as predictors
-  if(return.modmat){
-    condeffects <- cbind(as.data.frame(modmat),condeffects)
-  }else{
+  
+  ##### What should be returned? effects + expected outcomes, model matrix, covariates?
+  
+  if("covariates" %in% add.columns){
     condeffects <- cbind(dsub,condeffects)
   }
   
-  ## add true-outcomes
-  estimates <- est[paste0("b0",kz)]
-  trueoutcomes <- cbind(modmat %*% estimates)
-  for(i in 1:(ng-1)){
-    estimates <- est[paste0("b",i,kz)]
-    trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
+  if("modmat" %in% add.columns){
+    condeffects <- cbind(modmat,condeffects)
   }
-  trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("ExpOutc", 0:(ng-1))
-  condeffects <- cbind(condeffects,trueoutcomes)
   
-  
-  ## add variables used in the propscore model
-  propscore <- obj@input@vnames$propscore
-  if(!is.null(propscore)){
-    
-    d <- obj@input@data
-    
-    if(is(propscore, "formula")){      
-      form <- propscore
-    }else{
-      form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
+  if("expected-outcomes" %in% add.columns){
+    estimates <- est[paste0("b0",kz)]
+    trueoutcomes <- cbind(modmat %*% estimates)
+    for(i in 1:(ng-1)){
+      estimates <- est[paste0("b",i,kz)]
+      trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
     }
-    
-    dsub <- model.frame(form,data=d)
-    condeffects <- condeffects[,-1]
-    condeffects <- cbind(dsub, condeffects)
-    
+    trueoutcomes <- as.data.frame(trueoutcomes)
+    names(trueoutcomes) <- paste0("ExpOutc", 0:(ng-1))
+    condeffects <- cbind(condeffects,trueoutcomes)
   }
+  
+  if("prop-covariates" %in% add.columns){
+    propscore <- obj@input@vnames$propscore
+    if(!is.null(propscore)){
+      
+      d <- obj@input@data
+      
+      if(is(propscore, "formula")){      
+        form <- propscore
+      }else{
+        form <- as.formula(paste0(x, " ~ ", paste0(propscore, collapse=" + ")))
+      }
+      
+      dsub <- model.frame(form,data=d)
+      condeffects <- condeffects[,-1]
+      condeffects <- cbind(dsub, condeffects)
+      
+    }
+  }  
+  
   
   return(condeffects)
   
