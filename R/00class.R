@@ -34,7 +34,8 @@ setClass("input", representation(
 setClass("parnames", representation(
   alphas="array", 
   betas="array", 
-  gammas="array", 
+  gammas="array",
+  constrainedgammas="character",
   gammalabels="array",
   cellmeanz="character",
   meanz="character",

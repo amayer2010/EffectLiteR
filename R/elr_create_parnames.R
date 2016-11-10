@@ -5,12 +5,36 @@ createParNames <- function(obj){
   ng <- inp@ng ## number of treatment groups
   nz <- inp@nz ## number of z
   nk <- inp@nk ## number of unfolded categories of K
+  interactions <- inp@interactions
   
   # create list for alpha, beta and gamma coefficients
   tmp <- expand.grid(z=0:nz, k=0:(nk-1), x=0:(ng-1))
   alphas <- with(tmp, array(paste0("a",x,k,z), dim=c(nz+1,nk,ng)))
   betas <- with(tmp, array(paste0("b",x,k,z), dim=c(nz+1,nk,ng)))
   gammas <- with(tmp, array(paste0("g",x,k,z), dim=c(nz+1,nk,ng)))
+  
+  ## constrained gammas (if interactions != "all")
+  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z"))
+  constrainedgammas <- character()
+  
+  if(interactions == "none"){
+    constrainedgammas <- c(matrix(c(gammas), ncol=ng)[-1,-1])
+  } 
+  if(interactions == "2-way"){
+    if(nk>1 & nz>0){
+      constrainedgammas <- c(gammas[2:(nz+1), 2:nk, 2:ng])
+    }
+  }
+  if(interactions == "X:K"){
+    if(nz>0){
+      constrainedgammas <- c(gammas[2:(nz+1), , 2:ng])
+    }
+  }
+  if(interactions == "X:Z"){
+    if(nk>1){
+      constrainedgammas <- c(gammas[, 2:nk, 2:ng])
+    }
+  }
   
   ## for pretty printing
   gammalabels <- with(tmp, paste0("I_X=",x, " * I_K=",k, " * Z",z))
@@ -76,6 +100,7 @@ createParNames <- function(obj){
              alphas=alphas,
              betas=betas,
              gammas=gammas,
+             constrainedgammas=constrainedgammas,
              gammalabels=gammalabels,
              cellmeanz=cellmeanz,
              meanz=meanz,

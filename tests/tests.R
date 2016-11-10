@@ -17,6 +17,25 @@ library(EffectLiteR)
 # d$z3 <- rnorm(N)
 # d$dv <- rnorm(N)
 
+# library(testthat)
+# a <- 9
+# expect_that(a, is_less_than(10))
+# expect_lt(a, 10)
+# 
+# 
+# 
+# oldres <- rbind(m1@results@Egx,
+#                 m1@results@Egxgx,
+#                 m1@results@Egxgk,
+#                 m1@results@Egxgxk)
+# newres <- rbind(m1@results@Egx+1,
+#                 m1@results@Egxgx,
+#                 m1@results@Egxgk,
+#                 m1@results@Egxgxk)
+# 
+# expect_equivalent(newres, oldres)
+
+
 res_list <- list()
 
 d <- example01
@@ -711,10 +730,10 @@ d <- example01
 
 m1 <- effectLite(y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
                  control="control", data=d)
-newdata <- data.frame(k1="male", kateg2="1", z1=2)
+newdata <- data.frame(k1="male", kateg2="1", z1=2, testvar=5)
 pred <- elrPredict(m1, newdata)
 
-pred <- EffectLiteR:::computeConditionalEffects(m1, newdata=newdata, add.columns=c("prop-covariates","covariates"))
+pred <- EffectLiteR:::computeConditionalEffects(m1, newdata=newdata, add.columns=c("covariates"))
 pred
 
 m1 <- effectLite(y="dv", z=c("z1"), x="x", control="control", data=d)

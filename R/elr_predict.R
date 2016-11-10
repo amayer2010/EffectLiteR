@@ -24,7 +24,7 @@ elrPredict <- function(obj, newdata=NULL){
   
   z <- obj@input@vnames$z
   k <- obj@input@vnames$k
-  stopifnot(all(names(newdata) %in% c(z,k)))
+  stopifnot(all(c(z,k) %in% names(newdata)))
   
   ##TODO error check very important!
   ##TODO add documentation
@@ -113,7 +113,7 @@ elrPredict <- function(obj, newdata=NULL){
   return(individualeffects)
 }
 
-## maybe add an option that true outcomes and orginal data is included...
+
 ## TODO add documentation
 computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates"){
   
@@ -128,14 +128,17 @@ computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates
   z <- obj@input@vnames$z
   k <- obj@input@vnames$k
   x <- obj@input@vnames$x
-  mm <- obj@input@measurement 
+  
   nz <- obj@input@nz
   nk <- obj@input@nk
   ng <- obj@input@ng
   
+  latentz <- obj@input@vnames$latentz
+  mm <- obj@input@measurement 
+  
   if(!is.null(newdata)){
     
-    stopifnot(all(names(newdata) %in% c(z,k)))
+    stopifnot(all(c(z,k) %in% names(newdata))) ## no latent covariates in newdata
 
     #compute Kstar values first
     if(nk > 1){
@@ -166,7 +169,6 @@ computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates
   vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
   
   data$id <- 1:nrow(data)
-  latentz <- z[which(!z %in% names(data))]
   
   ## add factor scores
   ## TODO Add newdata to lavPredict...
@@ -276,3 +278,47 @@ computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates
   
 }
 
+
+
+
+# computeAggregatedEffects <- function(obj, covs){
+#   
+#   stopifnot(inherits(obj, "effectlite"))
+#   stopifnot(length(obj@input@measurement) == 0) ## no latent variables for now
+#   
+#   ## required things
+#   z <- obj@input@vnames$z
+#   k <- obj@input@vnames$k
+#   x <- obj@input@vnames$x
+#   
+#   nz <- obj@input@nz
+#   nk <- obj@input@nk
+#   ng <- obj@input@ng
+#   
+#   interactions <- obj@input@interactions
+#   
+#   ## compute formula
+#   data <- obj@input@data
+# 
+#   if(nz==0 & nk==1){
+#     formula <- as.formula(paste0(" ~ 1 + ", x))
+#     
+#   }else if(nz>0 & nk==1){
+#     rhs <- paste(z, collapse=" + ")
+#     rhs <- paste0(x, "*(", rhs, ")")
+#     formula <- as.formula(paste0(" ~ ", rhs))
+# 
+#   }else if(nz==0 & nk>1){      
+#     formula <- as.formula(paste0(" ~ ", x, "*kstar"))
+# 
+#   }else if(nz>0 & nk>1){
+#     rhs <- paste(z, "kstar", sep="*", collapse=" + ")
+#     rhs <- paste0(x, "*(", rhs, ")")
+#     formula <- as.formula(paste0(" ~ ", rhs))
+#   }
+#   
+#   modmat <- model.matrix(formula, data=data)
+#   colnames(modmat)
+#   
+# }
+# 

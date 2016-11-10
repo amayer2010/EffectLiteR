@@ -509,36 +509,14 @@ create_syntax_Egxgxk <- function(ng,nk,nz,Egxgxk,gammas,cellmeanz){
 }
 
 
-create_syntax_interaction_constraints <- function(ng,nk,nz,interactions,gammas){
+create_syntax_interaction_constraints <- function(ng,nk,nz,interactions,constrainedgammas){
   
   res <- NULL
   
-  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z"))
-  if(interactions == "none"){
+  if(interactions != "all"){
     res <- paste0(res, "\n\n## Equality Constraints")
-    gammas <- matrix(c(gammas), ncol=ng)[-1,-1]
-    res <- paste0(res, "\n", paste(gammas, "== 0", collapse="\n"))
-  } 
-  if(interactions == "2-way"){
-    if(nk>1 & nz>0){
-      res <- paste0(res, "\n\n## Equality Constraints")
-      gammas <- gammas[2:(nz+1), 2:nk, 2:ng]
-      res <- paste0(res, "\n", paste(gammas, "== 0", collapse="\n"))
-    }
-  }
-  if(interactions == "X:K"){
-    if(nz>0){
-      res <- paste0(res, "\n\n## Equality Constraints")
-      gammas <- gammas[2:(nz+1), , 2:ng]
-      res <- paste0(res, "\n", paste(gammas, "== 0", collapse="\n"))
-    }
-  }
-  if(interactions == "X:Z"){
-    if(nk>1){
-      res <- paste0(res, "\n\n## Equality Constraints")
-      gammas <- gammas[, 2:nk, 2:ng]
-      res <- paste0(res, "\n", paste(gammas, "== 0", collapse="\n"))
-    }
+    res <- paste0(res, "\n", paste(constrainedgammas, "== 0", collapse="\n"))
+    
   }
 
   return(res)  
@@ -597,6 +575,7 @@ createLavaanSyntax <- function(obj) {
   alphas <- parnames@alphas
   betas <- parnames@betas
   gammas <- parnames@gammas
+  constrainedgammas <- parnames@constrainedgammas
   cellmeanz <- parnames@cellmeanz
   relfreq <- parnames@relfreq
   groupw <- parnames@groupw
@@ -695,7 +674,7 @@ createLavaanSyntax <- function(obj) {
   
   ## Constraints about 2 and 3 way interactions
   model <- paste0(model, 
-              create_syntax_interaction_constraints(ng,nk,nz,interactions,gammas))
+              create_syntax_interaction_constraints(ng,nk,nz,interactions,constrainedgammas))
   
   ## additional syntax
   if(length(inp@add) != 0){
