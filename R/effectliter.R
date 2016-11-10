@@ -85,13 +85,13 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
   if(syntax.only){
-    return(obj@lavaansyntax@model)    
+    res <- obj@lavaansyntax@model    
+  }else{
+    obj@results <- computeResults(obj)
+    res <- obj
   }
-    
-  obj@results <- computeResults(obj)
-  obj@results@condeffects <- computeConditionalEffects(obj)
   
-  return(obj)  
+  return(res)  
 }
 
 
