@@ -253,7 +253,7 @@ create_syntax_Egx <- function(ng,nk,nz,pk,meanz,Ezk,Egx,gammas){
 }
 
 
-create_syntax_adjmeans <- function(ng,nk,nz,pk,meanz,Ezk,adjmeans,betas){
+create_syntax_adjmeans <- function(ng,nk,nz,pk,meanz,Ezk,adjmeans,gammas){
   
   ##TODO compute adjusted means based on gammas so that it can be used in
   ## single group models as well
@@ -271,12 +271,15 @@ create_syntax_adjmeans <- function(ng,nk,nz,pk,meanz,Ezk,adjmeans,betas){
   expectations <- c(1,meanz_tmp,pkEzk_tmp)
   
   ## adjusted means
-  for(i in 1:ng){
-    tmp <- paste0(adjmeans[i]," := ",
-                  paste(betas[,,i],expectations, sep="*", collapse=" + "))
+  tmp <- paste0(adjmeans[1]," := ",
+                paste(gammas[,,1],expectations, sep="*", collapse=" + "))
+  res <- paste0(res, "\n", tmp)
+  
+  for(i in 2:ng){
+    tmp <- paste(c(gammas[,,1], gammas[,,i]), expectations, sep="*", collapse=" + ")
+    tmp <- paste0(adjmeans[i]," := ", tmp)
     res <- paste0(res, "\n", tmp)
   }
-  
   
   return(res)
 }
@@ -646,7 +649,7 @@ createLavaanSyntax <- function(obj) {
   model <- paste0(model, create_syntax_Egx(ng,nk,nz,pk,meanz,Ezk,Egx,gammas))  
 
   ## compute adjusted means
-  model <- paste0(model, create_syntax_adjmeans(ng,nk,nz,pk,meanz,Ezk,adjmeans,betas))
+  model <- paste0(model, create_syntax_adjmeans(ng,nk,nz,pk,meanz,Ezk,adjmeans,gammas))
   
   ## conditional probabilities of K=k given X=x (Pkgx)
   model <- paste0(model, create_syntax_Pkgx(ng, nk, relfreq, Pkgx, px))

@@ -4,6 +4,7 @@ library(testthat)
 
 ## TODO why does test_file() not work?
 
+source("tests/adjmean_tests.R")
 source("tests/basic_tests.R")
 source("tests/latent_variables_tests.R")
 source("tests/complex_survey_tests.R")
