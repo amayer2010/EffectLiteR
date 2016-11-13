@@ -756,7 +756,7 @@ shinyServer(function(input, output, session) {
                   "data=data, ", 
                   "fixed.x=", m1@input@fixed.z, ", ",
                   "group.w.free=", !m1@input@fixed.cell, ", ",
-                  "mimic=\"", "mplus", "\") ")
+                  "mimic=\"", "lavaan", "\") ")
       cat(tmp, "\n")  
     }  
   })

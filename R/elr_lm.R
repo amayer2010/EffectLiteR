@@ -21,16 +21,10 @@ effectLiteLM <- function(y, x, k=NULL, z=NULL, control="0",
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLMSyntax(obj)
   
-  
-  
-  if(syntax.only){
-    res <- obj@lavaansyntax@model    
-  }else{
-    obj@results <- computeResults(obj)
-    res <- obj
-  }
-  
-  return(res)  
+  if(syntax.only){return(obj@lavaansyntax@model)}    ## elrInspect(obj, "syntax")
+  obj@results <- computeResults(obj)
+
+  return(obj)  
 }
 
 
@@ -108,7 +102,7 @@ createLMSyntax <- function(obj) {
   model <- paste0(model, create_syntax_Egx(ng,nk,nz,pk,meanz,Ezk,Egx,gammas))  
   
   ## compute adjusted means
-  # model <- paste0(model, create_syntax_adjmeans(ng,nk,nz,pk,meanz,Ezk,adjmeans,betas))
+  model <- paste0(model, create_syntax_adjmeans(ng,nk,nz,pk,meanz,Ezk,adjmeans,gammas))
   
   ## conditional probabilities of K=k given X=x (Pkgx)
   model <- paste0(model, create_syntax_Pkgx(ng, nk, relfreq, Pkgx, px))

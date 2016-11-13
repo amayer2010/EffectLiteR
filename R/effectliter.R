@@ -33,7 +33,7 @@
 #' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
-#' @param ... Further arguments passed to \code{\link[lavaan]{sem}}. Currently not used.
+#' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
 #' @examples
 #' ## Example with one categorical covariate
@@ -73,13 +73,13 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
                        homoscedasticity=FALSE, add=character(),...){
   
   obj <- new("effectlite")
-  ##TODO make use of ldots argument: sem_args <- list(...) and then pass it to sem() 
   ##TODO change such that first class input is generated, then class parnames...
   obj@call <- match.call()
+  method_args <- list(...)
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
                            fixed.cell, fixed.z, missing, se, bootstrap,
                            mimic, interactions, ids, weights, homoscedasticity,
-                           add)
+                           add, method_args)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)

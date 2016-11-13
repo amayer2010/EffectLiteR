@@ -2,7 +2,7 @@
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
                         fixed.cell, fixed.z, missing, se, bootstrap, mimic,
                         interactions, ids, weights, homoscedasticity,
-                        add){
+                        add, method_args){
   
   d <- data
   latentz <- z[which(!z %in% names(data))] ##TODO fix for interactions between continuous covariates
@@ -176,7 +176,8 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              mimic=mimic,
              interactions=interactions,
              complexsurvey=complexsurvey,
-             homoscedasticity=homoscedasticity
+             homoscedasticity=homoscedasticity,
+             method_args=method_args
   )
   
   return(res)

@@ -1,14 +1,14 @@
 
 computeResults <- function(obj){
-  
-  sem.call <- call("sem", model=obj@lavaansyntax@model,
+
+  sem.args <- list(model=obj@lavaansyntax@model,
                    group="cell", missing=obj@input@missing,
                    se=obj@input@se, bootstrap=obj@input@bootstrap,
-                   mimic=obj@input@mimic,
-                   group.label=obj@input@vlevels$cell, data=obj@input@data,
-                   fixed.x=obj@input@fixed.z, group.w.free = !obj@input@fixed.cell)
-  
-  m1 <- eval(sem.call)
+                   mimic=obj@input@mimic, fixed.x=obj@input@fixed.z,
+                   group.label=obj@input@vlevels$cell, data=obj@input@data, 
+                   group.w.free = !obj@input@fixed.cell)
+  sem.args <- c(sem.args, obj@input@method_args)
+  m1 <- do.call("sem", sem.args)
   
   ## lavaan.survey -- complex survey designs
   ids <- obj@input@complexsurvey$ids
