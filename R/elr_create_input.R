@@ -1,6 +1,6 @@
 
 createInput <- function(y, x, k, z, propscore, control, measurement, data, 
-                        fixed.cell, fixed.z, missing, se, bootstrap, mimic,
+                        fixed.cell, fixed.z, missing, se,
                         interactions, ids, weights, homoscedasticity,
                         add, method_args){
   
@@ -172,8 +172,6 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
              observed.freq=observed.freq,
              sampmeanz=sampmeanz,
              se=se,
-             bootstrap=bootstrap,
-             mimic=mimic,
              interactions=interactions,
              complexsurvey=complexsurvey,
              homoscedasticity=homoscedasticity,

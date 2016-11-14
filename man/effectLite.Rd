@@ -6,10 +6,9 @@
 \usage{
 effectLite(y, x, k = NULL, z = NULL, control = "0",
   measurement = character(), data, fixed.cell = FALSE, fixed.z = FALSE,
-  missing = "listwise", se = "standard", bootstrap = 1000L,
-  mimic = "lavaan", syntax.only = FALSE, interactions = "all",
-  propscore = NULL, ids = ~0, weights = NULL, homoscedasticity = FALSE,
-  add = character(), ...)
+  missing = "listwise", se = "standard", syntax.only = FALSE,
+  interactions = "all", propscore = NULL, ids = ~0, weights = NULL,
+  homoscedasticity = FALSE, add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -35,11 +34,6 @@ effectLite(y, x, k = NULL, z = NULL, control = "0",
 \item{se}{Type of standard errors. Will be 
 passed on to \code{\link[lavaan]{sem}}.}
 
-\item{bootstrap}{Number of bootstrap draws, if bootstrapping is used. Will be 
-passed on to \code{\link[lavaan]{sem}}.}
-
-\item{mimic}{Will be passed on to \code{\link[lavaan]{sem}}.}
-
 \item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model 
 will not be estimated.}
 
@@ -55,7 +49,7 @@ will not be estimated.}
 
 \item{add}{Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.}
 
-\item{...}{Further arguments passed to \code{\link[lavaan]{sem}}. Currently not used.}
+\item{...}{Further arguments passed to \code{\link[lavaan]{sem}}.}
 }
 \value{
 Object of class effectlite.

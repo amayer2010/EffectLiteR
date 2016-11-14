@@ -22,8 +22,6 @@ setClass("input", representation(
   observed.freq="numeric", ## observed group frequencies (fixed.cell only)
   sampmeanz="array", ## manifest sample means for continuous covriates
   se="character", ## lavaan standard errors
-  bootstrap="numeric", ## number of bootstrap draws
-  mimic="character", ## lavaan's mimic option
   interactions="character", ## type of interaction (all, 2-way, no)
   complexsurvey="list",
   homoscedasticity="logical",

@@ -6,7 +6,7 @@
 effectLiteLM <- function(y, x, k=NULL, z=NULL, control="0", 
                          measurement=character(), data, fixed.cell=FALSE, 
                          fixed.z=FALSE, missing="listwise", se="standard", 
-                         bootstrap=1000L, mimic="lavaan", syntax.only=FALSE, 
+                         syntax.only=FALSE, 
                          interactions="all", propscore=NULL, ids=~0, 
                          weights=NULL, homoscedasticity=FALSE, 
                          add=character(),...){
@@ -14,8 +14,8 @@ effectLiteLM <- function(y, x, k=NULL, z=NULL, control="0",
   obj <- new("effectlite")
   obj@call <- match.call()
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
-                           fixed.cell, fixed.z, missing, se, bootstrap,
-                           mimic, interactions, ids, weights, homoscedasticity,
+                           fixed.cell, fixed.z, missing, se,
+                           interactions, ids, weights, homoscedasticity,
                            add)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  

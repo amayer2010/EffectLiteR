@@ -72,7 +72,7 @@ expect_equivalent(res_hub_1z2k, oldres_hub_1z2k)
 # '
 # 
 # m1 <- sem(model, group="cell",group.label=levels(testdaten$cell), 
-#           data=testdaten, fixed.x=F, group.w.free = TRUE, mimic="mplus",
+#           data=testdaten, fixed.x=F, group.w.free = TRUE,
 #           se="robust")
 # summary(m1)
 

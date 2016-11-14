@@ -8,6 +8,7 @@
 #' categorical covariates as used when fitting the EffectLiteR model in
 #' obj. Only covariates (and neither the dependent variable nor indicators for 
 #' latent variables) should be included.
+#' @param add.columns Used to request additional columns. Can be one or several of c("covariates", "modmat", "expected-outcomes", "prop-covariates").
 #' @return Object of class \code{"data.frame"}.
 #' @examples
 #' m1 <- effectLite(y="dv", z=c("z1"), k=c("k1","kateg2"), x="x", 
@@ -15,102 +16,10 @@
 #' newdata <- data.frame(k1="male", kateg2="1", z1=2)
 #' elrPredict(m1, newdata)
 #' @export
-elrPredict <- function(obj, newdata=NULL){
+elrPredict <- function(obj, newdata=NULL, add.columns="expected-outcomes"){
   
-  stopifnot(inherits(obj, "effectlite"))
-  
-  ##TODO merge function with computeConditionalEffects()
-  if(is.null(newdata)){return(obj@results@condeffects)}
-  
-  z <- obj@input@vnames$z
-  k <- obj@input@vnames$k
-  stopifnot(all(c(z,k) %in% names(newdata)))
-  
-  ##TODO error check very important!
-  ##TODO add documentation
-  ##TODO do the above things before making it public!
-  
-  ## required things
-  lavresults <- obj@results@lavresults
-  nk <- obj@input@nk
-  nz <- obj@input@nz
-  ng <- obj@input@ng
-  
-  #compute Kstar values first
-  if(nk > 1){
-    tmp <- obj@input@vlevels$levels.k.original
-    tmp <- tmp[length(tmp):1]
-    tmp <- expand.grid(tmp)
-    tmp$kstar <- factor(obj@input@vlevels$kstar)
-    
-    ## add Kstar values to newdata
-    newdata <- merge(newdata, tmp)
-  }
-  
-  ## estimates and vcov
-  est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
-  names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
-  vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
-  
-  ## compute formula and model.matrix  
-  if(nz==0 & nk==1){
-    formula <- as.formula(" ~ 1")
-    modmat <- model.matrix(formula, data=newdata)
-    kz <- "00"
-    
-  }else if(nz>0 & nk==1){
-    formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
-    modmat <- model.matrix(formula, data=newdata)
-    kz <- paste0("0",0:nz)
-    
-  }else if(nz==0 & nk>1){      
-    formula <- as.formula(" ~ kstar")
-    modmat <- model.matrix(formula, data=newdata)      
-    kz <- paste0(1:nk-1,"0")
-    
-  }else if(nz>0 & nk>1){ 
-    formula <- as.formula(paste0(" ~ ", 
-                                 paste("kstar", z, sep="*", collapse=" + ")))
-    modmat <- model.matrix(formula, data=newdata)            
-    kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
-    kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
-    
-  }
-  
-  estimates <- est[paste0("g1",kz)]
-  vcov_est <- vcov[paste0("g1",kz),paste0("g1",kz)]
-  individualeffects <- cbind(modmat %*% estimates)
-  individualeffects <- cbind(individualeffects,
-                             apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
-  
-  
-  if(ng > 2){
-    for(i in 3:ng){
-      estimates <- est[paste0("g",i-1,kz)]
-      vcov_est <- vcov[paste0("g",i-1,kz),paste0("g",i-1,kz)]
-      individualeffects <- cbind(individualeffects, modmat %*% estimates)
-      individualeffects <- cbind(individualeffects,
-                                 apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
-    }      
-  }  
-  
-  individualeffects <- as.data.frame(individualeffects)
-  names(individualeffects) <- paste0(rep(c("","se_"), times=ng-1),
-                                     "g",
-                                     rep(2:ng-1, each=2))
-  
-  ## add true-outcomes
-  estimates <- est[paste0("b0",kz)]
-  trueoutcomes <- cbind(modmat %*% estimates)
-  for(i in 1:(ng-1)){
-    estimates <- est[paste0("b",i,kz)]
-    trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
-  }
-  trueoutcomes <- as.data.frame(trueoutcomes)
-  names(trueoutcomes) <- paste0("ExpOutc",  0:(ng-1))
-  individualeffects <- cbind(individualeffects,trueoutcomes)
-  
-  return(individualeffects)
+  condeffects <- computeConditionalEffects(obj, newdata, add.columns)
+  return(condeffects)
 }
 
 
@@ -180,6 +89,7 @@ computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates
   }
   
   ## compute formula and model.matrix  
+  ## TODO use computeModelMatrix() function
   if(nz==0 & nk==1){
     formula <- as.formula(" ~ 1")
     modmat <- model.matrix(formula, data=data)

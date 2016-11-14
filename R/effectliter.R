@@ -22,9 +22,6 @@
 #' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.
 #' @param se Type of standard errors. Will be 
 #' passed on to \code{\link[lavaan]{sem}}.
-#' @param bootstrap Number of bootstrap draws, if bootstrapping is used. Will be 
-#' passed on to \code{\link[lavaan]{sem}}.
-#' @param mimic Will be passed on to \code{\link[lavaan]{sem}}.
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
 #' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z")} and indicates the type of interaction used in the parameterization of the regression.
@@ -68,7 +65,7 @@
 effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
                        measurement=character(), data, fixed.cell=FALSE, 
                        fixed.z=FALSE, missing="listwise", se="standard", 
-                       bootstrap=1000L, mimic="lavaan", syntax.only=FALSE, interactions="all", 
+                       syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
                        homoscedasticity=FALSE, add=character(),...){
   
@@ -77,21 +74,18 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
   obj@call <- match.call()
   method_args <- list(...)
   obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
-                           fixed.cell, fixed.z, missing, se, bootstrap,
-                           mimic, interactions, ids, weights, homoscedasticity,
+                           fixed.cell, fixed.z, missing, se,
+                           interactions, ids, weights, homoscedasticity,
                            add, method_args)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
   obj@lavaansyntax <- createLavaanSyntax(obj)
   
-  if(syntax.only){
-    res <- obj@lavaansyntax@model    
-  }else{
-    obj@results <- computeResults(obj)
-    res <- obj
-  }
+  if(syntax.only){return(obj@lavaansyntax@model)}    
+  obj@results <- computeResults(obj)
+  obj@results@condeffects <- computeConditionalEffects(obj)
   
-  return(res)  
+  return(obj)  
 }
 
 
