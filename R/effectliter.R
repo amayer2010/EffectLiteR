@@ -14,7 +14,7 @@
 #' @param x Treatment variable (character string) treated as categorical variable.
 #' @param k Vector of manifest variables treated as categorical covariates (character vector).
 #' @param z Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.
-#' @param control Value of \code{x} that is used as control group.
+#' @param control Value of \code{x} that is used as control group. If "default", takes the first entry of \code{as.factor(x)}.
 #' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
 #' @param data A data frame. 
 #' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
@@ -62,9 +62,9 @@
 #' }
 #' @export
 #' @import lavaan
-effectLite <- function(y, x, k=NULL, z=NULL, control="0", 
+effectLite <- function(y, x, k=NULL, z=NULL, control="default", 
                        measurement=character(), data, fixed.cell=FALSE, 
-                       fixed.z=FALSE, missing="listwise", se="standard", 
+                       fixed.z=FALSE, missing="default", se="standard", 
                        syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
                        homoscedasticity=FALSE, add=character(),...){

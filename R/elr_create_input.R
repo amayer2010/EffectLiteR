@@ -12,8 +12,9 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  
   }
-  stopifnot(length(levels(d[,x])) <= 10) # test if it works for > 10 (problems with subscripts?)
+  stopifnot(length(levels(d[,x])) <= 10) # TODO: test if it works for > 10 (problems with subscripts?)
   
+  if(control=="default"){control <- levels(d[,x])[1]}
   d[,x] <- relevel(d[,x], control)
   levels.x.original <- levels(d[,x])
   levels(d[,x]) <- paste(0:(length(levels(d[,x]))-1))  
