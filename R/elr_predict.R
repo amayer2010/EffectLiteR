@@ -24,7 +24,8 @@ elrPredict <- function(obj, newdata=NULL, add.columns="expected-outcomes"){
 
 
 ## TODO add documentation
-computeConditionalEffects <- function(obj, newdata=NULL, add.columns="covariates"){
+computeConditionalEffects <- function(obj, newdata=NULL, 
+                                      add.columns=c("covariates","expected-outcomes")){
   
   stopifnot(inherits(obj, "effectlite"))
   
