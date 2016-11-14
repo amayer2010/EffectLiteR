@@ -769,7 +769,7 @@ shinyServer(function(input, output, session) {
       cat("")
     }else{
       m1 <- model()
-      cat(m1@lavaansyntax@model)  
+      cat(m1@syntax@model)  
     }  
   })
   

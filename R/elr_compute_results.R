@@ -1,7 +1,7 @@
 
 computeResults <- function(obj){
 
-  sem.args <- list(model=obj@lavaansyntax@model,
+  sem.args <- list(model=obj@syntax@model,
                    group="cell", 
                    missing=obj@input@missing,
                    se=obj@input@se,
@@ -51,14 +51,14 @@ computeResults <- function(obj){
   }else{
     if(nz==0 & nk==1){
       hypotheses <- data.frame(
-        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis1)[1:3])    
+        lavTestWald(m1, constraints=obj@syntax@hypotheses$hypothesis1)[1:3])    
       row.names(hypotheses) <- "No average effects"    
     }else{
       hypotheses <- data.frame(rbind(
-        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis1)[1:3],
-        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis2)[1:3],
-        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis3)[1:3],
-        lavTestWald(m1, constraints=obj@lavaansyntax@hypotheses$hypothesis4)[1:3]    
+        lavTestWald(m1, constraints=obj@syntax@hypotheses$hypothesis1)[1:3],
+        lavTestWald(m1, constraints=obj@syntax@hypotheses$hypothesis2)[1:3],
+        lavTestWald(m1, constraints=obj@syntax@hypotheses$hypothesis3)[1:3],
+        lavTestWald(m1, constraints=obj@syntax@hypotheses$hypothesis4)[1:3]    
       ))
       row.names(hypotheses) <- c("No average effects",
                                  "No covariate effects in control group",

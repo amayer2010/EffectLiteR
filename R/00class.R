@@ -1,9 +1,10 @@
 ######################## class definitions #####################
 
 ## structure of class effectlite
+# - call
 # - user input (class input)
 # - parameter names (class parnames)
-# - generated lavaansyntax (class lavsyntax)
+# - generated syntax (class syntax)
 # - obtained results (class results)
 
 setClass("input", representation(
@@ -56,7 +57,7 @@ setClass("parnames", representation(
 )
 )
 
-setClass("lavsyntax", representation(
+setClass("syntax", representation(
   model="character", 
   hypotheses="list"
 )
@@ -81,7 +82,7 @@ setClass("effectlite", representation(
   call="call",
   input="input",
   parnames="parnames",
-  lavaansyntax="lavsyntax",
+  syntax="syntax",
   results="results"
 )
 )

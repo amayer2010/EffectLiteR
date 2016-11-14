@@ -79,9 +79,9 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="0",
                            add, method_args)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
-  obj@lavaansyntax <- createLavaanSyntax(obj)
+  obj@syntax <- createSyntax(obj)
   
-  if(syntax.only){return(obj@lavaansyntax@model)}    
+  if(syntax.only){return(obj@syntax@model)}    
   obj@results <- computeResults(obj)
   obj@results@condeffects <- computeConditionalEffects(obj)
   
