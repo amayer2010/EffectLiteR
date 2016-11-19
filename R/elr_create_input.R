@@ -1,7 +1,7 @@
 
-createInput <- function(y, x, k, z, propscore, control, measurement, data, 
+createInput <- function(y,x,k,z,data,method,control,measurement, 
                         fixed.cell, fixed.z, missing, se,
-                        interactions, ids, weights, homoscedasticity,
+                        interactions, propscore, ids, weights, homoscedasticity,
                         add, method_args){
   
   d <- data
@@ -158,6 +158,7 @@ createInput <- function(y, x, k, z, propscore, control, measurement, data,
   
   
   res <- new("input",
+             method=method,
              vnames=vnames, 
              vlevels=vlevels,
              ng=ng,

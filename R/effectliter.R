@@ -14,9 +14,10 @@
 #' @param x Treatment variable (character string) treated as categorical variable.
 #' @param k Vector of manifest variables treated as categorical covariates (character vector).
 #' @param z Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.
+#' @param data A data frame.
+#' @param method Can be one of c("sem","lm") and indicates which function is used to fit the model.
 #' @param control Value of \code{x} that is used as control group. If "default", takes the first entry of \code{as.factor(x)}.
 #' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
-#' @param data A data frame. 
 #' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
 #' @param fixed.z logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z 
 #' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.
@@ -62,8 +63,8 @@
 #' }
 #' @export
 #' @import lavaan
-effectLite <- function(y, x, k=NULL, z=NULL, control="default", 
-                       measurement=character(), data, fixed.cell=FALSE, 
+effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="default", 
+                       measurement=character(), fixed.cell=FALSE, 
                        fixed.z=FALSE, missing="default", se="standard", 
                        syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
@@ -73,9 +74,9 @@ effectLite <- function(y, x, k=NULL, z=NULL, control="default",
   ##TODO change such that first class input is generated, then class parnames...
   obj@call <- match.call()
   method_args <- list(...)
-  obj@input <- createInput(y,x,k,z,propscore,control,measurement,data, 
+  obj@input <- createInput(y,x,k,z,data,method,control,measurement, 
                            fixed.cell, fixed.z, missing, se,
-                           interactions, ids, weights, homoscedasticity,
+                           interactions, propscore, ids, weights, homoscedasticity,
                            add, method_args)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  

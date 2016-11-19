@@ -27,6 +27,8 @@ elrPredict <- function(obj, newdata=NULL, add.columns="expected-outcomes"){
 computeConditionalEffects <- function(obj, newdata=NULL, 
                                       add.columns=c("covariates","expected-outcomes")){
   
+  if(obj@input@method =="lm"){return(data.frame())} ## TODO change this
+  
   stopifnot(inherits(obj, "effectlite"))
   
   current.na.action <- options('na.action')

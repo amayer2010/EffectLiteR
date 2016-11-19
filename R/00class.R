@@ -8,6 +8,7 @@
 # - obtained results (class results)
 
 setClass("input", representation(
+  method="character", ## sem or lm to fit object
   vnames="list", ## variable names
   vlevels="list", ## variable levels (for x, k, kstar and cell)
   control="character",
@@ -66,6 +67,10 @@ setClass("syntax", representation(
 
 setClass("results", representation(
   lavresults="lavaan",
+  lmresults="lm",
+  est="numeric",
+  se="numeric",
+  vcov.def="matrix",
   hypotheses="data.frame",
   Egx="data.frame",
   Egxgx="data.frame",
