@@ -43,6 +43,31 @@ computeResults <- function(obj){
   
   names(Egx) <- c("Estimate", "SE", "Est./SE", "p-value", "Effect Size")
   
+  ## Additional (user-defined) effects
+  AdditionalEffects <- data.frame()
+  if(length(obj@input@add > 0)){
+    if(grepl(":=", obj@input@add)){
+      
+      ## TODO: improve code
+      pt_tmp <- parTable(m1_sem) ## TODO: what about lm()
+      pt_tmp <- subset(pt_tmp, subset=op==":=")
+      npar <- nrow(pt_tmp)
+      nnewpar <- length(unlist(gregexpr(":=", obj@input@add)))
+      newnames <- pt_tmp$label[(npar-nnewpar+1):npar]
+      
+      AdditionalEffects <- data.frame(est[newnames],
+                                      se[newnames],
+                                      tval[newnames],
+                                      pval[newnames],
+                                      est[newnames]/sdyx0)
+      
+      names(AdditionalEffects) <- c("Estimate", "SE", "Est./SE", "p-value", 
+                                    "Effect Size")
+      
+    }
+  }
+  
+  
   ## Effects given a treatment condition
   Egxgx <- data.frame(est[obj@parnames@Egxgx],
                       se[obj@parnames@Egxgx],
@@ -105,6 +130,7 @@ computeResults <- function(obj){
              vcov.def=vcov.def,
              hypotheses=hypotheses,
              Egx=Egx,
+             AdditionalEffects=AdditionalEffects,
              Egxgx=Egxgx,
              Egxgk=Egxgk,
              Egxgxk=Egxgxk,

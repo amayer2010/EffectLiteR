@@ -90,3 +90,11 @@ effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="defaul
 }
 
 
+
+# elrEffects(m1)
+# lavEffects(m1)
+
+
+
+
+

@@ -73,6 +73,7 @@ setClass("results", representation(
   vcov.def="matrix",
   hypotheses="data.frame",
   Egx="data.frame",
+  AdditionalEffects="data.frame",
   Egxgx="data.frame",
   Egxgk="data.frame",
   Egxgxk="data.frame",
