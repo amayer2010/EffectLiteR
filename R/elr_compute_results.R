@@ -29,7 +29,6 @@ computeResults <- function(obj){
   
   sdyx0 <- computeStdDevEffectSize(obj, est, m1_sem)
   hypotheses <- computeHypothesesResults(obj, m1_sem)
-
   
   ng <- obj@input@ng
   nz <- obj@input@nz

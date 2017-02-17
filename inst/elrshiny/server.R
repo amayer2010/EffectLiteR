@@ -788,6 +788,52 @@ shinyServer(function(input, output, session) {
       ## maybe there was a reason I set fit.measures=FALSE in prior versions...
     }  
   })
+
+  ###### Output User Specified Effects #########
+  output$addeffects <- renderPrint({      
+    
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){            
+      
+      cat("Please specify the outcome variable and the treatment variable")
+      
+    }else if(input$add.syntax == ""){
+      
+      cat("No user-defined parameters specified")
+      
+    }else{
+      
+      m1 <- model()
+      AdditionalEffects <- m1@results@AdditionalEffects
+      print(AdditionalEffects, digits=3, print.gap=3)
+      
+    }  
+  })
+  
+    
+  
+  ###### Output User Specified Wald Test #########
+  output$waldtest <- renderPrint({      
+    
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){            
+      
+      cat("Please specify the outcome variable and the treatment variable")
+      
+    }else if(input$add.syntax.wald == ""){
+      
+      cat("No user-defined Wald test specified")
+      
+    }else{
+      
+      m1 <- model()
+      con <- input$add.syntax.wald
+      wtest <- data.frame(lavTestWald(m1@results@lavresults, con)[1:3])  
+      row.names(wtest) <- "Additional Wald Test"  
+      names(wtest) <- c("Wald Chi-Square", "df", "p-value")
+      print(wtest, digits=3, print.gap=3)
+
+    }  
+  })
+  
   
   
   ###### Download Data (Conditional Effects Table) #######

@@ -143,14 +143,6 @@ setMethod("show", "effectlite", function(object) {
   row.names(Egx) <- namesEgx
   print(Egx, digits=3, print.gap=3)
   
-  if(length(object@input@add > 0)){
-  if(grepl(":=", object@input@add)){
-    cat("\n\n --------------------- User Defined Parameters/Effects --------------------- \n\n")
-    AdditionalEffects <- object@results@AdditionalEffects
-    print(AdditionalEffects, digits=3, print.gap=3)
-  }}
-  
-  
   if(!(nz==0 & nk==1)){
     cat("\n\n --------------------- Effects given a Treatment Condition --------------------- \n\n")
     tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1))
@@ -180,6 +172,12 @@ setMethod("show", "effectlite", function(object) {
     print(Egxgxk, digits=3, print.gap=3)    
   }
   
+  if(length(object@input@add > 0)){
+    if(grepl(":=", object@input@add)){
+      cat("\n\n --------------------- User Defined Parameters/Effects --------------------- \n\n")
+      AdditionalEffects <- object@results@AdditionalEffects
+      print(AdditionalEffects, digits=3, print.gap=3)
+    }}
   
   propscore <- object@input@vnames$propscore
   if(!is.null(propscore)){
