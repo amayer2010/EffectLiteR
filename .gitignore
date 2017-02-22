@@ -5,6 +5,7 @@
 
 private/
 inst/elrshiny/shinyapps/
+inst/elrshiny/rsconnect/
 
 
 #################

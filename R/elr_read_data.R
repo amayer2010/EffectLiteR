@@ -45,8 +45,12 @@ elrReadData <- function(file, name=NULL, header="default", sep="default",
     if(header=="default"){header <- TRUE}
     if(sep=="default"){sep <- ","}
     if(dec=="default"){dec <- "."}
-    return(read.csv(file, header=header, sep=sep, dec=dec,
-                    na.strings=na.strings))
+    d <- try(read.csv(file, header=header, sep=sep, dec=dec,
+                  na.strings=na.strings), silent=TRUE)
+    if(class(d) == "try-error"){
+      d <- read.csv2(file, header=header, na.strings=na.strings)
+    }
+    return(d)
     
   }else if(suf == ".txt" || suf==".dat"){
     if(header=="default"){header <- FALSE}
