@@ -827,7 +827,7 @@ shinyServer(function(input, output, session) {
       m1 <- model()
       con <- input$add.syntax.wald
       wtest <- data.frame(lavTestWald(m1@results@lavresults, con)[1:3])  
-      row.names(wtest) <- "Additional Wald Test"  
+      row.names(wtest) <- "User-Specified Wald Test"  
       names(wtest) <- c("Wald Chi-Square", "df", "p-value")
       print(wtest, digits=3, print.gap=3)
 

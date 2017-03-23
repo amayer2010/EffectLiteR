@@ -4,11 +4,11 @@
 \alias{effectLite}
 \title{Estimate average and conditional effects}
 \usage{
-effectLite(y, x, k = NULL, z = NULL, control = "0",
-  measurement = character(), data, fixed.cell = FALSE, fixed.z = FALSE,
-  missing = "listwise", se = "standard", syntax.only = FALSE,
-  interactions = "all", propscore = NULL, ids = ~0, weights = NULL,
-  homoscedasticity = FALSE, add = character(), ...)
+effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
+  control = "default", measurement = character(), fixed.cell = FALSE,
+  fixed.z = FALSE, missing = "default", se = "standard",
+  syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
+  weights = NULL, homoscedasticity = FALSE, add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -19,11 +19,13 @@ effectLite(y, x, k = NULL, z = NULL, control = "0",
 
 \item{z}{Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.}
 
-\item{control}{Value of \code{x} that is used as control group.}
+\item{data}{A data frame.}
+
+\item{method}{Can be one of c("sem","lm") and indicates which function is used to fit the model.}
+
+\item{control}{Value of \code{x} that is used as control group. If "default", takes the first entry of \code{as.factor(x)}.}
 
 \item{measurement}{Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.}
-
-\item{data}{A data frame.}
 
 \item{fixed.cell}{logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.}
 
