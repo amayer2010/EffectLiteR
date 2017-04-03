@@ -210,16 +210,23 @@ computeHypothesesResults <- function(obj, m1_sem){
     hypotheses <- data.frame()
   }else{
     if(nz==0 & nk==1){
-      hypotheses <- data.frame(
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3])    
+      hypotheses <- try(data.frame(
+        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3]))    
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
       row.names(hypotheses) <- "No average effects"    
+      
     }else{
-      hypotheses <- data.frame(rbind(
+      hypotheses <- try(data.frame(rbind(
         lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3],
         lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis2)[1:3],
         lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis3)[1:3],
         lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis4)[1:3]    
-      ))
+      )))
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
       row.names(hypotheses) <- c("No average effects",
                                  "No covariate effects in control group",
                                  "No treatment*covariate interaction",
