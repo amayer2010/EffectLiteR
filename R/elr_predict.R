@@ -44,6 +44,10 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   nz <- obj@input@nz
   nk <- obj@input@nk
   ng <- obj@input@ng
+
+  sep <- ""
+  ## longer parameter names for many groups and/or covariates
+  if(ng>9 | nk>9 | nz>9){sep <- "_"}
   
   latentz <- obj@input@vnames$latentz
   mm <- obj@input@measurement 
@@ -96,19 +100,19 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   if(nz==0 & nk==1){
     formula <- as.formula(" ~ 1")
     modmat <- model.matrix(formula, data=data)
-    kz <- "00"
+    kz <- paste0("0",sep,"0")
     dsub <- data.frame(matrix(vector(),nrow=nrow(data),ncol=0))
     
   }else if(nz>0 & nk==1){
     formula <- as.formula(paste0(" ~ ", paste(z, collapse=" + ")))
     modmat <- model.matrix(formula, data=data)
-    kz <- paste0("0",0:nz)
+    kz <- paste0("0",sep,0:nz)
     dsub <- data[,c(x,z)]
     
   }else if(nz==0 & nk>1){      
     formula <- as.formula(" ~ kstar")
     modmat <- model.matrix(formula, data=data)      
-    kz <- paste0(1:nk-1,"0")
+    kz <- paste0(1:nk-1, sep, "0")
     dsub <- data[,c(x,"kstar",k)]
     names(dsub)[2] <- "K"
     
@@ -116,23 +120,23 @@ computeConditionalEffects <- function(obj, newdata=NULL,
     formula <- as.formula(paste0(" ~ ", 
                                  paste("kstar", z, sep="*", collapse=" + ")))
     modmat <- model.matrix(formula, data=data)            
-    kz <- c(paste0(1:nk-1,"0"), paste0("0",1:nz))
-    kz <- c(kz, paste0(rep(1:(nk-1),nz), rep(1:nz, each=nk-1)))
+    kz <- c(paste0(1:nk-1,sep,"0"), paste0("0",sep,1:nz))
+    kz <- c(kz, paste0(rep(1:(nk-1),nz), sep, rep(1:nz, each=nk-1)))
     dsub <- data[,c(x,"kstar",k,z)]
     names(dsub)[2] <- "K"
     
   }
   
-  estimates <- est[paste0("g1",kz)]
-  vcov_est <- vcov[paste0("g1",kz),paste0("g1",kz)]
+  estimates <- est[paste0("g1",sep,kz)]
+  vcov_est <- vcov[paste0("g1",sep,kz),paste0("g1",sep,kz)]
   condeffects <- cbind(modmat %*% estimates)
   condeffects <- cbind(condeffects,
                        apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
   
   if(ng > 2){
     for(i in 3:ng){
-      estimates <- est[paste0("g",i-1,kz)]
-      vcov_est <- vcov[paste0("g",i-1,kz),paste0("g",i-1,kz)]
+      estimates <- est[paste0("g",i-1,sep,kz)]
+      vcov_est <- vcov[paste0("g",i-1,sep,kz),paste0("g",i-1,sep,kz)]
       condeffects <- cbind(condeffects, modmat %*% estimates)
       condeffects <- cbind(condeffects,
                            apply(modmat,1,function(x){sqrt(t(x) %*% vcov_est %*% x)}))
@@ -156,10 +160,10 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   }
   
   if("expected-outcomes" %in% add.columns){
-    estimates <- est[paste0("b0",kz)]
+    estimates <- est[paste0("b0",sep,kz)]
     trueoutcomes <- cbind(modmat %*% estimates)
     for(i in 1:(ng-1)){
-      estimates <- est[paste0("b",i,kz)]
+      estimates <- est[paste0("b",i,sep,kz)]
       trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
     }
     trueoutcomes <- as.data.frame(trueoutcomes)

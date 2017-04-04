@@ -7,11 +7,15 @@ createParNames <- function(obj){
   nk <- inp@nk ## number of unfolded categories of K
   interactions <- inp@interactions
   
+  sep <- ""
+  ## longer parameter names for many groups and/or covariates
+  if(ng>9 | nk>9 | nz>9){sep <- "_"}
+  
   # create list for alpha, beta and gamma coefficients
   tmp <- expand.grid(z=0:nz, k=0:(nk-1), x=0:(ng-1))
-  alphas <- with(tmp, array(paste0("a",x,k,z), dim=c(nz+1,nk,ng)))
-  betas <- with(tmp, array(paste0("b",x,k,z), dim=c(nz+1,nk,ng)))
-  gammas <- with(tmp, array(paste0("g",x,k,z), dim=c(nz+1,nk,ng)))
+  alphas <- with(tmp, array(paste0("a",x,sep,k,sep,z), dim=c(nz+1,nk,ng)))
+  betas <- with(tmp, array(paste0("b",x,sep,k,sep,z), dim=c(nz+1,nk,ng)))
+  gammas <- with(tmp, array(paste0("g",x,sep,k,sep,z), dim=c(nz+1,nk,ng)))
   
   ## constrained gammas (if interactions != "all")
   stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z"))
@@ -50,7 +54,7 @@ createParNames <- function(obj){
   px <- paste0("Px",0:(ng-1))
   if(nz>0){
     tmp <- expand.grid(z=1:nz, k=0:(nk-1), x=0:(ng-1))
-    cellmeanz <- with(tmp, paste0("mz",x,k,z))
+    cellmeanz <- with(tmp, paste0("mz",x,sep,k,sep,z))
     meanz <- paste0("Ez",1:nz)  
     tmp <- expand.grid(k=0:(nk-1), z=1:nz)
     Ezk <- with(tmp, paste0("Ez",z,"k",k))    

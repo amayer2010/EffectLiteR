@@ -12,8 +12,7 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  
   }
-  stopifnot(length(levels(d[,x])) <= 10) # TODO: test if it works for > 10 (problems with subscripts?)
-  
+
   if(control=="default"){control <- levels(d[,x])[1]}
   d[,x] <- relevel(d[,x], control)
   levels.x.original <- levels(d[,x])
@@ -64,28 +63,27 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   ## nz
   nz <- length(vnames$z)
   
-  ## check for too many cells
-  if((nk>10 & ng>10) || (nk>10 & nz>10) || (ng>10 & nz>10)){
-    stop("EffectLiteR error: Too many cells")
-  }
-  
+  ## longer parameter names for many groups and/or covariates
+  sep <- ""
+  if(ng>9 | nk>9 | nz>9){sep <- "_"}
   
   ## cell variable (xk-cells)
   if(!is.null(k)){
-    cell <- expand.grid(k=levels(d$kstar), x=levels(d[,x]))
-    cell <- with(cell, paste0(x,k))
     dsub <- cbind(d[,x],d$kstar) - 1 # use x=0,1,2... and k=0,1,2,... as labels
     d$cell <- apply(dsub, 1, function(x){
       missing_ind <- sum(is.na(x)) > 0
       if(missing_ind){
         return(NA)
       }else{
-        return(paste(x, collapse=""))
+        return(paste(x, collapse=sep))
       }
     }) 
-    d$cell <- as.factor(d$cell)    
+    
+    levels.cell <- expand.grid(k=levels(d$kstar), x=levels(d[,x]))
+    levels.cell <- with(levels.cell, paste0(x,sep,k))
+    d$cell <- factor(d$cell, levels=levels.cell)    
   }else{
-    cell <- levels(d[,x])
+    # cell <- levels(d[,x])
     d$cell <- d[,x]
   }
   
