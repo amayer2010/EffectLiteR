@@ -18,7 +18,7 @@ createParNames <- function(obj){
   gammas <- with(tmp, array(paste0("g",x,sep,k,sep,z), dim=c(nz+1,nk,ng)))
   
   ## constrained gammas (if interactions != "all")
-  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z"))
+  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z","X:K,X:Z"))
   constrainedgammas <- character()
   
   if(interactions == "none"){
@@ -37,6 +37,11 @@ createParNames <- function(obj){
   if(interactions == "X:Z"){
     if(nk>1){
       constrainedgammas <- c(gammas[, 2:nk, 2:ng])
+    }
+  }
+  if(interactions == "X:K,X:Z"){
+    if(nk>1){
+      constrainedgammas <- c(gammas[2:(nz+1), 2:nk, ])
     }
   }
   
