@@ -13,4 +13,4 @@ source("tests/propscore_tests.R")
 source("tests/tests_some_options.R")
 source("tests/tests_with_private_data.R")
 source("tests/many_cells_tests.R") ## takes some time...
-
+source("tests/aggregated_effects_tests.R")

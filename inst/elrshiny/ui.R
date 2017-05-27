@@ -429,6 +429,31 @@ tabPanel('User-Specified Tests',
                
       ),
       
+      ######### Conditional Effects III ##########
+      tabPanel("Conditional Effects III", 
+               verbatimTextOutput("helptextaggeff"),
+               br(),
+               br(),
+               column(3, wellPanel(
+                 h5("Values of Covariates and Treatment"),
+                 uiOutput("uiaggeff"),
+                 uiOutput("uiaggeff2")
+               )) ,
+               column(9, wellPanel(
+                 h5("Aggregated Effects"),
+                 verbatimTextOutput("outputaggeff")
+               )) ,
+               br(),
+               br(),
+               br(),
+               br(),
+               column(12, wellPanel(
+                 h5("Subset used to compute aggregated effects"),
+                 uiOutput("uiaggeff3"),
+                 dataTableOutput("aggeffstable")
+               ))
+      ),
+      
       ######### User Specified Tests ##########
       tabPanel("User-Specified Tests", 
                verbatimTextOutput("addeffects"),

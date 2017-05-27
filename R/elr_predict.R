@@ -54,7 +54,7 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   
   if(!is.null(newdata)){
     
-    stopifnot(all(c(z,k) %in% names(newdata))) ## no latent covariates in newdata
+    stopifnot(all(c(z,k) %in% names(newdata)))
 
     #compute Kstar values first
     if(nk > 1){
@@ -89,10 +89,13 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   ## add factor scores
   ## TODO Add newdata to lavPredict...
   if(length(latentz) > 0){
-    fscores <- data.frame(do.call("rbind", lavPredict(lavresults)))
-    fscores <- subset(fscores, select=latentz)
-    fscores$id <- unlist(lavInspect(lavresults, "case.idx"))
-    data <- merge(data,fscores)
+    if(!all(latentz %in% names(data))){
+      
+      fscores <- data.frame(do.call("rbind", lavPredict(lavresults)))
+      fscores <- subset(fscores, select=latentz)
+      fscores$id <- unlist(lavInspect(lavresults, "case.idx"))
+      data <- merge(data,fscores)
+    }
   }
   
   ## compute formula and model.matrix  
@@ -157,6 +160,12 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   
   if("modmat" %in% add.columns){
     condeffects <- cbind(modmat,condeffects)
+  }
+  
+  ## undocumented; just for computeAggregatedEffects
+  if("modmat-only" %in% add.columns){
+    condeffects <- modmat
+    attr(condeffects, "kz") <- kz
   }
   
   if("expected-outcomes" %in% add.columns){

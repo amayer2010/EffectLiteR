@@ -350,7 +350,52 @@ shinyServer(function(input, output, session) {
       return(NULL)
       
     }
-  })  
+  })
+  
+  ###### Reactive subset for aggregated effects ###########
+  agg.subset <- reactive({
+    
+    m1 <- model()
+    vnamesk <- m1@input@vnames$k
+    vnamesz <- m1@input@vnames$z
+    vnamesx <- m1@input@vnames$x
+    numberks <- length(vnamesk)
+    numberzs <- length(vnamesz)
+    covnames <- c(vnamesk,vnamesz,vnamesx)
+    
+    valuesk <- list()
+    valuesz <- list()
+    
+    if(numberks>0){
+      for(i in 1:numberks){
+        valuesk <- c(valuesk, input[[paste0('aggvalk',i)]])
+      }}
+    
+    if(numberzs>0){
+      for(i in 1:numberzs){
+        valuesz <- c(valuesz, input[[paste0('aggvalz',i)]])
+      }}
+    
+    valuesx <- input[['xaggeff']]
+    
+    newdata <- data.frame(c(valuesk, valuesz, valuesx))
+    
+    nrowsagg <- input$nrowsagg
+    if(is.null(nrowsagg)){nrowsagg <- 10} ## weird error handling
+    
+    if(nrow(newdata) > 0){
+      newdata[newdata == "NA"] <- NA ## input somehow converts NA to "NA"
+      names(newdata) <- covnames
+      agg.subset <- autoSelectSubset(obj=m1, newdata=newdata, nsub=nrowsagg)
+      
+    }else{
+      agg.subset <- 1:nrow(m1@input@data)
+      
+    }
+    
+    return(agg.subset)
+    
+  })
   
   
   ###### Update Variable Selectors UI ########
@@ -865,7 +910,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  ##### Conditional effects II
+  ##### Conditional effects II User Interface ######
   output$ui <- renderUI({
     
     m1 <- model()
@@ -884,7 +929,7 @@ shinyServer(function(input, output, session) {
     for(i in 1:numberks){
       uilist[[i]] <- selectInput(inputId = paste0('valk',i), 
                                  label = vnamesk[i], 
-                                 choices = vlevelsk[i],
+                                 choices = vlevelsk[[i]],
                                  width='90%')
     }}
     
@@ -901,7 +946,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ## help text conditional effects 2
+  #### Help text conditional effects 2 #####
   output$helptextcondeffects2 <- renderPrint({
     if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
       
@@ -914,7 +959,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ## output conditional effects 2
+  #### output conditional effects 2 #####
   output$outputcondeffect2 <- renderPrint({
     
     m1 <- model()
@@ -946,6 +991,131 @@ shinyServer(function(input, output, session) {
     
   })
   
+  
+  
+  ##### Aggregated effects User Interface Covariates ######
+  output$uiaggeff <- renderUI({
+    
+    m1 <- model()
+    condeffects <- m1@results@condeffects
+    vnamesk <- m1@input@vnames$k
+    vlevelsk <- m1@input@vlevels$levels.k.original
+    vnamesz <- m1@input@vnames$z
+    numberks <- length(vnamesk)
+    numberzs <- length(vnamesz)
+    covnames <- c(vnamesk,vnamesz)
+    uilist <- vector("list", length(covnames))
+    
+    if(numberks==0 & numberzs==0){return(NULL)}
+    
+    if(numberks>0){
+      for(i in 1:numberks){
+        uilist[[i]] <- selectInput(inputId = paste0('aggvalk',i), 
+                                   label = vnamesk[i], 
+                                   choices = c(NA,vlevelsk[[i]]),
+                                   width='90%')
+      }}
+    
+    if(numberzs>0){
+      for(i in 1:numberzs){
+        uilist[[numberks+i]] <- numericInput(inputId = paste0('aggvalz',i),
+                                             label = vnamesz[i],
+                                             value = NA,
+                                             width='90%')
+      }}
+    
+    uilist
+    
+  })
+  
+  #### Aggregated effects User Interface Treatment ######
+  output$uiaggeff2 <- renderUI({
+    
+    m1 <- model()
+    vnamesx <- m1@input@vnames$x
+    vlevelsx <- m1@input@vlevels$levels.x.original
+    uilist <- vector("list", length=1)
+    
+    uilist[[1]] <- selectInput(inputId = "xaggeff", 
+                               label = vnamesx, 
+                               choices = c(NA,vlevelsx),
+                               width='90%')
+    
+    uilist
+    
+  })
+
+  #### Aggregated effects User Interface Number Rows ######
+  output$uiaggeff3 <- renderUI({
+    
+    
+    m1 <- model()
+    vnamesz <- m1@input@vnames$z
+    numberzs <- length(vnamesz)
+
+    valuesz <- list()
+    if(numberzs>0){
+      for(i in 1:numberzs){
+        valuesz <- c(valuesz, input[[paste0('aggvalz',i)]])
+      }}
+    
+    if(all(is.na(valuesz))){
+      
+      return(NULL)
+      
+    }else{
+      
+      uilist <- vector("list", length=1)
+      
+      uilist[[1]] <- numericInput("nrowsagg", 
+                                  label="Number of rows",
+                                  value=10,
+                                  min = 0, 
+                                  max = 5, 
+                                  width='30%')
+      
+      return(uilist)
+    }
+    
+  })
+  
+    
+  
+  #### Help text conditional effects 2 #####
+  output$helptextaggeff <- renderPrint({
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+      
+      cat("Aggregated effects are only available if you have specified the dependent variable and the treatment variable.")
+      
+    }else{
+      
+      cat("Aggregated effects for user specified values of categorical and continuous covariates.")
+    }
+  })
+  
+  
+  #### output aggregated effects #####
+  output$outputaggeff <- renderPrint({
+    
+    m1 <- model()
+    agg.subset <- agg.subset()
+      
+    try({aggeff <- round(computeAggregatedEffects(m1, agg.subset),3)}, silent=TRUE)
+    try({print(aggeff, row.names=F, print.gap=3)}, silent=TRUE)
+    
+  })
+  
+  #### output aggregated effects table ####
+  output$aggeffstable = renderDataTable({
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+      return(NULL)
+    }else{            
+      m1 <- model()
+      idx <- agg.subset()
+      condprint <- format(m1@results@condeffects[idx,], digits=3)
+      condprint
+    }  
+  })
   
     
   
