@@ -42,3 +42,49 @@ expect_equivalent(round(m1@results@Egxgxk$Estimate, 3),
                   round(m2@results@Egxgxk$Estimate, 3)) 
 
 
+## compare with Anova (in the balanced case)
+
+set.seed(324)
+
+N <- 150
+design <- expand.grid(k=0:2, x=0:1)
+design$y <- c(40,30,70,50,20,80)
+ind <- rep(1:6, each=25)
+d <- design[ind,]
+d$y <- d$y + rnorm(N,0,5)
+d$x <- as.factor(d$x)
+d$k <- as.factor(d$k)
+
+options(contrasts=c("contr.treatment","contr.poly"))
+
+m1 <- effectLite(y="y", x="x", k="k", control="0", data=d, 
+                 fixed.cell=TRUE, method="sem", homoscedasticity=TRUE)
+
+m2 <- effectLite(y="y", x="x", k="k", control="0", data=d, method="lm")
+
+options(contrasts=c("contr.sum","contr.poly"))
+m3 <- lm(y ~ x*k, data=d)
+
+
+tmp0 <- m1@results@hypotheses[[1,1]] ## Wald chisquare
+tmp1 <- m2@results@hypotheses[[1,1]] ## F value
+tmp2 <- Anova(m3, type="III")[2,3]
+
+expect_equivalent(round(tmp0,5),10.15771)
+expect_equivalent(tmp1,tmp2) ## main effect x and p value
+
+tmp1 <- m2@results@hypotheses[[1,4]] ## p values
+tmp2 <- Anova(m3, type="III")[2,4]
+expect_equivalent(tmp1,tmp2)
+
+tmp1 <- m2@results@hypotheses[[3,1]] ## interaction term
+tmp2 <- Anova(m3, type="III")[4,3]
+expect_equivalent(tmp1,tmp2)
+
+tmp1 <- m2@results@hypotheses[[3,4]] ## p value interaction term
+tmp2 <- Anova(m3, type="III")[4,4]
+expect_equivalent(tmp1,tmp2)
+
+
+options(contrasts=c("contr.treatment","contr.poly"))
+

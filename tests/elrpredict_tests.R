@@ -34,3 +34,16 @@ res_elrpred_2z2k <- elrPredict(m1, newdata)
 oldres_elrpred_2z2k <- read.table("tests/oldres/oldres_elrpred_2z2k.dat")
 expect_equivalent(res_elrpred_2z2k, oldres_elrpred_2z2k)
 
+
+
+## compare with method="lm"
+m1 <- effectLite(y="dv", z=c("z1","z2"),
+                 k=c("k1", "kateg2"), x="x", control="control", data=example01)
+m2 <- effectLite(y="dv", z=c("z1","z2"), method="lm",
+                 k=c("k1", "kateg2"), x="x", control="control", data=example01)
+
+tmp1 <- round(m1@results@condeffects$g1, 3)
+tmp2 <- round(m2@results@condeffects$g1, 3)
+expect_equivalent(tmp1,tmp2)
+
+

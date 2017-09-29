@@ -1,6 +1,7 @@
 
 library(EffectLiteR)
 library(testthat)
+library(car)
 
 ## TODO why does test_file() not work?
 
