@@ -13,7 +13,8 @@ computeResults <- function(obj){
     tval <- est/se
     pval <- 2*(1-pnorm(abs(tval)))
     
-    hypotheses <- computeHypothesesResults(obj, m1_sem)
+    hypotheses <- computeHypothesesResults(obj, m1_sem, type="main")
+    hypothesesk <- computeHypothesesResults(obj, m1_sem, type="kconditional")
     
   }else if(obj@input@method == "lm"){
     
@@ -29,7 +30,8 @@ computeResults <- function(obj){
     ## should we use pt instead of pnorm? (this then applies to all est?)
     ## I think it's OK, because we only report it for coefs and effects
     
-    hypotheses <- computeHypothesesLM(obj, m1_lm)
+    hypotheses <- computeHypothesesLM(obj, m1_lm, type="main")
+    hypothesesk <- computeHypothesesLM(obj, m1_lm, type="kconditional")
   }
 
   
@@ -145,6 +147,7 @@ computeResults <- function(obj){
              se=se,
              vcov.def=vcov.def,
              hypotheses=hypotheses,
+             hypothesesk=hypothesesk,
              Egx=Egx,
              AdditionalEffects=AdditionalEffects,
              Egxgx=Egxgx,
@@ -209,14 +212,12 @@ computeLMResults <- function(obj){
 }
 
 
-computeHypothesesResults <- function(obj, m1_sem){
+computeHypothesesResults <- function(obj, m1_sem, type="main"){
   
   ng <- obj@input@ng
   nz <- obj@input@nz
   nk <- obj@input@nk  
   
-  # any(partable(m1)$op %in% c("==",">","<"))
-  ## main hypotheses
   if(obj@input@se != "standard" | obj@input@interactions != "all" |
      any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
      any(grepl("<", obj@input@add))){ 
@@ -224,7 +225,8 @@ computeHypothesesResults <- function(obj, m1_sem){
     ## no Wald Test for models with equality constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
     hypotheses <- data.frame()
-  }else{
+    
+  }else if(type=="main"){
     if(nz==0 & nk==1){
       hypotheses <- try(data.frame(
         lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3]))    
@@ -249,7 +251,27 @@ computeHypothesesResults <- function(obj, m1_sem){
                                  "No treatment*covariate interaction",
                                  "No treatment effects")
       names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
-    }    
+    }
+    
+  }else if(type=="kconditional"){
+    
+    hypotheses <- data.frame()
+    if(nk>1){
+      hypotheses <- try(lavTestWald(m1_sem, constraints=obj@syntax@hypothesesk[[1]])[1:3])
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
+      
+      for(i in 2:nk){
+        hypotheses <- rbind(hypotheses,
+                            lavTestWald(m1_sem, constraints=obj@syntax@hypothesesk[[i]])[1:3])
+      }
+      
+      row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
+      colnames(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
+      hypotheses <- as.data.frame(hypotheses)
+    }
+    
   }
   
   return(hypotheses)
@@ -287,7 +309,7 @@ elrTestWald <- function(obj, con, coefs, vcovs, resid.df, stat="Ftest"){
 }
 
 
-computeHypothesesLM <- function(obj, m1_lm){
+computeHypothesesLM <- function(obj, m1_lm, type="main"){
 
   ng <- obj@input@ng
   nz <- obj@input@nz
@@ -302,8 +324,6 @@ computeHypothesesLM <- function(obj, m1_lm){
   resid.df <- m1_lm$df.residual
   
   ## this if condition needs to be adjusted for lm
-  # any(partable(m1)$op %in% c("==",">","<"))
-  ## main hypotheses
   if(obj@input@se != "standard" | obj@input@interactions != "all" |
      any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
      any(grepl("<", obj@input@add))){ 
@@ -311,7 +331,8 @@ computeHypothesesLM <- function(obj, m1_lm){
     ## no Wald Test for models with equality constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
     hypotheses <- data.frame()
-  }else{
+    
+  }else if(type=="main"){
     if(nz==0 & nk==1){
       hypotheses <- try(data.frame(
         elrTestWald(obj=obj,
@@ -356,7 +377,35 @@ computeHypothesesLM <- function(obj, m1_lm){
                                  "No treatment*covariate interaction",
                                  "No treatment effects")
       names(hypotheses) <- c("F value", "df1", "df2", "p-value")
-    }    
+    }
+    
+  }else if(type=="kconditional"){
+    
+    hypotheses <- data.frame()
+    if(nk>1){
+      hypotheses <- try(elrTestWald(obj=obj,
+                                    con=obj@syntax@hypothesesk[[1]], 
+                                    coefs=coefs,
+                                    vcovs=vcovs,
+                                    resid.df=resid.df))
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
+      
+      for(i in 2:nk){
+        hypotheses <- rbind(hypotheses,
+                            elrTestWald(obj=obj,
+                                        con=obj@syntax@hypothesesk[[i]], 
+                                        coefs=coefs,
+                                        vcovs=vcovs,
+                                        resid.df=resid.df))
+      }
+      
+      row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
+      colnames(hypotheses) <- c("F value", "df1", "df2", "p-value")
+      hypotheses <- as.data.frame(hypotheses)
+    }
+    
   }
   
   return(hypotheses)

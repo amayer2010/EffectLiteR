@@ -15,11 +15,13 @@ createSyntax <- function(obj){
   }
   
   ## syntax for main hypotheses
-  hypotheses <- createHypothesesSyntax(obj)
+  hypotheses <- createHypothesesSyntax(obj, type="main")
+  hypothesesk <- createHypothesesSyntax(obj, type="kconditional")
   
   res <- new("syntax",             
              model=model,
-             hypotheses=hypotheses
+             hypotheses=hypotheses,
+             hypothesesk=hypothesesk
   )
   
 }
@@ -168,31 +170,52 @@ createLavaanSyntax <- function(obj) {
 
 
 
-createHypothesesSyntax <- function(obj){
+createHypothesesSyntax <- function(obj, type="main"){
   
   ng <- obj@input@ng
+  nk <- obj@input@nk
   Egx <- obj@parnames@Egx
   gammas <- obj@parnames@gammas
   
-  ## Hypothesis 1: No average treatment effects
-  hypothesis1 <- paste(Egx, "== 0", collapse="\n")
+  if(type=="main"){
+    
+    ## Hypothesis 1: No average treatment effects
+    hypothesis1 <- paste(Egx, "== 0", collapse="\n")
+    
+    ## Hypothesis 2: No covariate effects in control group
+    gammas_tmp <- matrix(c(gammas), ncol=ng)[-1,1]
+    hypothesis2 <- paste(gammas_tmp, "== 0", collapse="\n")
+    
+    ## Hypothesis 3: No treatment*covariate interaction
+    gammas_tmp <- matrix(c(gammas), ncol=ng)[-1,-1]
+    hypothesis3 <- paste(gammas_tmp, "== 0", collapse="\n")
+    
+    ## Hypothesis 4: No treatment effects
+    gammas_tmp <- matrix(c(gammas), ncol=ng)[,-1]
+    hypothesis4 <- paste(gammas_tmp, "== 0", collapse="\n")
+    
+    hypotheses <- list(hypothesis1=hypothesis1,
+                       hypothesis2=hypothesis2,
+                       hypothesis3=hypothesis3,
+                       hypothesis4=hypothesis4)
+    
+  }else if(type=="kconditional"){
+    
+    hypotheses <- vector("list",length=nk)
+    
+    if(nk>1){
+      
+      Egxk <- matrix(obj@parnames@Egxgk, nrow=ng-1, ncol=nk)
+      
+      for(i in 1:nk){
+        hypotheses[[i]] <- paste(Egxk[,i], "== 0", collapse="\n")
+      }
+      
+      names(hypotheses) <- paste0("hypothesisk", 0:(nk-1))
+    }
+    
+  }
   
-  ## Hypothesis 2: No covariate effects in control group
-  gammas_tmp <- matrix(c(gammas), ncol=ng)[-1,1]
-  hypothesis2 <- paste(gammas_tmp, "== 0", collapse="\n")
-  
-  ## Hypothesis 3: No treatment*covariate interaction
-  gammas_tmp <- matrix(c(gammas), ncol=ng)[-1,-1]
-  hypothesis3 <- paste(gammas_tmp, "== 0", collapse="\n")
-  
-  ## Hypothesis 4: No treatment effects
-  gammas_tmp <- matrix(c(gammas), ncol=ng)[,-1]
-  hypothesis4 <- paste(gammas_tmp, "== 0", collapse="\n")
-  
-  hypotheses <- list(hypothesis1=hypothesis1,
-                     hypothesis2=hypothesis2,
-                     hypothesis3=hypothesis3,
-                     hypothesis4=hypothesis4)
   
   return(hypotheses)
 }

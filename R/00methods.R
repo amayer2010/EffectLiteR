@@ -171,6 +171,16 @@ setMethod("show", "effectlite", function(object) {
     print(Egxgxk, digits=3, print.gap=3)    
   }
 
+  if(nk>1){
+  cat("\n\n--------------------- Hypotheses given K=k --------------------- \n\n")
+  if(nrow(object@results@hypothesesk)==0){
+    cat("Wald tests for these hypotheses are currently not available for models with \n non-standard SEs and for models with (in-)equality constraints (e.g., on interactions).")
+  }else{
+    hypothesesk <- object@results@hypothesesk
+    print(hypothesesk, digits=3, print.gap=3)
+  }
+    
+  }
   
   # ## currently not printed  
   # if(nz>0){

@@ -61,7 +61,8 @@ setClass("parnames", representation(
 
 setClass("syntax", representation(
   model="character", 
-  hypotheses="list"
+  hypotheses="list",
+  hypothesesk="list"
 )
 )
 
@@ -73,6 +74,7 @@ setClass("results", representation(
   se="numeric",
   vcov.def="matrix",
   hypotheses="data.frame",
+  hypothesesk="data.frame",
   Egx="data.frame",
   AdditionalEffects="data.frame",
   Egxgx="data.frame",
