@@ -28,4 +28,3 @@ control="control", data=example01)
 newdata <- data.frame(k1="male", kateg2="1", z1=2)
 elrPredict(m1, newdata)
 }
-

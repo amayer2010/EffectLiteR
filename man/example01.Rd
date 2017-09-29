@@ -18,4 +18,3 @@ A simulated dataset. The variables are:
 }
 }
 \keyword{datasets}
-

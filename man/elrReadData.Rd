@@ -36,4 +36,3 @@ chooses the appropriate function to read data. Currently supports .csv,
 \code{\link[foreign]{read.xport}} accordingly. The default values for
 arguments depend on the function used to read data.
 }
-

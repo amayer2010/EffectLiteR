@@ -5,10 +5,10 @@
 \title{Estimate average and conditional effects}
 \usage{
 effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
-  control = "default", measurement = character(), fixed.cell = FALSE,
-  fixed.z = FALSE, missing = "default", se = "standard",
+  control = "default", measurement = character(), fixed.cell = "default",
+  fixed.z = "default", missing = "default", se = "standard",
   syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
-  weights = NULL, homoscedasticity = FALSE, add = character(), ...)
+  weights = NULL, homoscedasticity = "default", add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -31,10 +31,10 @@ effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
 
 \item{fixed.z}{logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z}
 
-\item{missing}{Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.}
+\item{missing}{Missing data handling. Will be passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.}
 
 \item{se}{Type of standard errors. Will be 
-passed on to \code{\link[lavaan]{sem}}.}
+passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.}
 
 \item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model 
 will not be estimated.}
@@ -93,4 +93,3 @@ m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
 print(m1)
 }
 }
-

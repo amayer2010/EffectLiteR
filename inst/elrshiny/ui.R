@@ -12,6 +12,10 @@ shinyUI(fluidPage(
         actionButton("newanalysis","Start a New Analysis"),
         uiOutput("reload"),
         hr(),        
+        selectizeInput(inputId="method", label="Statistical Model", selected="sem",
+                       choices= c("sem","lm"),
+                       width='50%'),
+        # hr(),        
         selectizeInput(inputId="exdata", label="Example Data", selected="",
                        choices= c("","nonortho","example01","example02lv",
                                   "example_multilevel"),
@@ -93,8 +97,8 @@ br()
       ############ Latent Variables ###########
       tabPanel('Latent Variables',
         img(src='effectliter_logo.png', align = "right"),       
-        br(),       
-        checkboxInput("latenty", "Latent dependent variable", FALSE),        
+        br(),
+        checkboxInput("latenty", "Latent dependent variable", FALSE),
         conditionalPanel(
           condition = "input.latenty",
           selectizeInput("indicatorsy", 
@@ -291,10 +295,11 @@ br()
                      choices=c("listwise","fiml"), 
                      selected = "listwise"),
         radioButtons("fixed.cell", "Sampling Model", 
-                     choices=c("stochastic"="stochastic",
+                     choices=c("default"="default",
+                               "stochastic"="stochastic",
                                "fixed cell sizes"="fixed",
                                "fixed cell sizes and fixed means of Z"="fixed+e"), 
-                     selected = "stochastic"),
+                     selected = "default"),
         radioButtons("se", "Standard Errors", 
                      choices=c("standard","boot","first.order",
                                "robust.sem","robust.huber.white"),
@@ -304,11 +309,9 @@ br()
           numericInput("bootstrap", "Number of bootstrap draws", 
                       min=1, max=5000, value=5)
         ),
-        br(),
-        h5("Additional Options"),
-        checkboxInput("homoscedasticity", "Homoscedastic residual variances", 
-                      value=FALSE)
-        
+        radioButtons("homoscedasticity", "Residual variances", 
+                     choices=c("default","homoscedastic", "heteroscedastic"), 
+                     selected = "default")
     ),
 ########## Interactions #############
     tabPanel('Interactions',
@@ -392,18 +395,21 @@ tabPanel('User-Specified Tests',
       ######### EffectLiteR ##########
       tabPanel("EffectLiteR", verbatimTextOutput("summary")),
       
-      ######### lavaan Syntax ##########
-      tabPanel("lavaan Syntax",
+      ######### lavaan or lm Syntax ##########
+      tabPanel("Syntax",
                br(),
-               downloadLink('downloadLavData', 'Download Data for lavaan'),
+               downloadLink('downloadLavData', 'Download Data'),
                br(),
                br(),
                verbatimTextOutput("elrcall"),
-               verbatimTextOutput("lavcall"),
+               conditionalPanel(
+                 condition="method == 'sem'",
+                 verbatimTextOutput("lavcall")
+               ),
                verbatimTextOutput("lavsyntax")),
       
-      ######### lavaan Results ##########
-      tabPanel("lavaan Results", verbatimTextOutput("lavresults")),
+      ######### lavaan or lm Results ##########
+      tabPanel("Results", verbatimTextOutput("lavresults")),
       
       ######### Conditional Effects I ##########
       tabPanel('Conditional Effects I', 

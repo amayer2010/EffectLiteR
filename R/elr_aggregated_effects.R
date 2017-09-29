@@ -29,11 +29,18 @@ computeAggregatedEffects <- function(obj, agg.subset){
   ## longer parameter names for many groups and/or covariates
   if(ng>9 | nk>9 | nz>9){sep <- "_"}
   
-  ## lavaan results
-  lavresults <- obj@results@lavresults
-  est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
-  names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
-  vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
+  if(obj@input@method=="sem"){
+    lavresults <- obj@results@lavresults
+    est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
+    names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
+    vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
+    
+  }else if(obj@input@method=="lm"){
+    lmresults <- obj@results@lmresults
+    est <- coef(lmresults) ## parameter estimates
+    vcov <- vcov(lmresults)
+    names(est) <- row.names(vcov) <- colnames(vcov) <- c(obj@parnames@gammas)
+  }
   
   ## conditional effects
   modmat <- elrPredict(obj, add.columns="modmat-only")

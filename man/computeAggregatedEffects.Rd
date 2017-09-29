@@ -26,4 +26,3 @@ newdata <- data.frame(k1=NA, z1=1)
 agg.subset <- autoSelectSubset(m1, newdata)
 computeAggregatedEffects(m1, agg.subset)
 }
-

@@ -7,6 +7,10 @@ d <- example01
 m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
                  fixed.z=TRUE, fixed.cell=TRUE)
 
+m2 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
+                 fixed.z=TRUE, fixed.cell=TRUE, method="lm")
+
+
 ## effect given X and K
 newdata <- data.frame(k1="male", z1=NA, x="control")
 agg.subset <- autoSelectSubset(m1, newdata, nsub=10)
@@ -15,6 +19,11 @@ opt2 <- m1@results@Egxgxk
 
 expect_equivalent(opt1["Agg_g1"], opt2$Estimate[1])
 
+# with lm
+opt3 <- computeAggregatedEffects(m2, agg.subset=agg.subset)
+
+expect_equivalent(round(opt1[c(1,3,5,6,7)], 6),  ## sem
+                  round(opt3[c(1,3,5,6,7)], 6)) ## lm
 
 ## average effect
 newdata <- data.frame(k1=NA, z1=NA, x=NA)

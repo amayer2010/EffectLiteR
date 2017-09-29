@@ -20,4 +20,3 @@ A simulated dataset with a cluster ID and sampling weights to test multilevel op
 }
 }
 \keyword{datasets}
-

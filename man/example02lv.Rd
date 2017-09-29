@@ -19,4 +19,3 @@ A simulated dataset with latent variables. The variables are:
 }
 }
 \keyword{datasets}
-

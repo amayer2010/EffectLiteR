@@ -66,9 +66,18 @@ shinyServer(function(input, output, session) {
     x <- input$variablex
     
     k <- NULL; if(length(input$variablek) != 0){k <- input$variablek}
-    fixed.cell <- FALSE; fixed.z <- FALSE
-    if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
-    if(input$fixed.cell == "fixed+e"){fixed.cell <- TRUE; fixed.z=TRUE}
+    
+    ## sampling model
+    if(input$fixed.cell == "default"){
+      fixed.cell <- "default"
+      fixed.z <- "default"
+    }else{
+      fixed.cell <- FALSE
+      fixed.z <- FALSE
+      if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
+      if(input$fixed.cell == "fixed+e"){fixed.cell <- TRUE; fixed.z=TRUE} 
+    }
+    
     
     z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
     if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
@@ -88,6 +97,8 @@ shinyServer(function(input, output, session) {
     if(input$weights != ""){weights <- as.formula(paste0(" ~ ", input$weights))}
     
     homoscedasticity <- input$homoscedasticity
+    if(homoscedasticity=="homoscedastic"){homoscedasticity <- TRUE}
+    if(homoscedasticity=="heteroscedastic"){homoscedasticity <- FALSE}
     
     if(input$add.syntax == ""){
       add <- character()
@@ -101,6 +112,7 @@ shinyServer(function(input, output, session) {
                  k=k,
                  z=z,
                  data=d,
+                 method=input$method,
                  control=input$control,
                  measurement=mm,
                  missing=input$missing,
@@ -778,7 +790,7 @@ shinyServer(function(input, output, session) {
                     "add=", printadd,
                     ")")
       
-      cat(tmp)  
+      cat(tmp)
     }  
   })
   
@@ -834,7 +846,14 @@ shinyServer(function(input, output, session) {
     }else{
           
       m1 <- model()
-      summary(m1@results@lavresults, fit.measures=TRUE)  
+      
+      if(input$method == "sem"){
+        summary(m1@results@lavresults, fit.measures=TRUE)  
+        
+      }else if(input$method == "lm"){
+        summary(m1@results@lmresults)  
+      }
+      
       ## maybe there was a reason I set fit.measures=FALSE in prior versions...
     }  
   })

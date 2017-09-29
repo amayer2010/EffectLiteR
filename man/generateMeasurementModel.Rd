@@ -37,4 +37,3 @@ ncells = 2
 cat(generateMeasurementModel(names, indicators, ncells))
 
 }
-
