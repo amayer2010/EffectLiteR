@@ -27,8 +27,6 @@ elrPredict <- function(obj, newdata=NULL, add.columns="expected-outcomes"){
 computeConditionalEffects <- function(obj, newdata=NULL, 
                                       add.columns=c("covariates","expected-outcomes")){
   
-  if(obj@input@method =="lm"){return(data.frame())} ## TODO change this
-  
   stopifnot(inherits(obj, "effectlite"))
   
   current.contrast.action <- options('contrasts')
@@ -83,10 +81,18 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   }
   
   
-  lavresults <- obj@results@lavresults
-  est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
-  names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
-  vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
+  if(obj@input@method=="sem"){
+    lavresults <- obj@results@lavresults
+    est <- parameterEstimates(lavresults, fmi=FALSE)$est ## parameter estimates
+    names(est) <- parameterEstimates(lavresults, fmi=FALSE)$label 
+    vcov <- lavInspect(lavresults, "vcov.def", add.class = FALSE)
+    
+  }else if(obj@input@method=="lm"){
+    lmresults <- obj@results@lmresults
+    est <- coef(lmresults) ## parameter estimates
+    vcov <- vcov(lmresults)
+    names(est) <- row.names(vcov) <- colnames(vcov) <- c(obj@parnames@gammas)
+  }
   
   data$id <- 1:nrow(data)
   
@@ -173,11 +179,11 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   }
   
   if("expected-outcomes" %in% add.columns){
-    estimates <- est[paste0("b0",sep,kz)]
+    estimates <- est[paste0("g0",sep,kz)]
     trueoutcomes <- cbind(modmat %*% estimates)
     for(i in 1:(ng-1)){
-      estimates <- est[paste0("b",i,sep,kz)]
-      trueoutcomes <- cbind(trueoutcomes, modmat %*% estimates)
+      estimates <- c(est[paste0("g0",sep,kz)], est[paste0("g",i,sep,kz)])
+      trueoutcomes <- cbind(trueoutcomes, cbind(modmat,modmat) %*% estimates)
     }
     trueoutcomes <- as.data.frame(trueoutcomes)
     names(trueoutcomes) <- paste0("ExpOutc", 0:(ng-1))
