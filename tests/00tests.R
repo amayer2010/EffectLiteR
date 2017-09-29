@@ -6,6 +6,7 @@ library(testthat)
 
 source("tests/adjmean_tests.R")
 source("tests/basic_tests.R")
+source("tests/lm_method_tests.R")
 source("tests/latent_variables_tests.R")
 source("tests/complex_survey_tests.R")
 source("tests/elrpredict_tests.R")

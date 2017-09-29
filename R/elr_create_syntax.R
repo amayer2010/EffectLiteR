@@ -66,6 +66,7 @@ createLavaanSyntax <- function(obj) {
   Egxgx <- parnames@Egxgx
   Egxgk <- parnames@Egxgk
   Egxgxk <- parnames@Egxgxk
+  AveEffZ <- parnames@AveEffZ
   
   
   model <- "#### lavaan Syntax for EffectLiteR Model ####"
@@ -144,6 +145,12 @@ createLavaanSyntax <- function(obj) {
   
   ## Effects given X=x and K=k
   model <- paste0(model, create_syntax_Egxgxk(ng,nk,nz,Egxgxk,gammas,cellmeanz))
+  
+  ## Average effects of continuous covariates
+  model <- paste0(model, create_syntax_AveEffZ(nz, alphas, relfreq, AveEffZ))
+  
+  ## Average effects of categorical covariate K
+  model <- paste0(model, create_syntax_AveEffK(ng,nk,nz,pk,meanz,Ezk,Egx,gammas))  
   
   ## Constraints about 2 and 3 way interactions
   model <- paste0(model, 
@@ -831,4 +838,62 @@ create_syntax_interaction_constraints <- function(ng,nk,nz,interactions,constrai
 }
 
 
+
+create_syntax_AveEffZ <- function(nz, alphas, relfreq, AveEffZ){
+  
+  res <- NULL
+  
+  if(nz > 0){
+    
+    res <- "\n\n## Average Effects of Continuous Covariates"
+    
+    for(i in 1:nz){
+      tmp <- paste0(AveEffZ[i] ," := ",
+                    paste(alphas[i,,],relfreq, sep="*", collapse=" + "))
+      res <- paste0(res, "\n", tmp)
+    }
+  }
+  
+  return(res)
+}
+
+
+create_syntax_AveEffK <- function(ng,nk,nz,pk,meanz,Ezk,Egx,gammas){
+  
+  res <- NULL
+  
+  # if(nk>1){
+  #   
+  #   res <- "\n\n## Average Effects of Categorical Covariate K"
+  #   
+  # }
+  # 
+  # TODO
+  # - Im Prinzip müsste das genauso gehen wie bei den average effects
+  # - man brauch aber noch E(Z*X)
+  # - und bei mehreren Ks wird es schwierig
+  # - ein einfacher Weg das zu testen wäre das Modell nochmal durchlaufen
+  #   zu lassen mit K und X vertauscht
+  # 
+  # 
+  # ## create vector of unconditional expectations of Z, K, Z*K
+  # pk_tmp <- pk[-1]
+  # meanz_tmp <- Ezk_tmp <- pkEzk_tmp <- character()
+  # 
+  # if(nz>0){meanz_tmp <- meanz}  
+  # if(nk>1 & nz>0){Ezk_tmp <- c(matrix(Ezk, nrow=nk)[-1,])}  
+  # if(nk>1){pkEzk_tmp <- c(matrix(c(pk_tmp,Ezk_tmp), ncol=nk-1, byrow=T))}
+  # 
+  # expectations <- c(1,meanz_tmp,pkEzk_tmp)
+  # 
+  # ## average total effects  
+  # for(i in 2:ng){
+  #   tmp <- paste0(Egx[i-1]," := ",
+  #                 paste(gammas[,,i],expectations, sep="*", collapse=" + "))
+  #   res <- paste0(res, "\n", tmp)
+  # }
+  
+  return(res)  
+  
+}
 

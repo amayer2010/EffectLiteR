@@ -20,9 +20,9 @@
 #' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
 #' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
 #' @param fixed.z logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z 
-#' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}}.
+#' @param missing Missing data handling. Will be passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.
 #' @param se Type of standard errors. Will be 
-#' passed on to \code{\link[lavaan]{sem}}.
+#' passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
 #' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z","X:K,X:Z")} and indicates the type of interaction used in the parameterization of the regression.
@@ -64,11 +64,11 @@
 #' @export
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="default", 
-                       measurement=character(), fixed.cell=FALSE, 
-                       fixed.z=FALSE, missing="default", se="standard", 
+                       measurement=character(), fixed.cell="default", 
+                       fixed.z="default", missing="default", se="standard", 
                        syntax.only=FALSE, interactions="all", 
                        propscore=NULL, ids=~0, weights=NULL, 
-                       homoscedasticity=FALSE, add=character(),...){
+                       homoscedasticity="default", add=character(),...){
   
   obj <- new("effectlite")
   ##TODO change such that first class input is generated, then class parnames...

@@ -13,6 +13,8 @@ computeResults <- function(obj){
     tval <- est/se
     pval <- 2*(1-pnorm(abs(tval)))
     
+    hypotheses <- computeHypothesesResults(obj, m1_sem)
+    
   }else if(obj@input@method == "lm"){
     
     m1_sem <- new("lavaan")
@@ -22,13 +24,16 @@ computeResults <- function(obj){
     se <- allcoefs$se
     vcov.def <- allcoefs$vcov.def ## vcov of defined parameters
     tval <- est/se
-    pval <- 2*(1-pnorm(abs(tval)))
+    rdf <- m1_lm$df.residual
+    pval <- 2*(1-pt(abs(tval),df=rdf)) 
+    ## should we use pt instead of pnorm? (this then applies to all est?)
+    ## I think it's OK, because we only report it for coefs and effects
     
+    hypotheses <- computeHypothesesLM(obj, m1_lm)
   }
 
   
   sdyx0 <- computeStdDevEffectSize(obj, est, m1_sem)
-  hypotheses <- computeHypothesesResults(obj, m1_sem)
   
   ng <- obj@input@ng
   nz <- obj@input@nz
@@ -121,6 +126,18 @@ computeResults <- function(obj){
                          tval[obj@parnames@adjmeans])
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
   
+  ## average effect of continuous covariates
+  AveEffZ <- data.frame()
+  if(obj@input@method == "sem"){
+    if(nz>0){
+      AveEffZ <- data.frame(est[obj@parnames@AveEffZ],
+                            se[obj@parnames@AveEffZ],
+                            tval[obj@parnames@AveEffZ],
+                            pval[obj@parnames@AveEffZ])
+      names(AveEffZ) <- c("Estimate", "SE", "Est./SE", "p-value")
+    }
+  }
+  
   res <- new("results",
              lavresults=m1_sem,
              lmresults=m1_lm,
@@ -135,6 +152,7 @@ computeResults <- function(obj){
              Egxgxk=Egxgxk,
              gx=gx,
              adjmeans=adjmeans,
+             AveEffZ=AveEffZ,
              condeffects=data.frame() ## we compute conditional effects later using computeConditionalEffects()
   )
   
@@ -193,8 +211,6 @@ computeLMResults <- function(obj){
 
 computeHypothesesResults <- function(obj, m1_sem){
   
-  if(obj@input@method =="lm"){return(data.frame())} ## TODO change this
-  
   ng <- obj@input@ng
   nz <- obj@input@nz
   nk <- obj@input@nk  
@@ -215,7 +231,8 @@ computeHypothesesResults <- function(obj, m1_sem){
       if(class(hypotheses) == "try-error"){
         return(data.frame())
       }
-      row.names(hypotheses) <- "No average effects"    
+      row.names(hypotheses) <- "No average effects"
+      names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
       
     }else{
       hypotheses <- try(data.frame(rbind(
@@ -230,13 +247,122 @@ computeHypothesesResults <- function(obj, m1_sem){
       row.names(hypotheses) <- c("No average effects",
                                  "No covariate effects in control group",
                                  "No treatment*covariate interaction",
-                                 "No treatment effects")    
+                                 "No treatment effects")
+      names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
     }    
   }
   
   return(hypotheses)
   
 }
+
+
+elrTestWald <- function(obj, con, coefs, vcovs, resid.df, stat="Ftest"){
+
+  partable <- lavaanify(obj@syntax@model, as.data.frame.=FALSE)
+  conparse <- lav_constraints_parse(partable, con)
+  ceq.function <- conparse$ceq.function
+  
+  theta.r <- ceq.function(coefs)
+  JAC <- lav_func_jacobian_complex(func=ceq.function, x=coefs)
+  info.r <- JAC %*% vcovs %*% t(JAC)
+  Wald <- as.numeric(t(theta.r) %*% solve(info.r) %*% theta.r)
+  Wald.df <- nrow(JAC)
+  Wald.pvalue <- 1 - pchisq(Wald, df = Wald.df)
+  
+  Fvalue <- Wald/Wald.df
+  F.df1 <- Wald.df
+  F.df2 <- resid.df
+  F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
+  
+  if(stat=="Wald"){
+    ## not used currently
+    return(list(stat=Wald, df=Wald.df, p.value=Wald.pvalue))
+    
+  }else if(stat=="Ftest"){
+    return(list(stat=Fvalue, df1=F.df1, df2=F.df2, p.value=F.pvalue))
+  }
+  
+
+}
+
+
+computeHypothesesLM <- function(obj, m1_lm){
+
+  ng <- obj@input@ng
+  nz <- obj@input@nz
+  nk <- obj@input@nk  
+  
+  ## für die elrTestWald brauchen wir: obj, con, coefs, vcovs, resid.df
+  con <- obj@syntax@hypotheses$hypothesis1
+  coefs <- coef(m1_lm) 
+  vcovs <- vcov(m1_lm)
+  pnames <- obj@parnames@gammas
+  names(coefs) <- row.names(vcovs) <- colnames(vcovs) <- pnames
+  resid.df <- m1_lm$df.residual
+  
+  ## this if condition needs to be adjusted for lm
+  # any(partable(m1)$op %in% c("==",">","<"))
+  ## main hypotheses
+  if(obj@input@se != "standard" | obj@input@interactions != "all" |
+     any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
+     any(grepl("<", obj@input@add))){ 
+    ## no Wald Test for robust, bootstrapped SE...
+    ## no Wald Test for models with equality constraints (ask Yves to adjust...)
+    ## maybe we could come up with something similar
+    hypotheses <- data.frame()
+  }else{
+    if(nz==0 & nk==1){
+      hypotheses <- try(data.frame(
+        elrTestWald(obj=obj,
+                    con=obj@syntax@hypotheses$hypothesis1, 
+                    coefs=coefs,
+                    vcovs=vcovs,
+                    resid.df=resid.df)))    
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
+      row.names(hypotheses) <- "No average effects"
+      names(hypotheses) <- c("F value", "df1", "df2", "p-value")
+      
+    }else{
+      hypotheses <- try(data.frame(rbind(
+        elrTestWald(obj=obj,
+                    con=obj@syntax@hypotheses$hypothesis1, 
+                    coefs=coefs,
+                    vcovs=vcovs,
+                    resid.df=resid.df),
+        elrTestWald(obj=obj,
+                    con=obj@syntax@hypotheses$hypothesis2, 
+                    coefs=coefs,
+                    vcovs=vcovs,
+                    resid.df=resid.df),
+        elrTestWald(obj=obj,
+                    con=obj@syntax@hypotheses$hypothesis3, 
+                    coefs=coefs,
+                    vcovs=vcovs,
+                    resid.df=resid.df),
+        elrTestWald(obj=obj,
+                    con=obj@syntax@hypotheses$hypothesis4, 
+                    coefs=coefs,
+                    vcovs=vcovs,
+                    resid.df=resid.df)    
+      )))
+      if(class(hypotheses) == "try-error"){
+        return(data.frame())
+      }
+      row.names(hypotheses) <- c("No average effects",
+                                 "No covariate effects in control group",
+                                 "No treatment*covariate interaction",
+                                 "No treatment effects")
+      names(hypotheses) <- c("F value", "df1", "df2", "p-value")
+    }    
+  }
+  
+  return(hypotheses)
+  
+}
+
 
 
 
@@ -303,8 +429,9 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
   con_full <- obj@syntax@model
   
   ## compute effects
-  pt <- lavaanify(con_full)
-  def.function <- lavaan:::lav_partable_constraints_def(pt)
+  partable <- lavaanify(con_full, as.data.frame.=FALSE)
+  conparse <- lav_constraints_parse(partable)
+  def.function <- conparse$def.function
   JAC <- lav_func_jacobian_complex(func=def.function, x=coefs)
   info.r <- JAC %*% vcovs %*% t(JAC)
   se <- sqrt(diag(info.r))
@@ -325,6 +452,12 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
 computeModelMatrix <- function(obj){
   
   stopifnot(length(obj@input@measurement)==0) ## no latent variables
+  
+  current.contrast.action <- options('contrasts')
+  on.exit(options(current.contrast.action))
+  
+  options(contrasts=c("contr.treatment","contr.poly"))
+  
   
   ## required things
   z <- obj@input@vnames$z

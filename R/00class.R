@@ -54,7 +54,8 @@ setClass("parnames", representation(
   Egxgx="character", ## E(gx|X=x)
   Egxgk="character", ## E(gx|K=k)
   Egxgxk="character", ## E(gx|X=x,K=k)
-  adjmeans="character"
+  adjmeans="character",
+  AveEffZ="character" ## average effect continuous covariate Z
 )
 )
 
@@ -79,6 +80,7 @@ setClass("results", representation(
   Egxgxk="data.frame",
   gx="list",
   adjmeans="data.frame",
+  AveEffZ="data.frame",
   condeffects="data.frame"
 )
 )

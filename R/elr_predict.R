@@ -31,9 +31,13 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   
   stopifnot(inherits(obj, "effectlite"))
   
+  current.contrast.action <- options('contrasts')
   current.na.action <- options('na.action')
+  
+  on.exit(options(current.contrast.action))
   on.exit(options(current.na.action))
   
+  options(contrasts=c("contr.treatment","contr.poly"))
   options(na.action='na.pass')
   
   ## required things

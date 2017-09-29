@@ -8,6 +8,56 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   latentz <- z[which(!z %in% names(data))] ##TODO fix for interactions between continuous covariates
   vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore,latentz=latentz)  
   
+  ## check consistency with method argument
+  if(method=="sem"){
+    if(fixed.cell=="default"){fixed.cell <- FALSE}
+    if(fixed.z=="default"){fixed.z <- FALSE}
+    if(homoscedasticity=="default"){homoscedasticity <- FALSE}
+  }
+
+  if(method=="lm"){
+    if(fixed.cell=="default"){
+      fixed.cell <- TRUE
+    }else if(fixed.cell==FALSE){
+      stop('EffectLiteR error: Stochastic cells are currently not allowed with method="lm".')
+    }
+    
+    if(fixed.z=="default"){
+      fixed.z <- TRUE
+    }else if(fixed.z==FALSE){
+      stop('EffectLiteR error: Stochastic covariates are currently not allowed with method="lm".')
+    }
+    
+    if(homoscedasticity=="default"){
+      homoscedasticity <- TRUE
+    }else if(homoscedasticity==FALSE){
+      stop('EffectLiteR error: Heteroscedasticity is currently not allowed with method="lm".')
+    }
+    
+    if(length(measurement) != 0){
+      stop('EffectLiteR error: Measurement models are currently not allowed with method="lm".')
+    }
+
+    if(length(add) != 0){
+      stop('EffectLiteR error: Additional syntax is currently not allowed with method="lm".')
+    }
+    
+    if(!interactions == "all"){
+      stop('EffectLiteR error: Constraints on interactions are currently not allowed with method="lm".')
+    }
+    
+    if(ids != ~0){
+      stop('EffectLiteR error: Complex survey functionality is currently not allowed with method="lm".')
+    }
+    
+    if(!is.null(weights)){
+      stop('EffectLiteR error: Complex survey functionality is currently not allowed with method="lm".')
+    }
+    
+  }
+  
+    
+  
   ## treatment variable
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  

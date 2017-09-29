@@ -105,6 +105,10 @@ createParNames <- function(obj){
   tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
   Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)
   
+  ## average effect continuous covariate Z
+  AveEffZ <- character()
+  if(nz>0){AveEffZ <- paste0("AveEffZ",1:nz)}
+  
   res <- new("parnames",
              alphas=alphas,
              betas=betas,
@@ -127,7 +131,8 @@ createParNames <- function(obj){
              Egxgx=Egxgx,
              Egxgk=Egxgk,
              Egxgxk=Egxgxk,
-             adjmeans=adjmeans
+             adjmeans=adjmeans,
+             AveEffZ=AveEffZ
   )
   
   return(res)  

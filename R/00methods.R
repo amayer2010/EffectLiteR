@@ -126,7 +126,6 @@ setMethod("show", "effectlite", function(object) {
     cat("Wald tests for main hypotheses are currently not available for models with \n non-standard SEs and for models with (in-)equality constraints (e.g., on interactions).")
   }else{
     hypotheses <- object@results@hypotheses
-    names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
     print(hypotheses, digits=3, print.gap=3)
   }
   
@@ -171,6 +170,15 @@ setMethod("show", "effectlite", function(object) {
     row.names(Egxgxk) <- namesEgxgxk
     print(Egxgxk, digits=3, print.gap=3)    
   }
+
+  
+  # ## currently not printed  
+  # if(nz>0){
+  #   cat("\n\n --------------------- Average Effects of Continuous Covariates --------------------- \n\n")
+  #   AveEffZ <- object@results@AveEffZ
+  #   print(AveEffZ, digits=3, print.gap=3)
+  #   
+  # }
   
   if(length(object@input@add > 0)){
     if(grepl(":=", object@input@add)){
