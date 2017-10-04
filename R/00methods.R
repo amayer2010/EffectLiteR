@@ -22,7 +22,10 @@ setMethod("show", "effectlite", function(object) {
     cat("Categorical covariates K: ", paste0(vnames$k), "\n")
   }
   if(!is.null(vnames$z)){
-    cat("Continuous covariates Z: ", paste0(vnames$z), "\n")
+    tmp <- "Continuous covariates in Z=("
+    tmp <- paste0(tmp, paste0("Z",1:nz, collapse=","), "): ")
+    tmp <- paste0(tmp, paste0(paste0("Z", 1:nz, "="), vnames$z, collapse=" "))
+    cat(tmp, "\n")
   }
   if(!is.null(vnames$propscore)){
     v <- vnames$propscore
