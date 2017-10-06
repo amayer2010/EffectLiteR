@@ -220,11 +220,12 @@ computeHypothesesResults <- function(obj, m1_sem, type="main"){
   
   if(obj@input@se != "standard" | obj@input@interactions != "all" |
      any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
-     any(grepl("<", obj@input@add))){ 
+     any(grepl("<", obj@input@add)) | 
+     !lavInspect(m1_sem, "converged")){ 
     ## no Wald Test for robust, bootstrapped SE...
     ## no Wald Test for models with equality constraints (ask Yves to adjust...)
     ## maybe we could come up with something similar
-    hypotheses <- data.frame()
+    return(data.frame())
     
   }else if(type=="main"){
     if(nz==0 & nk==1){

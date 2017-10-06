@@ -71,3 +71,14 @@ res_bettina_simple <- rbind(m1@results@Egx,
 oldres_bettina_simple <- read.table("tests/oldres/oldres_bettina_simple.dat")
 expect_equivalent(res_bettina_simple, oldres_bettina_simple)
 
+
+########## Test with Rolf's problem data (non-convergence in lavaan) ############
+
+
+expect_warning(d <- elrReadData("private/data/problem1.sav"))
+expect_warning(m1 <- effectLite(y="Y", x="X", k="Z", data=d))
+
+
+
+
+

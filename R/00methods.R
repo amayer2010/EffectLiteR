@@ -14,6 +14,15 @@ setMethod("show", "effectlite", function(object) {
   if(nk>1 & nz==0){label.g.function <- "(K)"; label.covs <- ",K"}
   if(nk==1 & nz>0){label.g.function <- "(Z)"; label.covs <- ",Z"}
   
+  if(object@input@method == "sem"){
+    if(!lavInspect(object@results@lavresults, "converged")){
+      cat("\n\n------------------------------------------------------\n")
+      cat("---------------------- Warning  ----------------------\n")
+      cat("------------------------------------------------------ \n\n")
+      cat("lavaan model has not converged \n\n")
+    }
+  }
+  
   cat("\n\n--------------------- Variables  --------------------- \n\n")
   cat("Outcome variable Y: ", paste0(vnames$y), "\n")
   cat("Treatment variable X: ", paste0(vnames$x), "  (Reference group: ", 
