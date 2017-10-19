@@ -721,9 +721,16 @@ shinyServer(function(input, output, session) {
                          "\")")
       }
       
-      fixed.cell <- FALSE; fixed.z <- FALSE
-      if(input$fixed.cell == "fixed"){fixed.cell <- TRUE}
-      if(input$fixed.cell == "fixed+e"){fixed.cell <- TRUE; fixed.z=TRUE}
+      printfixedcell <- paste0("fixed.cell=\"", "default", "\"")
+      if(input$fixed.cell == "stochastic"){printfixedcell <- "fixed.cell=FALSE"}
+      if(input$fixed.cell == "fixed"){printfixedcell <- "fixed.cell=TRUE"}
+      if(input$fixed.cell == "fixed+e"){printfixedcell <- "fixed.cell=TRUE"}
+      
+      printfixedz <- paste0("fixed.z=\"", "default", "\"")
+      if(input$fixed.cell == "stochastic"){printfixedz <- "fixed.z=FALSE"}
+      if(input$fixed.cell == "fixed"){printfixedz <- "fixed.z=FALSE"}
+      if(input$fixed.cell == "fixed+e"){printfixedz <- "fixed.z=TRUE"}
+      
       
       z <- NULL
       printz <- "NULL"
@@ -775,18 +782,19 @@ shinyServer(function(input, output, session) {
                     "k=", printk, ", ",
                     "z=", printz, ", ",
                     "data=data, ",
+                    "method=\"", input$method, "\", ",
                     "control=\"", input$control, "\", ",
                     "measurement=", printmm, ", ",
                     "missing=\"", input$missing, "\", ",
                     "se=\"", input$se, "\", ",
                     printbootstrap,
-                    "fixed.cell=", fixed.cell, ", ",
-                    "fixed.z=", fixed.z, ", ",
+                    printfixedcell, ", ",
+                    printfixedz, ", ",
                     "interactions=\"", interactions, "\", ",
                     "propscore=", printpropscore, ", ",
                     "ids=", printids, ", ",
                     "weights=", printweights, ", ",
-                    "homoscedasticity=", homoscedasticity, ", ",
+                    "homoscedasticity=\"", homoscedasticity, "\", ",
                     "add=", printadd,
                     ")")
       
