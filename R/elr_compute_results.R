@@ -314,7 +314,11 @@ computeHypothesesLM <- function(obj, m1_lm, type="main"){
 
   ng <- obj@input@ng
   nz <- obj@input@nz
-  nk <- obj@input@nk  
+  nk <- obj@input@nk
+  
+  if(obj@input@interactions != "all"){
+    return(data.frame())
+  }
   
   ## für die elrTestWald brauchen wir: obj, con, coefs, vcovs, resid.df
   con <- obj@syntax@hypotheses$hypothesis1
@@ -474,7 +478,11 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
   coefs <- coef(m1_lm) 
   vcovs <- vcov(m1_lm)
   
-  pnames <- obj@parnames@gammas
+  pnames <- obj@parnames@betas
+  if(obj@input@interactions != "all"){
+    idx <- which(obj@parnames@gammas %in% obj@parnames@constrainedgammas)
+    pnames <- pnames[-idx]
+  }
   names(coefs) <- row.names(vcovs) <- colnames(vcovs) <- pnames
   con_full <- obj@syntax@model
   
@@ -484,14 +492,16 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
   def.function <- conparse$def.function
   JAC <- lav_func_jacobian_complex(func=def.function, x=coefs)
   info.r <- JAC %*% vcovs %*% t(JAC)
+  
   se <- sqrt(diag(info.r))
   est <- def.function(coefs)
+  vcov.def <- info.r
   
-  names(se) <- names(est)
+  row.names(vcov.def) <- colnames(vcov.def) <- names(se) <- names(est)
   
   est <- c(coefs, est)
   se <- c(sqrt(diag(vcovs)), se)
-  vcov.def <- info.r
+  
   
   return(list(est=est, se=se, vcov.def=vcov.def))
   
@@ -557,7 +567,7 @@ computeModelMatrix <- function(obj){
   colnames(modmat) <- c(gammas)
   
   ## delete constraint parameters (if interactions != "all")
-  if(interactions != "all"){
+  if(length(constrainedgammas) != 0){
     
     idx <- which(colnames(modmat) %in% constrainedgammas)
     modmat <- modmat[,-idx]

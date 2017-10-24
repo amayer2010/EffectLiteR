@@ -156,7 +156,7 @@ createLavaanSyntax <- function(obj) {
   
   ## Constraints about 2 and 3 way interactions
   model <- paste0(model, 
-                  create_syntax_interaction_constraints(ng,nk,nz,interactions,constrainedgammas))
+                  create_syntax_interaction_constraints(constrainedgammas))
   
   ## additional syntax
   if(length(inp@add) != 0){
@@ -243,6 +243,18 @@ createLMSyntax <- function(obj) {
   ## parnames
   gammas <- parnames@gammas
   constrainedgammas <- parnames@constrainedgammas
+  unconstrainedgammas <- gammas
+  
+  betas <- parnames@betas
+  unconstrainedbetas <- betas
+  
+  if(length(constrainedgammas) != 0){
+    idx <- which(gammas %in% constrainedgammas) 
+    ## TODO: include unconstrainedgammas in input obj
+    unconstrainedgammas <- gammas[-idx]
+    unconstrainedbetas <- betas[-idx]
+  }
+  
   cellmeanz <- parnames@cellmeanz
   relfreq <- parnames@relfreq
   groupw <- parnames@groupw
@@ -266,10 +278,19 @@ createLMSyntax <- function(obj) {
   
   ## regression model
   model <- paste0(model, "\n\n## Regression Model \n")
-  tmp <- paste0("mm",1:length(gammas))
-  tmp <- paste0(gammas, "*", tmp, collapse=" + ")
+  tmp <- paste0("mm",1:length(unconstrainedbetas))
+  tmp <- paste0(unconstrainedbetas, "*", tmp, collapse=" + ")
   model <- paste0(model, paste0(y, " ~ ", tmp))
   
+  ## "compute" gammas based on betas
+  tmp <- paste0(unconstrainedgammas, " := ", unconstrainedbetas, collapse="\n")
+  model <- paste0(model, "\n\n" ,tmp)
+  
+  ## constraints on interactions
+  model <- paste0(model,
+                  create_syntax_interaction_constraints_lm(constrainedgammas))
+  
+    
   ## mean z in each cell
   model <- paste0(model, create_syntax_cellmeanz(z, nz, fixed.z, cellmeanz, 
                                                  sampmeanz))
@@ -847,16 +868,30 @@ create_syntax_Egxgxk <- function(ng,nk,nz,Egxgxk,gammas,cellmeanz){
 }
 
 
-create_syntax_interaction_constraints <- function(ng,nk,nz,interactions,constrainedgammas){
+create_syntax_interaction_constraints <- function(constrainedgammas){
   
   res <- NULL
   
-  if(interactions != "all"){
+  if(length(constrainedgammas) != 0){
     res <- paste0(res, "\n\n## Equality Constraints")
     res <- paste0(res, "\n", paste(constrainedgammas, "== 0", collapse="\n"))
     
   }
 
+  return(res)  
+}
+
+
+create_syntax_interaction_constraints_lm <- function(constrainedgammas){
+  
+  res <- NULL
+  
+  if(length(constrainedgammas) != 0){
+    res <- paste0(res, "\n\n## Interaction Constraints")
+    res <- paste0(res, "\n", paste(constrainedgammas, ":= 0", collapse="\n"))
+    
+  }
+  
   return(res)  
 }
 

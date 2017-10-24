@@ -114,3 +114,28 @@ expect_equivalent(round(opt1["Agg_g1"],3), round(opt2$Estimate[1],3)) ## small d
 
 
 
+######### test with interaction and lm ###########
+
+d <- example01
+
+## 1 K; 1 Z
+m1 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
+                 fixed.z=TRUE, fixed.cell=TRUE, interactions="X:K")
+
+m2 <- effectLite(data=d, y="dv", z=c("z1"), k=c("k1"), x="x", control="control",
+                 fixed.z=TRUE, fixed.cell=TRUE, method="lm", interactions="X:K")
+
+
+## effect given X and K
+newdata <- data.frame(k1="male", z1=NA, x="control")
+agg.subset <- autoSelectSubset(m1, newdata, nsub=10)
+opt1 <- computeAggregatedEffects(m1, agg.subset=agg.subset)
+opt2 <- m1@results@Egxgxk
+
+expect_equivalent(opt1["Agg_g1"], opt2$Estimate[1])
+
+# with lm
+opt3 <- computeAggregatedEffects(m2, agg.subset=agg.subset)
+
+expect_equivalent(round(opt1[c(1,3,5,6,7)], 3),  ## sem
+                  round(opt3[c(1,3,5,6,7)], 3)) ## lm

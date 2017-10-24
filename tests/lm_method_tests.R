@@ -1,5 +1,5 @@
 
-## basic tests with method="lm"
+#### basic tests with method="lm" #####
 
 d <- example01
 
@@ -87,4 +87,34 @@ expect_equivalent(tmp1,tmp2)
 
 
 options(contrasts=c("contr.treatment","contr.poly"))
+
+
+
+#### tests with interaction option in lm ####
+
+m1 <- effectLite(y="dv", x="x", k="k1", data=example01,
+                 fixed.cell=TRUE, method="sem", homoscedasticity=TRUE,
+                 interactions="none")
+
+m2 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
+                 interactions="none")
+
+expect_equivalent(round(m1@results@Egxgx[,1], 5),  ## sem
+                  round(m2@results@Egxgx[,1], 5)) ## lm
+
+expect_equivalent(round(head(m1@results@condeffects)[,c(4,6)], 5),  ## sem
+                  round(head(m2@results@condeffects)[,c(4,6)], 5)) ## lm
+
+
+m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
+                 interactions="X:K")
+
+m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
+                 interactions="X:Z")
+
+m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
+                 interactions="none")
+
+m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
+                 interactions="all")
 

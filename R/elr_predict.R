@@ -89,9 +89,9 @@ computeConditionalEffects <- function(obj, newdata=NULL,
     
   }else if(obj@input@method=="lm"){
     lmresults <- obj@results@lmresults
-    est <- coef(lmresults) ## parameter estimates
-    vcov <- vcov(lmresults)
-    names(est) <- row.names(vcov) <- colnames(vcov) <- c(obj@parnames@gammas)
+    addcoefs <- computeAdditionalLMCoefficients(obj, lmresults)
+    est <- addcoefs$est ## parameter estimates
+    vcov <- addcoefs$vcov.def
   }
   
   data$id <- 1:nrow(data)
