@@ -18,12 +18,22 @@ createParNames <- function(obj){
   gammas <- with(tmp, array(paste0("g",x,sep,k,sep,z), dim=c(nz+1,nk,ng)))
   
   ## constrained gammas (if interactions != "all")
-  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z","X:K,X:Z"))
+  stopifnot(interactions %in% c("all","none","2-way","X:K","X:Z","X:K,X:Z","no"))
   constrainedgammas <- character()
   
   if(interactions == "none"){
     constrainedgammas <- c(matrix(c(gammas), ncol=ng)[-1,-1])
-  } 
+  }
+  if(interactions == "no"){
+    
+    unconstrainedgammas <- c(gammas[1, 1, ]) ## main effects X + g000
+    if(nk>1){unconstrainedgammas <- c(unconstrainedgammas, c(gammas[1, , 1])[-1])} ## main effects K
+    if(nz>0){unconstrainedgammas <- c(unconstrainedgammas, c(gammas[, 1, 1])[-1])} ## main effects Z
+    
+    idx <- which(c(gammas) %in% unconstrainedgammas)
+    constrainedgammas <- c(gammas)[-idx]
+    
+  }
   if(interactions == "2-way"){
     if(nk>1 & nz>0){
       constrainedgammas <- c(gammas[2:(nz+1), 2:nk, 2:ng])

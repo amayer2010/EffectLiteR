@@ -39,7 +39,7 @@ passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.}
 \item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model 
 will not be estimated.}
 
-\item{interactions}{character. Can be one of \code{c("all","none","2-way","X:K","X:Z","X:K,X:Z")} and indicates the type of interaction used in the parameterization of the regression.}
+\item{interactions}{character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.}
 
 \item{propscore}{Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.}
 

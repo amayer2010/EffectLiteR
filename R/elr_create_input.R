@@ -42,10 +42,6 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
       stop('EffectLiteR error: Additional syntax is currently not allowed with method="lm".')
     }
     
-    # if(!interactions == "all"){
-    #   stop('EffectLiteR error: Constraints on interactions are currently not allowed with method="lm".')
-    # }
-    
     if(ids != ~0){
       stop('EffectLiteR error: Complex survey functionality is currently not allowed with method="lm".')
     }

@@ -245,6 +245,19 @@ oldres_int_xkxznew <- read.table("tests/oldres/oldres_int_xkxznew.dat")
 expect_equivalent(res_int_xkxznew, oldres_int_xkxznew)
 
 
+## interaction option no
+m1 <- effectLite(fixed.cell = TRUE, data=example01, y="dv", z=c("z1","z2"),
+                 k=c("k1","kateg2"), x="x", homoscedasticity=TRUE,
+                 control="control",  syntax.only=FALSE,
+                 interactions="no")
+
+m2 <- effectLite(fixed.cell = TRUE, data=example01, y="dv", z=c("z1","z2"),
+                 k=c("k1","kateg2"), x="x", method="lm",
+                 control="control",  syntax.only=FALSE,
+                 interactions="no")
+
+expect_equivalent(round(m1@results@Egxgk$Estimate,5), round(m2@results@Egxgk$Estimate,5))
+
 
 ################ homoscedastic residual variances ##############
 

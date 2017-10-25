@@ -25,7 +25,7 @@
 #' passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
-#' @param interactions character. Can be one of \code{c("all","none","2-way","X:K","X:Z","X:K,X:Z")} and indicates the type of interaction used in the parameterization of the regression.
+#' @param interactions character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.
 #' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
 #' @param ids Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
 #' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
