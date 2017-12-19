@@ -1018,7 +1018,27 @@ shinyServer(function(input, output, session) {
     
   })
   
+
+  #### output descriptive stats for conditional effects 2 #####
+  output$descriptivestats <- renderPrint({
+    
+    m1 <- model()
+    vnamesz <- m1@input@vnames$z
+    numberzs <- length(vnamesz)
+
+    if(numberzs==0){
+      print("No continuous covariates in the model")
+      
+    }else if(numberzs>0){
+      print(EffectLiteR:::elr_compute_descriptives_z(m1))
+      
+    }
+    
+  })
   
+  
+  
+    
   
   ##### Aggregated effects User Interface Covariates ######
   output$uiaggeff <- renderUI({

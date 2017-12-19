@@ -438,6 +438,8 @@ computeStdDevEffectSize <- function(obj, est, m1_sem){
   Pkgx <- est[obj@parnames@Pkgx][1:nk]
   vary <- meany <- numeric(nk)  
   
+  ##TODO: Improve code (see also elr_compute_descriptives_z)
+  
   ## manifest outcome variable  
   if(obj@input@vnames$y %in% names(obj@input@data)){
     
@@ -451,8 +453,8 @@ computeStdDevEffectSize <- function(obj, est, m1_sem){
     
   }else{ ## latent outcome variable
     
-    fv.cov <- inspect(m1_sem, what="cov.lv")[1:nk]
-    fv.mean <- inspect(m1_sem, what="mean.lv")[1:nk]    
+    fv.cov <- lavInspect(m1_sem, what="cov.lv")[1:nk]
+    fv.mean <- lavInspect(m1_sem, what="mean.lv")[1:nk]    
     
     for(i in 1:nk){
       tmp.cov <- fv.cov[[i]]
@@ -467,6 +469,7 @@ computeStdDevEffectSize <- function(obj, est, m1_sem){
   meanyx0 <- sum(meany*Pkgx) ##TODO: compute parameter in model constraint
   sdyx0 <- sqrt(sum(vary*Pkgx) + sum(Pkgx*(meany-meanyx0)^2)) ## law of total variance  
   
+  return(sdyx0)
   
 }
 

@@ -160,4 +160,20 @@ expect_equivalent(res_lzmy, oldres_lzmy)
 
 
 
+######### Example with latent z and manifest z #############
+
+d <- example02lv
+d$maniz <- rnorm(nrow(d))
+
+mmtest <- '
+eta1 =~ 1*CPM11 + 1*CPM21
+CPM11~ 0*1
+CPM21 ~ c(m,m)*1
+'
+
+m1 <- effectLite(y="CPM22", x="x", z=c("eta1","maniz"), control="0", 
+                 measurement=mmtest, data=d, fixed.cell=TRUE,
+                 missing="fiml", syntax.only=FALSE)
+
+
 

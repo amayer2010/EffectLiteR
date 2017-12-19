@@ -6,7 +6,8 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   
   d <- data
   latentz <- z[which(!z %in% names(data))] ##TODO fix for interactions between continuous covariates
-  vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore,latentz=latentz)  
+  manifestz <- z[which(z %in% names(data))]
+  vnames <- list(y=y,x=x,k=k,z=z,propscore=propscore,latentz=latentz,manifestz=manifestz)  
   
   ## check consistency with method argument
   if(method=="sem"){

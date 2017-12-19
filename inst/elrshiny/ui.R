@@ -432,7 +432,11 @@ tabPanel('User-Specified Tests',
           )) ,
           column(9, wellPanel(
             h5("Conditional Effects"),
-            verbatimTextOutput("outputcondeffect2")
+            verbatimTextOutput("outputcondeffect2"),
+            br(),
+            br(),
+            h5("Descriptive Statistics for Continuous Covariates"),
+            verbatimTextOutput("descriptivestats")
           ))
                
       ),
