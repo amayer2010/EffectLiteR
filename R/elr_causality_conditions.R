@@ -26,16 +26,12 @@ elrTestCausalityConditions <- function(object, zsub, ksub=NULL, condition="unit-
   con <- paste0(testgammas, "==0")
   lavres <- object@results@lavresults
   
-  res <- data.frame(lavTestWald(lavres, con))
+  res <- data.frame(lavTestWald(lavres, con))[,1:3]
+  names(res) <- c("Wald Chi-Square", "df", "p-value")
+  row.names(res) <- "No effects of selected covariates"
   return(res)
 }
 
-## seems very sensitive...
-# elrTestCausalityConditions(m1, zsub="z2")
 # elrTestCausalityConditions(m1, zsub=c("z1","z2"))
-# elrTestCausalityConditions(m1, zsub=c("z1","z3"))
-# elrTestCausalityConditions(m1, zsub=c("z1","z2","k1"))
-# elrTestCausalityConditions(m1, zsub=c("z1","z2","z3","k1"))
-# elrTestCausalityConditions(m1, zsub=c("z1","z2","z4","k1"))
 
 

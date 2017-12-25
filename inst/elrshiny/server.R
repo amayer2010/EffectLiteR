@@ -455,6 +455,15 @@ shinyServer(function(input, output, session) {
                     choices = zsel)  
   })
 
+  ###### Update zselect for continuous covariate tests ########
+  observe({
+    zsel <- zSelect()
+    updateSelectInput(session, "subconcov", 
+                      choices = zsel)  
+  })
+  
+  
+  
   ###### Update gxselect for Plot 3 ########
   observe({
     gxsel <- gxSelect()
@@ -866,6 +875,28 @@ shinyServer(function(input, output, session) {
     }  
   })
 
+  ###### Output User Specified Effects #########
+  output$covtests <- renderPrint({      
+    
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){            
+      
+      cat("Please specify the outcome variable and the treatment variable")
+      
+    }else if(length(input$subconcov) == 0){
+      
+      cat("No subset of continuous covariates specified")
+      
+    }else{
+      
+      m1 <- model()
+      covariatetests <- EffectLiteR:::elrTestCausalityConditions(m1, input$subconcov)
+      print(covariatetests, digits=3, print.gap=3)
+      
+    }  
+  })
+  
+  
+  
   ###### Output User Specified Effects #########
   output$addeffects <- renderPrint({      
     
