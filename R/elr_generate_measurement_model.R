@@ -3,7 +3,7 @@
 #' 
 #' This function automatically generates \code{lavaan} syntax for the measurement model for a call to \code{\link[EffectLiteR]{effectLite}}. It is currently also used in the shiny interface.
 #'
-#' @param names A vector of character strings with names of latent variables.
+#' @param names A vector of character strings with names of latent variables. If not specified, names(indicators) is used.
 #' @param indicators A list of vectors of character strings to specify indicators of latent variables (see example).
 #' @param ncells Number of groups/cells.
 #' @param model A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("default","parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used. If "default", the function tries to guess a reasonable measurement model: Congeneric for latent variables with three or more indicators, essentially tau-equivalent for latent variables with less than three indicators and for latent variables with cross-loadings (e.g., method factors), and parallel for single-indicator latent variables. If NULL, "default" is assumed for all latent variables.
@@ -26,8 +26,9 @@
 #' cat(generateMeasurementModel(names, indicators, ncells))
 #' 
 #' @export
-generateMeasurementModel <- function(names, indicators, ncells, model=NULL){  
+generateMeasurementModel <- function(names=NULL, indicators, ncells, model=NULL){  
   
+  if(is.null(names)){names <- names(indicators)}
   if(is.null(model)){model <- rep("default", times=length(names))}
   
   stopifnot(length(names) == length(indicators))
