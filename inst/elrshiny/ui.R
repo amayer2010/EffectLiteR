@@ -26,9 +26,9 @@ shinyUI(fluidPage(
           fileInput("file1", "Data File", 
                     accept=c(".csv", ".txt", ".sav", ".xpt", 
                               ".CSV", ".TXT", ".SAV", ".XPT",
-                             ".DAT", ".dat"))
+                             ".DAT", ".dat", ".RDS", ".rds", ".Rds"))
         ),
-        helpText('Select either a .csv, .dat, .txt, .sav or a .xpt file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, or read.xport) will be chosen automatically with the default settings for arguments. Some default arguments can be overwritten (see additional options below).'),
+        helpText('Select either a .csv, .dat, .txt, .sav, .xpt or a .rds file to be uploaded. The corresponding R function (read.csv, read.table, read.spss, read.xport, or readRDS) will be chosen automatically with the default settings for arguments. Some default arguments can be overwritten (see additional options below).'),
         br(),
         h5(strong("Additional Options to Read Data")),
         br(),

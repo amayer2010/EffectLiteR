@@ -66,6 +66,9 @@ elrReadData <- function(file, name=NULL, header="default", sep="default",
     
   }else if(suf == ".xpt"){
     return(foreign::read.xport(file))
+    
+  }else if(suf == ".rds"){
+    return(readRDS(file))
   }
   
 }
