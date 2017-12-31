@@ -20,6 +20,10 @@ setMethod("show", "effectlite", function(object) {
       cat("---------------------- Warning  ----------------------\n")
       cat("------------------------------------------------------ \n\n")
       cat("lavaan model has not converged \n\n")
+      
+    }else if(lavInspect(object@results@lavresults, "converged")){
+      cat("\n\n--------------------- Note  --------------------- \n\n")
+      cat(" -- model converged succesfully -- \n")
     }
   }
   
