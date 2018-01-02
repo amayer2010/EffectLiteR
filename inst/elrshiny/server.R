@@ -165,7 +165,9 @@ shinyServer(function(input, output, session) {
     
     if(input$latentz & input$nlatentz > 0){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
-                        input$name.etaz4, input$name.etaz5)
+                        input$name.etaz4, input$name.etaz5, input$name.etaz6, 
+                        input$name.etaz7, input$name.etaz8, input$name.etaz9, 
+                        input$name.etaz10)
       nameslatentz <- nameslatentz[1:input$nlatentz]
       zselect <- c(nameslatentz, zselect)
     }
@@ -197,6 +199,15 @@ shinyServer(function(input, output, session) {
     kstar <- NULL
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect3 <- c("", input$variablek, kstar, input$variablex, input$variablez)
+    
+    if(input$latentz & input$nlatentz > 0){
+      nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
+                        input$name.etaz4, input$name.etaz5, input$name.etaz6, 
+                        input$name.etaz7, input$name.etaz8, input$name.etaz9, 
+                        input$name.etaz10)
+      nameslatentz <- nameslatentz[1:input$nlatentz]
+      zselect3 <- c(nameslatentz, zselect3)
+    }
     
     d <- dataInput()
     x <- d[[input$variablex]]    
@@ -237,6 +248,15 @@ shinyServer(function(input, output, session) {
     kstar <- NULL
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect4 <- c("", input$variablek, kstar, input$variablex, input$variablez)
+    
+    if(input$latentz & input$nlatentz > 0){
+      nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
+                        input$name.etaz4, input$name.etaz5, input$name.etaz6, 
+                        input$name.etaz7, input$name.etaz8, input$name.etaz9, 
+                        input$name.etaz10)
+      nameslatentz <- nameslatentz[1:input$nlatentz]
+      zselect4 <- c(nameslatentz, zselect4)
+    }
 
     d <- dataInput()
     x <- d[[input$variablex]]
@@ -259,7 +279,36 @@ shinyServer(function(input, output, session) {
     return(zselect4)
   })
   
+
+  ######## Reactive zselect5 user specified tests ########
+  zSelect5 <- reactive({
     
+    zselect5 <- c("", input$variablez)
+    
+    if(input$latentz & input$nlatentz > 0){
+      nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
+                        input$name.etaz4, input$name.etaz5, input$name.etaz6, 
+                        input$name.etaz7, input$name.etaz8, input$name.etaz9, 
+                        input$name.etaz10)
+      nameslatentz <- nameslatentz[1:input$nlatentz]
+      zselect5 <- c(nameslatentz, zselect5)
+    }
+    
+    d <- dataInput()
+    x <- d[[input$variablex]]
+    ng <- length(unique(x))
+    
+    if(!is.null(input$propscore)){
+      zselect5 <- c(zselect5, paste0("logprop",1:(ng-1)))
+    }
+    if(input$prop.formula != "" & input$propscoreformula){
+      zselect5 <- c(zselect5, paste0("logprop",1:(ng-1)))
+    }
+    
+    return(zselect5)
+  })
+  
+      
   
   ######## Reactive measurement model ########
   mm <- reactive({
@@ -314,6 +363,31 @@ shinyServer(function(input, output, session) {
         indicators$indicatorsz5 <- input$indicatorsz5
         mmodel$mm.etaz5 <- input$mm.etaz5
       }
+      if(input$latentz & input$nlatentz > 5){
+        names$etaz6 <- input$name.etaz6
+        indicators$indicatorsz6 <- input$indicatorsz6
+        mmodel$mm.etaz6 <- input$mm.etaz6
+      }
+      if(input$latentz & input$nlatentz > 6){
+        names$etaz7 <- input$name.etaz7
+        indicators$indicatorsz7 <- input$indicatorsz7
+        mmodel$mm.etaz7 <- input$mm.etaz7
+      }
+      if(input$latentz & input$nlatentz > 7){
+        names$etaz8 <- input$name.etaz8
+        indicators$indicatorsz8 <- input$indicatorsz8
+        mmodel$mm.etaz8 <- input$mm.etaz8
+      }
+      if(input$latentz & input$nlatentz > 8){
+        names$etaz9 <- input$name.etaz9
+        indicators$indicatorsz9 <- input$indicatorsz9
+        mmodel$mm.etaz9 <- input$mm.etaz9
+      }
+      if(input$latentz & input$nlatentz > 9){
+        names$etaz10 <- input$name.etaz10
+        indicators$indicatorsz10 <- input$indicatorsz10
+        mmodel$mm.etaz10 <- input$mm.etaz10
+      }
       
       names <- unlist(names)
       mmodel <- unlist(mmodel)
@@ -354,6 +428,11 @@ shinyServer(function(input, output, session) {
       if(input$nlatentz > 2){nameslatentcov$etaz3 <- input$name.etaz3}
       if(input$nlatentz > 3){nameslatentcov$etaz4 <- input$name.etaz4}
       if(input$nlatentz > 4){nameslatentcov$etaz5 <- input$name.etaz5}
+      if(input$nlatentz > 5){nameslatentcov$etaz6 <- input$name.etaz6}
+      if(input$nlatentz > 6){nameslatentcov$etaz7 <- input$name.etaz7}
+      if(input$nlatentz > 7){nameslatentcov$etaz8 <- input$name.etaz8}
+      if(input$nlatentz > 8){nameslatentcov$etaz9 <- input$name.etaz9}
+      if(input$nlatentz > 9){nameslatentcov$etaz10 <- input$name.etaz10}
       
       nameslatentcov <- unlist(nameslatentcov)
       return(nameslatentcov)
@@ -445,6 +524,11 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "indicatorsz3", choices = names(d))
     updateSelectInput(session, "indicatorsz4", choices = names(d))
     updateSelectInput(session, "indicatorsz5", choices = names(d))
+    updateSelectInput(session, "indicatorsz6", choices = names(d))
+    updateSelectInput(session, "indicatorsz7", choices = names(d))
+    updateSelectInput(session, "indicatorsz8", choices = names(d))
+    updateSelectInput(session, "indicatorsz9", choices = names(d))
+    updateSelectInput(session, "indicatorsz10", choices = names(d))
   })
 
 
@@ -457,7 +541,7 @@ shinyServer(function(input, output, session) {
 
   ###### Update zselect for continuous covariate tests ########
   observe({
-    zsel <- zSelect()
+    zsel <- zSelect5()
     updateSelectInput(session, "subconcov", 
                       choices = zsel)  
   })

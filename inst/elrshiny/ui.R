@@ -113,7 +113,7 @@ br()
           ### Indicators for latent covariates
           column(8, p("Number of Latent Covariates")),
           column(4, numericInput("nlatentz", label=NULL, 0,
-                       min = 0, max = 5, width='60%')),
+                       min = 0, max = 10, width='60%')),
           ### Cov 1
           conditionalPanel(
             condition = "input.nlatentz > 0",
@@ -151,6 +151,46 @@ br()
             condition = "input.nlatentz > 4",
             selectizeInput("indicatorsz5", 
                            "Indicators of Latent Covariate 5", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
+          ),
+          ### Cov 6
+          conditionalPanel(
+            condition = "input.nlatentz > 5",
+            selectizeInput("indicatorsz6", 
+                           "Indicators of Latent Covariate 6", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
+          ),
+          ### Cov 7
+          conditionalPanel(
+            condition = "input.nlatentz > 6",
+            selectizeInput("indicatorsz7", 
+                           "Indicators of Latent Covariate 7", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
+          ),
+          ### Cov 8
+          conditionalPanel(
+            condition = "input.nlatentz > 7",
+            selectizeInput("indicatorsz8", 
+                           "Indicators of Latent Covariate 8", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
+          ),
+          ### Cov 9
+          conditionalPanel(
+            condition = "input.nlatentz > 8",
+            selectizeInput("indicatorsz9", 
+                           "Indicators of Latent Covariate 9", 
+                           "", multiple=TRUE, 
+                           options = list(placeholder = 'select indicators'))
+          ),
+          ### Cov 10
+          conditionalPanel(
+            condition = "input.nlatentz > 9",
+            selectizeInput("indicatorsz10", 
+                           "Indicators of Latent Covariate 10", 
                            "", multiple=TRUE, 
                            options = list(placeholder = 'select indicators'))
           ),
@@ -203,6 +243,41 @@ br()
             condition = "input.nlatentz > 4",
             textInput("name.etaz5", "Latent Covariate 5", 
                       value = "xi5",
+                      width='60%')
+          ),
+          ### Cov 6
+          conditionalPanel(
+            condition = "input.nlatentz > 5",
+            textInput("name.etaz6", "Latent Covariate 6", 
+                      value = "xi6",
+                      width='60%')
+          ),
+          ### Cov 7
+          conditionalPanel(
+            condition = "input.nlatentz > 6",
+            textInput("name.etaz7", "Latent Covariate 7", 
+                      value = "xi7",
+                      width='60%')
+          ),
+          ### Cov 8
+          conditionalPanel(
+            condition = "input.nlatentz > 7",
+            textInput("name.etaz8", "Latent Covariate 8", 
+                      value = "xi8",
+                      width='60%')
+          ),
+          ### Cov 9
+          conditionalPanel(
+            condition = "input.nlatentz > 8",
+            textInput("name.etaz9", "Latent Covariate 9", 
+                      value = "xi9",
+                      width='60%')
+          ),
+          ### Cov 10
+          conditionalPanel(
+            condition = "input.nlatentz > 9",
+            textInput("name.etaz10", "Latent Covariate 10", 
+                      value = "xi10",
                       width='60%')
           )
         ),
@@ -277,6 +352,66 @@ br()
             selectizeInput(
               inputId="mm.etaz5", 
               label="Measurement Model for Latent Covariate 5", 
+              choices = c("default" = "default",
+                          "equivalent measures" = "parallel",
+                          "essentially equivalent measures" = "tau-equi",
+                          "congeneric measures" = "tau-cong"),
+              width='100%')
+          ),
+          ### Cov 6
+          conditionalPanel(
+            condition = "input.nlatentz > 5",
+            selectizeInput(
+              inputId="mm.etaz6", 
+              label="Measurement Model for Latent Covariate 6", 
+              choices = c("default" = "default",
+                          "equivalent measures" = "parallel",
+                          "essentially equivalent measures" = "tau-equi",
+                          "congeneric measures" = "tau-cong"),
+              width='100%')
+          ),
+          ### Cov 7
+          conditionalPanel(
+            condition = "input.nlatentz > 6",
+            selectizeInput(
+              inputId="mm.etaz7", 
+              label="Measurement Model for Latent Covariate 7", 
+              choices = c("default" = "default",
+                          "equivalent measures" = "parallel",
+                          "essentially equivalent measures" = "tau-equi",
+                          "congeneric measures" = "tau-cong"),
+              width='100%')
+          ),
+          ### Cov 8
+          conditionalPanel(
+            condition = "input.nlatentz > 7",
+            selectizeInput(
+              inputId="mm.etaz8", 
+              label="Measurement Model for Latent Covariate 8", 
+              choices = c("default" = "default",
+                          "equivalent measures" = "parallel",
+                          "essentially equivalent measures" = "tau-equi",
+                          "congeneric measures" = "tau-cong"),
+              width='100%')
+          ),
+          ### Cov 9
+          conditionalPanel(
+            condition = "input.nlatentz > 8",
+            selectizeInput(
+              inputId="mm.etaz9", 
+              label="Measurement Model for Latent Covariate 9", 
+              choices = c("default" = "default",
+                          "equivalent measures" = "parallel",
+                          "essentially equivalent measures" = "tau-equi",
+                          "congeneric measures" = "tau-cong"),
+              width='100%')
+          ),
+          ### Cov 10
+          conditionalPanel(
+            condition = "input.nlatentz > 9",
+            selectizeInput(
+              inputId="mm.etaz10", 
+              label="Measurement Model for Latent Covariate 10", 
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
