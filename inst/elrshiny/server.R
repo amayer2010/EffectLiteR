@@ -106,26 +106,28 @@ shinyServer(function(input, output, session) {
       add <- input$add.syntax
     }
     
+    elr.args <- list(y=dv, 
+                     x=x,
+                     k=k,
+                     z=z,
+                     data=d,
+                     method=input$method,
+                     control=input$control,
+                     measurement=mm,
+                     missing=input$missing,
+                     se=input$se,
+                     bootstrap=input$bootstrap,
+                     fixed.cell=fixed.cell,
+                     fixed.z=fixed.z,
+                     interactions=interactions,
+                     propscore=propscore,                 
+                     ids=ids,
+                     weights=weights,
+                     homoscedasticity=homoscedasticity,
+                     add=add)
+
     tryCatch(
-      effectLite(y=dv, 
-                 x=x,
-                 k=k,
-                 z=z,
-                 data=d,
-                 method=input$method,
-                 control=input$control,
-                 measurement=mm,
-                 missing=input$missing,
-                 se=input$se,
-                 bootstrap=input$bootstrap,
-                 fixed.cell=fixed.cell,
-                 fixed.z=fixed.z,
-                 interactions=interactions,
-                 propscore=propscore,                 
-                 ids=ids,
-                 weights=weights,
-                 homoscedasticity=homoscedasticity,
-                 add=add)
+      do.call("effectLite", elr.args)
     )  
   })
 
@@ -230,6 +232,25 @@ shinyServer(function(input, output, session) {
     return(zselect3)
   })
 
+  
+  ######## Reactive wselect for Conditional Effects IV ########
+  wSelect <- reactive({
+    
+    d <- dataInput()
+    wselect <- c("", names(d))
+    
+    if(input$latentz & input$nlatentz > 0){
+      nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
+                        input$name.etaz4, input$name.etaz5, input$name.etaz6, 
+                        input$name.etaz7, input$name.etaz8, input$name.etaz9, 
+                        input$name.etaz10)
+      nameslatentz <- nameslatentz[1:input$nlatentz]
+      wselect <- c(wselect, nameslatentz)
+    }
+    
+    return(wselect)
+  })
+  
   
   ######## Reactive gxselect2 for Plot 4 ########
   gxSelect2 <- reactive({
@@ -531,6 +552,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "indicatorsz10", choices = names(d))
   })
 
+  
 
   ###### Update zselect for Plot 2 ########
   observe({
@@ -546,7 +568,15 @@ shinyServer(function(input, output, session) {
                       choices = zsel)  
   })
   
+
+  ###### Update gxselectce4 for Conditional Effects 4 ########
+  observe({
+    gxsel <- gxSelect()
+    updateSelectInput(session, "gxselectce4", 
+                      choices = gxsel)  
+  })
   
+    
   
   ###### Update gxselect for Plot 3 ########
   observe({
@@ -569,6 +599,15 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "zselect3", 
                       choices = zsel3)  
   })
+  
+  ###### Update variablece4 for Conditional Effects IV ########
+  observe({
+    
+    wselect <- wSelect()
+    updateSelectInput(session, "variablece4", 
+                      choices = wselect)  
+  })
+  
 
   ###### Update gxselect2 for Plot 4 ########
   observe({
@@ -1152,6 +1191,17 @@ shinyServer(function(input, output, session) {
   })
   
   
+  #### Help text conditional effects 4 #####
+  output$helptextcondeff4 <- renderPrint({
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+      
+      cat("Conditional effects are only available if you have specified the dependent variable and the treatment variable.")
+      
+    }else{
+      
+      cat("Computes the regression of the selected effect function gx on the variable W. If you want standard errors for the regression coefficients, please specify the number of bootstrap draws. This may take a while to compute.")
+    }
+  })
   
     
   
@@ -1278,7 +1328,38 @@ shinyServer(function(input, output, session) {
       condprint
     }  
   })
+
   
+  #### output conditional effects IV #####
+  output$outputcondeff4 <- renderPrint({
+    
+    m1 <- model()
+    d <- dataInput()
+    nboot <- input$bootstrapce4
+    gx <- input$gxselectce4
+    w <- input$variablece4
+    
+    if(w == ""){return(NULL)}
+    
+    formula <- paste0(gx, " ~ ", w)
+    formula <- as.formula(formula)
+    
+    try({aggeff <- round(EffectLiteR:::elrCondeffectsBoot(d, m1, formula, nboot),3)}, silent=FALSE)
+    try({print(aggeff, row.names=T, print.gap=3)}, silent=FALSE)
+    
+  })
+  
+  #### output aggregated effects table ####
+  output$aggeffstable = renderDataTable({
+    if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
+      return(NULL)
+    }else{            
+      m1 <- model()
+      idx <- agg.subset()
+      condprint <- format(m1@results@condeffects[idx,], digits=3)
+      condprint
+    }  
+  })    
     
   
 })

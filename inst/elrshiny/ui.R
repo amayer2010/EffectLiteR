@@ -607,6 +607,29 @@ tabPanel('User-Specified Tests',
                ))
       ),
       
+      ######### Conditional Effects IV ##########
+      tabPanel("Conditional Effects IV", 
+               verbatimTextOutput("helptextcondeff4"),
+               br(),
+               br(),
+               column(5, wellPanel(
+                 selectInput("gxselectce4", 
+                             "Effect function", 
+                             "g1(K,Z)", 
+                             multiple=FALSE,
+                             selectize=TRUE),
+                 selectizeInput("variablece4", "Variable W", "", 
+                                multiple=FALSE, selected="",
+                                options = list(placeholder = 'select variable')),
+                 numericInput("bootstrapce4", "Number of bootstrap draws", 
+                              min=1, max=5000, value=NA)
+               )) ,
+               column(7, wellPanel(
+                 h5("Regression Coefficients E(gx | W)"),
+                 verbatimTextOutput("outputcondeff4")
+               ))
+      ),
+      
       ######### Output User Specified Tests ##########
       tabPanel("User-Specified Tests", 
                verbatimTextOutput("covtests"),
