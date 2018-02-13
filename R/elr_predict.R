@@ -33,7 +33,7 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   current.na.action <- options('na.action')
   
   on.exit(options(current.contrast.action))
-  on.exit(options(current.na.action))
+  on.exit(options(current.na.action), add=TRUE)
   
   options(contrasts=c("contr.treatment","contr.poly"))
   options(na.action='na.pass')
