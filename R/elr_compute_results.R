@@ -32,6 +32,7 @@ computeResults <- function(obj){
     
     hypotheses <- computeHypothesesLM(obj, m1_lm, type="main")
     hypothesesk <- computeHypothesesLM(obj, m1_lm, type="kconditional")
+    
   }
 
   
@@ -320,6 +321,10 @@ computeHypothesesLM <- function(obj, m1_lm, type="main"){
     return(data.frame())
   }
   
+  if(obj@input@fixed.cell == FALSE){
+    return(data.frame())
+  }
+  
   ## für die elrTestWald brauchen wir: obj, con, coefs, vcovs, resid.df
   con <- obj@syntax@hypotheses$hypothesis1
   coefs <- coef(m1_lm) 
@@ -487,10 +492,31 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
     pnames <- pnames[-idx]
   }
   names(coefs) <- row.names(vcovs) <- colnames(vcovs) <- pnames
+  
   con_full <- obj@syntax@model
+  partable <- lavaanify(con_full)
+  
+  ## augment coefs, vcovs, and partable with stochastic group sizes
+  if(obj@input@fixed.cell == FALSE){
+    
+    N <- nrow(obj@input@data)
+    prop <- obj@input@observed.freq
+    prop.vcm <- (diag(prop) - prop %*% t(prop)) / N
+    names(prop) <- row.names(prop.vcm) <- colnames(prop.vcm) <- obj@parnames@groupw
+    
+    coefs <- c(coefs, prop)
+    vcovs <- lav_matrix_bdiag(vcovs, prop.vcm)
+    
+    ## augment partable
+    groupw <- obj@parnames@groupw
+    tmp <- paste0("group % c(", paste(groupw, collapse=","), ")*w")
+    pt2 <- lavaanify(tmp,ngroups=length(groupw))
+    pt2$free <- (max(partable$free)+1):(max(partable$free)+length(groupw))
+    partable <- rbind(pt2,partable)
+  }
   
   ## compute effects
-  partable <- lavaanify(con_full, as.data.frame.=FALSE)
+  partable <- as.list(partable)
   conparse <- lav_constraints_parse(partable)
   def.function <- conparse$def.function
   JAC <- lav_func_jacobian_complex(func=def.function, x=coefs)

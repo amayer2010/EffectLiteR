@@ -1,4 +1,5 @@
 
+
 #### basic tests with method="lm" #####
 
 d <- example01
@@ -117,4 +118,10 @@ m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
 
 m1 <- effectLite(y="dv", x="x", k="k1", data=example01, method="lm",
                  interactions="all")
+
+
+### first test with stochastic group sizes and lm
+m1 <- effectLite(data=nonortho, y="y", k="z", x="x", 
+                 method="lm", fixed.cell=FALSE, fixed.z=FALSE)
+
 

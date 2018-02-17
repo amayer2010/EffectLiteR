@@ -282,6 +282,10 @@ createLMSyntax <- function(obj) {
   tmp <- paste0(unconstrainedbetas, "*", tmp, collapse=" + ")
   model <- paste0(model, paste0(y, " ~ ", tmp))
   
+  ## compute relative group frequencies
+  model <- paste0(model, create_syntax_group_freq_lm(fixed.cell, relfreq, 
+                                                     observed.freq, groupw))
+  
   ## "compute" gammas based on betas
   tmp <- paste0(unconstrainedgammas, " := ", unconstrainedbetas, collapse="\n")
   model <- paste0(model, "\n\n" ,tmp)
@@ -294,10 +298,6 @@ createLMSyntax <- function(obj) {
   ## mean z in each cell
   model <- paste0(model, create_syntax_cellmeanz(z, nz, fixed.z, cellmeanz, 
                                                  sampmeanz))
-  
-  ## compute relative group frequencies
-  model <- paste0(model, create_syntax_group_freq(fixed.cell, relfreq, 
-                                                  observed.freq, groupw))
   
   ## compute unconditional means of z
   model <- paste0(model, create_syntax_ez(nz, meanz, cellmeanz, relfreq))
@@ -457,6 +457,26 @@ create_syntax_group_freq <- function(fixed.cell, relfreq, observed.freq, groupw)
     res <- paste0(res, "\n", tmp)
     
     tmp <- paste(paste0(relfreq, " := exp(", groupw, ")/N"), collapse="\n")
+    res <- paste0(res, "\n", tmp)    
+  }
+  
+  return(res)
+}
+
+
+
+
+create_syntax_group_freq_lm <- function(fixed.cell, relfreq, observed.freq, groupw){
+  
+  
+  res <- "\n\n## Relative Group Frequencies \n"
+  
+  if(fixed.cell){
+    tmp <- paste(paste0(relfreq, " := ", observed.freq), collapse="\n")
+    res <- paste0(res, tmp)       
+    
+  }else if(!fixed.cell){
+    tmp <- paste0(relfreq, " := ", groupw, collapse="\n")
     res <- paste0(res, "\n", tmp)    
   }
   
