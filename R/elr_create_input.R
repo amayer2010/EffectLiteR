@@ -17,11 +17,7 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   }
 
   if(method=="lm"){
-    if(fixed.cell=="default"){
-      fixed.cell <- TRUE
-    }else if(fixed.cell==FALSE){
-      # stop('EffectLiteR error: Stochastic cells are currently not allowed with method="lm".')
-    }
+    if(fixed.cell=="default"){fixed.cell <- TRUE}
     
     if(fixed.z=="default"){
       fixed.z <- TRUE

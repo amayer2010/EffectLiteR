@@ -504,19 +504,19 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
     prop.vcm <- (diag(prop) - prop %*% t(prop)) / N
     names(prop) <- row.names(prop.vcm) <- colnames(prop.vcm) <- obj@parnames@groupw
     
-    coefs <- c(coefs, prop)
-    vcovs <- lav_matrix_bdiag(vcovs, prop.vcm)
+    coefs <- c(prop, coefs)
+    vcovs <- lav_matrix_bdiag(prop.vcm, vcovs)
     
     ## augment partable
     groupw <- obj@parnames@groupw
     tmp <- paste0("group % c(", paste(groupw, collapse=","), ")*w")
     pt2 <- lavaanify(tmp,ngroups=length(groupw))
-    pt2$free <- (max(partable$free)+1):(max(partable$free)+length(groupw))
     partable <- rbind(pt2,partable)
+    nfreepars <- sum(!partable$free == 0)
+    partable[1:nfreepars] <- 1:nfreepars
   }
   
   ## compute effects
-  partable <- as.list(partable)
   conparse <- lav_constraints_parse(partable)
   def.function <- conparse$def.function
   JAC <- lav_func_jacobian_complex(func=def.function, x=coefs)
