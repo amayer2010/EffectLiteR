@@ -39,3 +39,11 @@ res_many_xk <- rbind(m1@results@Egx,
 oldres_many_xk <- read.table("tests/oldres/oldres_many_xk.dat")
 expect_equivalent(res_many_xk, oldres_many_xk)
 
+
+## many xk cells and z with lm
+m2 <- effectLite(data=d, y="dv", x="cid", k="k1", z="z1", method="lm")
+expect_equivalent(round(m1@results@Egx$Estimate,4),
+                  round(m2@results@Egx$Estimate,4))
+
+
+

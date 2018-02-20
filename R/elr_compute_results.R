@@ -14,11 +14,16 @@ computeResults <- function(obj){
       se[obj@parnames@constrainedgammas] <- NA
     }
     tval <- est/se
-    pval <- 2*(1-pnorm(abs(tval)))
+    pval <- 2*(1-pnorm(abs(tval))) ## TODO Use pt() for stat="Ftest"? (would be inconsistent with se...)
     
-    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df=NULL, stat="Chisq")
-    hypothesesk <- computeHypothesesResults(obj, m1_sem, type="kconditional")
+    ## residual degrees of freedom for F Test
+    N <- lavInspect(m1_sem, "ntotal")
+    p <- length(obj@parnames@gammas) - length(obj@parnames@constrainedgammas)
+    resid.df <- N-p
     
+    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat="Chisq")
+    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat="Chisq")
+
   }else if(obj@input@method == "lm"){
     
     m1_sem <- new("lavaan")
@@ -33,11 +38,10 @@ computeResults <- function(obj){
     tval <- est/se
     rdf <- m1_lm$df.residual
     pval <- 2*(1-pt(abs(tval),df=rdf)) 
-    ## should we use pt instead of pnorm? (this then applies to all est?)
-    ## I think it's OK, because we only report it for coefs and effects
-    
-    hypotheses <- computeHypothesesLM(obj, m1_lm, type="main")
-    hypothesesk <- computeHypothesesLM(obj, m1_lm, type="kconditional")
+
+    resid.df <- m1_lm$df.residual
+    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat="Ftest")
+    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat="Ftest")
     
   }
 
@@ -220,7 +224,7 @@ computeLMResults <- function(obj){
 
 
 
-elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chisq"){
+elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   
   ng <- obj@input@ng
   nk <- obj@input@nk
@@ -228,11 +232,6 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chis
   Egx <- obj@parnames@Egx
   gammas <- obj@parnames@gammas
   constrainedgammas <- obj@parnames@constrainedgammas
-  
-  ## no Wald Test for models with additional equality constraints
-  if(any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) | any(grepl("<", obj@input@add))){ 
-    return(data.frame())
-  }
   
   ## Hypothesis 1: No average treatment effects
   Wald <- try(t(est[Egx]) %*% solve(vcov.def[Egx,Egx]) %*% est[Egx], silent=TRUE)
@@ -246,8 +245,19 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chis
     row.names(hypotheses) <- "No average effects"
     names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
     
+    if(stat=="Ftest"){
+      Fvalue <- Wald/Wald.df
+      F.df1 <- Wald.df
+      F.df2 <- resid.df
+      F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
+      hypotheses <- data.frame(rbind(c(Fvalue, F.df1, F.df2, F.pvalue)))
+      row.names(hypotheses) <- "No average effects"
+      names(hypotheses) <- c("F value", "df1", "df2", "p-value")
+    }
+    
     return(hypotheses)
   }
+  
   
   ## Hypothesis 2: No covariate effects in control group
   gammas_tmp <- c(matrix(c(gammas), ncol=ng)[-1,1])
@@ -260,6 +270,7 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chis
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis2 <- c(Wald, Wald.df, Wald.pvalue)
   
+  
   ## Hypothesis 3: No treatment*covariate interaction
   gammas_tmp <- c(matrix(c(gammas), ncol=ng)[-1,-1])
   idx <- which(gammas_tmp %in% constrainedgammas)
@@ -270,7 +281,8 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chis
   Wald.df <- length(gammas_tmp)
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis3 <- c(Wald, Wald.df, Wald.pvalue)
-  
+
+    
   ## Hypothesis 4: No treatment effects
   gammas_tmp <- matrix(c(gammas), ncol=ng)[,-1]
   idx <- which(gammas_tmp %in% constrainedgammas)
@@ -289,224 +301,74 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chis
                              "No treatment effects")
   names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
   
-  return(hypotheses)
   
-  
-}
-
-
-
-
-
-
-computeHypothesesResults <- function(obj, m1_sem, type="main"){
-  
-  ng <- obj@input@ng
-  nz <- obj@input@nz
-  nk <- obj@input@nk  
-  
-  if(obj@input@se != "standard" | obj@input@interactions != "all" |
-     any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
-     any(grepl("<", obj@input@add)) | 
-     !lavInspect(m1_sem, "converged")){ 
-    ## no Wald Test for robust, bootstrapped SE...
-    ## no Wald Test for models with equality constraints (ask Yves to adjust...)
-    ## maybe we could come up with something similar
-    return(data.frame())
-    
-  }else if(type=="main"){
-    if(nz==0 & nk==1){
-      hypotheses <- try(data.frame(
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3]))    
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      row.names(hypotheses) <- "No average effects"
-      names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
-      
-    }else{
-      hypotheses <- try(data.frame(rbind(
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis1)[1:3],
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis2)[1:3],
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis3)[1:3],
-        lavTestWald(m1_sem, constraints=obj@syntax@hypotheses$hypothesis4)[1:3]    
-      )))
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      row.names(hypotheses) <- c("No average effects",
-                                 "No covariate effects in control group",
-                                 "No treatment*covariate interaction",
-                                 "No treatment effects")
-      names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
-    }
-    
-  }else if(type=="kconditional"){
-    
-    hypotheses <- data.frame()
-    if(nk>1){
-      hypotheses <- try(lavTestWald(m1_sem, constraints=obj@syntax@hypothesesk[[1]])[1:3])
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      
-      for(i in 2:nk){
-        hypotheses <- rbind(hypotheses,
-                            lavTestWald(m1_sem, constraints=obj@syntax@hypothesesk[[i]])[1:3])
-      }
-      
-      row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
-      colnames(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
-      hypotheses <- as.data.frame(hypotheses)
-    }
-    
+  if(stat=="Ftest"){
+    Fvalue <- hypotheses$Wald/hypotheses$df
+    F.df1 <- hypotheses$df
+    F.df2 <- resid.df
+    F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
+    hypotheses <- data.frame(Fvalue, F.df1, F.df2, F.pvalue)
+    row.names(hypotheses) <- c("No average effects",
+                               "No covariate effects in control group",
+                               "No treatment*covariate interaction",
+                               "No treatment effects")
+    names(hypotheses) <- c("F value", "df1", "df2", "p-value")
   }
   
   return(hypotheses)
   
+  
 }
 
 
-elrTestWald <- function(obj, con, coefs, vcovs, resid.df, stat="Ftest"){
 
-  partable <- lavaanify(obj@syntax@model, as.data.frame.=FALSE)
-  conparse <- lav_constraints_parse(partable, con)
-  ceq.function <- conparse$ceq.function
+
+
+
+elrKConditionalHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   
-  theta.r <- ceq.function(coefs)
-  JAC <- lav_func_jacobian_complex(func=ceq.function, x=coefs)
-  info.r <- JAC %*% vcovs %*% t(JAC)
-  Wald <- as.numeric(t(theta.r) %*% solve(info.r) %*% theta.r)
-  Wald.df <- nrow(JAC)
-  Wald.pvalue <- 1 - pchisq(Wald, df = Wald.df)
-  
-  Fvalue <- Wald/Wald.df
-  F.df1 <- Wald.df
-  F.df2 <- resid.df
-  F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
-  
-  if(stat=="Wald"){
-    ## not used currently
-    return(list(stat=Wald, df=Wald.df, p.value=Wald.pvalue))
-    
-  }else if(stat=="Ftest"){
-    return(list(stat=Fvalue, df1=F.df1, df2=F.df2, p.value=F.pvalue))
-  }
-  
-
-}
-
-
-computeHypothesesLM <- function(obj, m1_lm, type="main"){
-
   ng <- obj@input@ng
-  nz <- obj@input@nz
   nk <- obj@input@nk
+  hypotheses <- vector("list",length=nk)
   
-  if(obj@input@interactions != "all"){
+  if(nk==1){
     return(data.frame())
+    
+  }else if(nk>1){
+    Egxk <- matrix(obj@parnames@Egxgk, nrow=ng-1, ncol=nk)
+    
+    for(i in 1:nk){
+      Egxk_tmp <- Egxk[,i]
+      Wald <- try(t(est[Egxk_tmp]) %*% solve(vcov.def[Egxk_tmp,Egxk_tmp]) %*% est[Egxk_tmp], silent=TRUE)
+      if(class(Wald) == "try-error"){Wald <- NA}
+      Wald.df <- length(Egxk_tmp)
+      Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
+      hypothesis <- c(Wald, Wald.df, Wald.pvalue)
+      
+      hypotheses[[i]] <- hypothesis
+    }
   }
   
-  if(obj@input@fixed.cell == FALSE){
-    return(data.frame())
-  }
-  
-  ## für die elrTestWald brauchen wir: obj, con, coefs, vcovs, resid.df
-  con <- obj@syntax@hypotheses$hypothesis1
-  coefs <- coef(m1_lm) 
-  vcovs <- vcov(m1_lm)
-  pnames <- obj@parnames@gammas
-  names(coefs) <- row.names(vcovs) <- colnames(vcovs) <- pnames
-  resid.df <- m1_lm$df.residual
-  
-  ## this if condition needs to be adjusted for lm
-  if(obj@input@se != "standard" | obj@input@interactions != "all" |
-     any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) |
-     any(grepl("<", obj@input@add))){ 
-    ## no Wald Test for robust, bootstrapped SE...
-    ## no Wald Test for models with equality constraints (ask Yves to adjust...)
-    ## maybe we could come up with something similar
-    hypotheses <- data.frame()
-    
-  }else if(type=="main"){
-    if(nz==0 & nk==1){
-      hypotheses <- try(data.frame(
-        elrTestWald(obj=obj,
-                    con=obj@syntax@hypotheses$hypothesis1, 
-                    coefs=coefs,
-                    vcovs=vcovs,
-                    resid.df=resid.df)))    
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      row.names(hypotheses) <- "No average effects"
-      names(hypotheses) <- c("F value", "df1", "df2", "p-value")
-      
-    }else{
-      hypotheses <- try(data.frame(rbind(
-        elrTestWald(obj=obj,
-                    con=obj@syntax@hypotheses$hypothesis1, 
-                    coefs=coefs,
-                    vcovs=vcovs,
-                    resid.df=resid.df),
-        elrTestWald(obj=obj,
-                    con=obj@syntax@hypotheses$hypothesis2, 
-                    coefs=coefs,
-                    vcovs=vcovs,
-                    resid.df=resid.df),
-        elrTestWald(obj=obj,
-                    con=obj@syntax@hypotheses$hypothesis3, 
-                    coefs=coefs,
-                    vcovs=vcovs,
-                    resid.df=resid.df),
-        elrTestWald(obj=obj,
-                    con=obj@syntax@hypotheses$hypothesis4, 
-                    coefs=coefs,
-                    vcovs=vcovs,
-                    resid.df=resid.df)    
-      )))
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      row.names(hypotheses) <- c("No average effects",
-                                 "No covariate effects in control group",
-                                 "No treatment*covariate interaction",
-                                 "No treatment effects")
-      names(hypotheses) <- c("F value", "df1", "df2", "p-value")
-    }
-    
-  }else if(type=="kconditional"){
-    
-    hypotheses <- data.frame()
-    if(nk>1){
-      hypotheses <- try(elrTestWald(obj=obj,
-                                    con=obj@syntax@hypothesesk[[1]], 
-                                    coefs=coefs,
-                                    vcovs=vcovs,
-                                    resid.df=resid.df))
-      if(class(hypotheses) == "try-error"){
-        return(data.frame())
-      }
-      
-      for(i in 2:nk){
-        hypotheses <- rbind(hypotheses,
-                            elrTestWald(obj=obj,
-                                        con=obj@syntax@hypothesesk[[i]], 
-                                        coefs=coefs,
-                                        vcovs=vcovs,
-                                        resid.df=resid.df))
-      }
-      
-      row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
-      colnames(hypotheses) <- c("F value", "df1", "df2", "p-value")
-      hypotheses <- as.data.frame(hypotheses)
-    }
-    
+  hypotheses <- do.call(rbind.data.frame, hypotheses)
+  row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
+  colnames(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
+
+  if(stat=="Ftest"){
+    Fvalue <- hypotheses$Wald/hypotheses$df
+    F.df1 <- hypotheses$df
+    F.df2 <- resid.df
+    F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
+    hypotheses <- data.frame(Fvalue, F.df1, F.df2, F.pvalue)
+    row.names(hypotheses) <- paste0("No average effects given K=", 0:(nk-1))
+    names(hypotheses) <- c("F value", "df1", "df2", "p-value")
   }
   
   return(hypotheses)
   
+  
 }
+
+
 
 
 
@@ -599,7 +461,7 @@ computeAdditionalLMCoefficients <- function(obj, m1_lm){
     pt2 <- lavaanify(tmp,ngroups=length(groupw))
     partable <- rbind(pt2,partable)
     nfreepars <- sum(!partable$free == 0)
-    partable[1:nfreepars] <- 1:nfreepars
+    partable$free[1:nfreepars] <- 1:nfreepars
   }
   
   ## compute effects
