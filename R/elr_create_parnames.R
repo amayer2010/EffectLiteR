@@ -23,9 +23,9 @@ createParNames <- function(obj){
   
   if(interactions == "none"){
     constrainedgammas <- c(matrix(c(gammas), ncol=ng)[-1,-1])
+    
   }
   if(interactions == "no"){
-    
     unconstrainedgammas <- c(gammas[1, 1, ]) ## main effects X + g000
     if(nk>1){unconstrainedgammas <- c(unconstrainedgammas, c(gammas[1, , 1])[-1])} ## main effects K
     if(nz>0){unconstrainedgammas <- c(unconstrainedgammas, c(gammas[, 1, 1])[-1])} ## main effects Z
@@ -53,6 +53,15 @@ createParNames <- function(obj){
     if(nk>1){
       constrainedgammas <- c(gammas[2:(nz+1), 2:nk, ])
     }
+  }
+  
+  ## add unconstrainedgammas
+  if(length(constrainedgammas) != 0){
+    idx <- which(gammas %in% constrainedgammas) 
+    unconstrainedgammas <- c(gammas[-idx])
+    
+  }else if(length(constrainedgammas) == 0){
+    unconstrainedgammas <- c(gammas)
   }
   
   ## for pretty printing
@@ -124,6 +133,7 @@ createParNames <- function(obj){
              betas=betas,
              gammas=gammas,
              constrainedgammas=constrainedgammas,
+             unconstrainedgammas=unconstrainedgammas,
              gammalabels=gammalabels,
              cellmeanz=cellmeanz,
              meanz=meanz,

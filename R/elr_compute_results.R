@@ -10,10 +10,13 @@ computeResults <- function(obj){
     se <- parameterEstimates(m1_sem, fmi=FALSE)$se ## standard errors
     vcov.def <- lavInspect(m1_sem, "vcov.def", add.class = FALSE)
     names(se) <- names(est) <- parameterEstimates(m1_sem, fmi=FALSE)$label 
+    if(length(obj@parnames@constrainedgammas) > 0){
+      se[obj@parnames@constrainedgammas] <- NA
+    }
     tval <- est/se
     pval <- 2*(1-pnorm(abs(tval)))
     
-    hypotheses <- computeHypothesesResults(obj, m1_sem, type="main")
+    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df=NULL, stat="Chisq")
     hypothesesk <- computeHypothesesResults(obj, m1_sem, type="kconditional")
     
   }else if(obj@input@method == "lm"){
@@ -23,6 +26,9 @@ computeResults <- function(obj){
     allcoefs <- computeAdditionalLMCoefficients(obj, m1_lm)
     est <- allcoefs$est
     se <- allcoefs$se
+    if(length(obj@parnames@constrainedgammas) > 0){
+      se[obj@parnames@constrainedgammas] <- NA
+    }
     vcov.def <- allcoefs$vcov.def ## vcov of defined parameters
     tval <- est/se
     rdf <- m1_lm$df.residual
@@ -211,6 +217,86 @@ computeLMResults <- function(obj){
   
   return(m1)
 }
+
+
+
+elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df=NULL, stat="Chisq"){
+  
+  ng <- obj@input@ng
+  nk <- obj@input@nk
+  nz <- obj@input@nz
+  Egx <- obj@parnames@Egx
+  gammas <- obj@parnames@gammas
+  constrainedgammas <- obj@parnames@constrainedgammas
+  
+  ## no Wald Test for models with additional equality constraints
+  if(any(grepl("==", obj@input@add)) | any(grepl(">", obj@input@add)) | any(grepl("<", obj@input@add))){ 
+    return(data.frame())
+  }
+  
+  ## Hypothesis 1: No average treatment effects
+  Wald <- try(t(est[Egx]) %*% solve(vcov.def[Egx,Egx]) %*% est[Egx], silent=TRUE)
+  if(class(Wald) == "try-error"){Wald <- NA}
+  Wald.df <- length(Egx)
+  Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
+  hypothesis1 <- c(Wald, Wald.df, Wald.pvalue)
+  
+  if(nz==0 & nk==1){
+    hypotheses <- data.frame(rbind(hypothesis1))
+    row.names(hypotheses) <- "No average effects"
+    names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
+    
+    return(hypotheses)
+  }
+  
+  ## Hypothesis 2: No covariate effects in control group
+  gammas_tmp <- c(matrix(c(gammas), ncol=ng)[-1,1])
+  idx <- which(gammas_tmp %in% constrainedgammas)
+  if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
+  
+  Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
+  if(class(Wald) == "try-error"){Wald <- NA}
+  Wald.df <- length(gammas_tmp)
+  Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
+  hypothesis2 <- c(Wald, Wald.df, Wald.pvalue)
+  
+  ## Hypothesis 3: No treatment*covariate interaction
+  gammas_tmp <- c(matrix(c(gammas), ncol=ng)[-1,-1])
+  idx <- which(gammas_tmp %in% constrainedgammas)
+  if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
+  
+  Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
+  if(class(Wald) == "try-error"){Wald <- NA}
+  Wald.df <- length(gammas_tmp)
+  Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
+  hypothesis3 <- c(Wald, Wald.df, Wald.pvalue)
+  
+  ## Hypothesis 4: No treatment effects
+  gammas_tmp <- matrix(c(gammas), ncol=ng)[,-1]
+  idx <- which(gammas_tmp %in% constrainedgammas)
+  if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
+  
+  Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
+  if(class(Wald) == "try-error"){Wald <- NA}
+  Wald.df <- length(gammas_tmp)
+  Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
+  hypothesis4 <- c(Wald, Wald.df, Wald.pvalue)
+  
+  hypotheses <- data.frame(rbind(hypothesis1,hypothesis2,hypothesis3,hypothesis4))
+  row.names(hypotheses) <- c("No average effects",
+                             "No covariate effects in control group",
+                             "No treatment*covariate interaction",
+                             "No treatment effects")
+  names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
+  
+  return(hypotheses)
+  
+  
+}
+
+
+
+
 
 
 computeHypothesesResults <- function(obj, m1_sem, type="main"){

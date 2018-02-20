@@ -250,7 +250,6 @@ createLMSyntax <- function(obj) {
   
   if(length(constrainedgammas) != 0){
     idx <- which(gammas %in% constrainedgammas) 
-    ## TODO: include unconstrainedgammas in input obj
     unconstrainedgammas <- gammas[-idx]
     unconstrainedbetas <- betas[-idx]
   }

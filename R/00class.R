@@ -37,6 +37,7 @@ setClass("parnames", representation(
   betas="array", 
   gammas="array",
   constrainedgammas="character",
+  unconstrainedgammas="character",
   gammalabels="array",
   cellmeanz="character",
   meanz="character",
