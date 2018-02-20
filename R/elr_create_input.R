@@ -186,10 +186,10 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   
   complexsurvey <- list(ids=ids, weights=weights)
   
-  ## non-standard se only work with fixed group sizes
-  if(se != "standard" & fixed.cell==FALSE){
+  ## robust se only works with fixed group sizes (TODO: Ask Yves why?)
+  if(se == "robust.sem" & fixed.cell==FALSE){
     
-    stop("EffectLiteR error: Non-standard SEs currently only work with fixed cell sizes. Please use fixed.cell=TRUE.")
+    warning("EffectLiteR warning: SE robust.sem currently only works with fixed cell sizes. Please use fixed.cell=TRUE.")
     
   }
   
