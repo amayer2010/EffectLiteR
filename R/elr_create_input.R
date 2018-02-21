@@ -1,7 +1,7 @@
 
-createInput <- function(y,x,k,z,data,method,control,measurement, 
-                        fixed.cell, fixed.z, missing, se,
-                        interactions, propscore, ids, weights, homoscedasticity,
+createInput <- function(y, x, k, z, data, method, control, measurement, 
+                        fixed.cell, fixed.z, missing, se, interactions, 
+                        homoscedasticity, test.stat, propscore, ids, weights,
                         add, method_args){
   
   d <- data
@@ -14,6 +14,7 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
     if(fixed.cell=="default"){fixed.cell <- FALSE}
     if(fixed.z=="default"){fixed.z <- FALSE}
     if(homoscedasticity=="default"){homoscedasticity <- FALSE}
+    if(test.stat=="default"){test.stat <- "Chisq"}
   }
 
   if(method=="lm"){
@@ -34,6 +35,8 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
       stop('EffectLiteR error: Heteroscedasticity is currently not allowed with method="lm".')
     }
     
+    if(test.stat=="default"){test.stat <- "Ftest"}
+    
     if(length(measurement) != 0){
       stop('EffectLiteR error: Measurement models are currently not allowed with method="lm".')
     }
@@ -53,7 +56,6 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
   }
   
     
-  
   ## treatment variable
   if(!is.factor(d[,x])){    
     d[,x] <- as.factor(d[,x])  
@@ -214,6 +216,7 @@ createInput <- function(y,x,k,z,data,method,control,measurement,
              interactions=interactions,
              complexsurvey=complexsurvey,
              homoscedasticity=homoscedasticity,
+             test.stat=test.stat,
              method_args=method_args
   )
   

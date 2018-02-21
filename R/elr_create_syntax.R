@@ -946,10 +946,10 @@ create_syntax_AveEffK <- function(ng,nk,nz,pk,meanz,Ezk,Egx,gammas){
   # }
   # 
   # TODO
-  # - Im Prinzip müsste das genauso gehen wie bei den average effects
+  # - Im Prinzip muesste das genauso gehen wie bei den average effects
   # - man brauch aber noch E(Z*X)
   # - und bei mehreren Ks wird es schwierig
-  # - ein einfacher Weg das zu testen wäre das Modell nochmal durchlaufen
+  # - ein einfacher Weg das zu testen waere das Modell nochmal durchlaufen
   #   zu lassen mit K und X vertauscht
   # 
   # 

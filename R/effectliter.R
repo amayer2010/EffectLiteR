@@ -15,7 +15,7 @@
 #' @param k Vector of manifest variables treated as categorical covariates (character vector).
 #' @param z Vector of continuous covariates (character vector). Names of both manifest and latent variables are allowed.
 #' @param data A data frame.
-#' @param method Can be one of c("sem","lm") and indicates which function is used to fit the model.
+#' @param method Can be one of \code{c("sem","lm")} and indicates which function is used to fit the model.
 #' @param control Value of \code{x} that is used as control group. If "default", takes the first entry of \code{as.factor(x)}.
 #' @param measurement Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.
 #' @param fixed.cell logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.
@@ -26,10 +26,11 @@
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
 #' @param interactions character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.
+#' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
+#' @param test.stat character. Can be one of \code{c("default","Chisq","Ftest")} and indicates the statistic used for the hypothesis tests. The tests are either based on the large sample Chi-Squared statistic (Wald tests) or the finite sample F statistic with approximate F distribution.  The default setting for \code{method="sem"} is \code{"Chisq"} and the default setting for \code{method="lm"} is \code{"Ftest"}.
 #' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
 #' @param ids Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.
 #' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
-#' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
 #' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
@@ -66,17 +67,16 @@
 effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="default", 
                        measurement=character(), fixed.cell="default", 
                        fixed.z="default", missing="default", se="standard", 
-                       syntax.only=FALSE, interactions="all", 
-                       propscore=NULL, ids=~0, weights=NULL, 
-                       homoscedasticity="default", add=character(),...){
+                       syntax.only=FALSE, interactions="all", homoscedasticity="default",
+                       test.stat="default", propscore=NULL, ids=~0, weights=NULL, 
+                       add=character(),...){
   
   obj <- new("effectlite")
-  ##TODO change such that first class input is generated, then class parnames...
   obj@call <- match.call()
   method_args <- list(...)
-  obj@input <- createInput(y,x,k,z,data,method,control,measurement, 
-                           fixed.cell, fixed.z, missing, se,
-                           interactions, propscore, ids, weights, homoscedasticity,
+  obj@input <- createInput(y, x, k, z, data, method, control, measurement, 
+                           fixed.cell, fixed.z, missing, se, interactions, 
+                           homoscedasticity, test.stat, propscore, ids, weights,
                            add, method_args)
   obj@input <- computePropensityScore(obj@input)
   obj@parnames <- createParNames(obj)  
@@ -88,12 +88,6 @@ effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="defaul
   
   return(obj)  
 }
-
-
-
-# elrEffects(m1)
-# lavEffects(m1)
-
 
 
 

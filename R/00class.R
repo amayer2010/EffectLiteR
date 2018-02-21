@@ -27,6 +27,7 @@ setClass("input", representation(
   interactions="character", ## type of interaction (all, 2-way, no)
   complexsurvey="list",
   homoscedasticity="logical",
+  test.stat="character",
   outprop="list", ## output from propensity score model
   method_args="list" ## additional ... arguments passed to method (sem, lm)
 )

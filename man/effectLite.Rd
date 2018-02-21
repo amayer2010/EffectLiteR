@@ -7,8 +7,9 @@
 effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
   control = "default", measurement = character(), fixed.cell = "default",
   fixed.z = "default", missing = "default", se = "standard",
-  syntax.only = FALSE, interactions = "all", propscore = NULL, ids = ~0,
-  weights = NULL, homoscedasticity = "default", add = character(), ...)
+  syntax.only = FALSE, interactions = "all", homoscedasticity = "default",
+  test.stat = "default", propscore = NULL, ids = ~0, weights = NULL,
+  add = character(), ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}
@@ -21,7 +22,7 @@ effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
 
 \item{data}{A data frame.}
 
-\item{method}{Can be one of c("sem","lm") and indicates which function is used to fit the model.}
+\item{method}{Can be one of \code{c("sem","lm")} and indicates which function is used to fit the model.}
 
 \item{control}{Value of \code{x} that is used as control group. If "default", takes the first entry of \code{as.factor(x)}.}
 
@@ -41,13 +42,15 @@ will not be estimated.}
 
 \item{interactions}{character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.}
 
+\item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
+
+\item{test.stat}{character. Can be one of \code{c("default","Chisq","Ftest")} and indicates the statistic used for the hypothesis tests. The tests are either based on the large sample Chi-Squared statistic (Wald tests) or the finite sample F statistic with approximate F distribution.  The default setting for \code{method="sem"} is \code{"Chisq"} and the default setting for \code{method="lm"} is \code{"Ftest"}.}
+
 \item{propscore}{Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.}
 
 \item{ids}{Formula specifying cluster ID variables. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details.}
 
 \item{weights}{Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{\link[lavaan.survey]{lavaan.survey}}. See \code{\link[survey]{svydesign}} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.}
-
-\item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
 
 \item{add}{Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.}
 

@@ -20,9 +20,10 @@ computeResults <- function(obj){
     N <- lavInspect(m1_sem, "ntotal")
     p <- length(obj@parnames@gammas) - length(obj@parnames@constrainedgammas)
     resid.df <- N-p
+    stat <- obj@input@test.stat
     
-    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat="Chisq")
-    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat="Chisq")
+    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat)
+    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat)
 
   }else if(obj@input@method == "lm"){
     
@@ -40,8 +41,9 @@ computeResults <- function(obj){
     pval <- 2*(1-pt(abs(tval),df=rdf)) 
 
     resid.df <- m1_lm$df.residual
-    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat="Ftest")
-    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat="Ftest")
+    stat <- obj@input@test.stat
+    hypotheses <- elrMainHypothesisTests(obj, est, vcov.def, resid.df, stat)
+    hypothesesk <- elrKConditionalHypothesisTests(obj, est, vcov.def, resid.df, stat)
     
   }
 
@@ -67,7 +69,7 @@ computeResults <- function(obj){
       
       ## TODO: improve code
       pt_tmp <- parTable(m1_sem) ## TODO: what about lm()
-      pt_tmp <- subset(pt_tmp, subset=op==":=")
+      pt_tmp <- pt_tmp[pt_tmp$op == ":=",]
       npar <- nrow(pt_tmp)
       nnewpar <- length(unlist(gregexpr(":=", obj@input@add)))
       newnames <- pt_tmp$label[(npar-nnewpar+1):npar]
