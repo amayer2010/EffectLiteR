@@ -100,6 +100,8 @@ shinyServer(function(input, output, session) {
     if(homoscedasticity=="homoscedastic"){homoscedasticity <- TRUE}
     if(homoscedasticity=="heteroscedastic"){homoscedasticity <- FALSE}
     
+    test.stat <- input$test.stat
+    
     if(input$add.syntax == ""){
       add <- character()
     }else{
@@ -120,10 +122,11 @@ shinyServer(function(input, output, session) {
                      fixed.cell=fixed.cell,
                      fixed.z=fixed.z,
                      interactions=interactions,
+                     homoscedasticity=homoscedasticity,
+                     test.stat=test.stat,
                      propscore=propscore,                 
                      ids=ids,
                      weights=weights,
-                     homoscedasticity=homoscedasticity,
                      add=add)
 
     tryCatch(
@@ -899,6 +902,7 @@ shinyServer(function(input, output, session) {
         }
       
       homoscedasticity <- input$homoscedasticity
+      test.stat <- input$test.stat
       
       printadd <- "character()"
       if(input$add.syntax != ""){printadd <- "add"}
@@ -923,10 +927,11 @@ shinyServer(function(input, output, session) {
                     printfixedcell, ", ",
                     printfixedz, ", ",
                     "interactions=\"", interactions, "\", ",
+                    "homoscedasticity=\"", homoscedasticity, "\", ",
+                    "test.stat=\"", test.stat, "\", ",
                     "propscore=", printpropscore, ", ",
                     "ids=", printids, ", ",
                     "weights=", printweights, ", ",
-                    "homoscedasticity=\"", homoscedasticity, "\", ",
                     "add=", printadd,
                     ")")
       

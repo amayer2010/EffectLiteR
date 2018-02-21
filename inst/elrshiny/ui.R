@@ -446,6 +446,9 @@ br()
         ),
         radioButtons("homoscedasticity", "Residual variances", 
                      choices=c("default","homoscedastic", "heteroscedastic"), 
+                     selected = "default"),
+        radioButtons("test.stat", "Test statistic for hypotheses", 
+                     choices=c("default","Chisq", "Ftest"), 
                      selected = "default")
     ),
 ########## Interactions #############
