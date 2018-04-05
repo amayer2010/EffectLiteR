@@ -425,7 +425,7 @@ br()
       tabPanel('Options',
         img(src='effectliter_logo.png', align = "right"),
         br(),
-        selectInput("control", "Control Group", "", width='60%'),
+        selectInput("control", "Reference Group", "", width='60%'),
         radioButtons("missing", "Missing Data", 
                      choices=c("listwise","fiml"), 
                      selected = "listwise"),

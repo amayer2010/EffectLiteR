@@ -80,7 +80,7 @@ shinyServer(function(input, output, session) {
     
     
     z <- NULL; if(length(input$variablez) != 0){z <- input$variablez}
-    if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
+    if(isLatentCovs()){z <- c(z,latentcov())}
     
     propscore <- NULL 
     if(length(input$propscore) != 0 & !input$propscoreformula){
@@ -133,7 +133,13 @@ shinyServer(function(input, output, session) {
       do.call("effectLite", elr.args)
     )  
   })
-
+  
+  ######## Reactive latent covariates ########
+  isLatentCovs <- reactive({
+    
+    input$latentz && !is.na(input$nlatentz) && input$nlatentz>0 && input$nlatentz<11
+  })
+  
   
   ######## Reactive zselect for Plot 2 ########
   zSelect <- reactive({
@@ -168,7 +174,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect <- c(input$variablez, input$variablek, kstar, input$variablex)
     
-    if(input$latentz & input$nlatentz > 0){
+    if(isLatentCovs()){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
                         input$name.etaz4, input$name.etaz5, input$name.etaz6, 
                         input$name.etaz7, input$name.etaz8, input$name.etaz9, 
@@ -205,7 +211,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect3 <- c("", input$variablek, kstar, input$variablex, input$variablez)
     
-    if(input$latentz & input$nlatentz > 0){
+    if(isLatentCovs()){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
                         input$name.etaz4, input$name.etaz5, input$name.etaz6, 
                         input$name.etaz7, input$name.etaz8, input$name.etaz9, 
@@ -242,7 +248,7 @@ shinyServer(function(input, output, session) {
     d <- dataInput()
     wselect <- c("", names(d))
     
-    if(input$latentz & input$nlatentz > 0){
+    if(isLatentCovs()){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
                         input$name.etaz4, input$name.etaz5, input$name.etaz6, 
                         input$name.etaz7, input$name.etaz8, input$name.etaz9, 
@@ -273,7 +279,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$variablek)){kstar <- "K"}
     zselect4 <- c("", input$variablek, kstar, input$variablex, input$variablez)
     
-    if(input$latentz & input$nlatentz > 0){
+    if(isLatentCovs()){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
                         input$name.etaz4, input$name.etaz5, input$name.etaz6, 
                         input$name.etaz7, input$name.etaz8, input$name.etaz9, 
@@ -309,7 +315,7 @@ shinyServer(function(input, output, session) {
     
     zselect5 <- c("", input$variablez)
     
-    if(input$latentz & input$nlatentz > 0){
+    if(isLatentCovs()){
       nameslatentz <- c(input$name.etaz1, input$name.etaz2, input$name.etaz3,
                         input$name.etaz4, input$name.etaz5, input$name.etaz6, 
                         input$name.etaz7, input$name.etaz8, input$name.etaz9, 
@@ -336,10 +342,10 @@ shinyServer(function(input, output, session) {
   
   ######## Reactive measurement model ########
   mm <- reactive({
-    if(!input$latenty & !input$latentz){
+    if(!input$latenty && !isLatentCovs()){
       return(character())
       
-    }else if(input$latenty | input$nlatentz > 0){
+    }else if(input$latenty || isLatentCovs()){
       
       ## determine number of cells
       d <- dataInput()
@@ -445,7 +451,7 @@ shinyServer(function(input, output, session) {
   ###### Reactive latent covariates ###########
   latentcov <- reactive({
     
-    if(input$latentz == TRUE & input$nlatentz > 0){
+    if(isLatentCovs()){
         
       nameslatentcov <- NULL; nameslatentcov$etaz1 <- input$name.etaz1
       if(input$nlatentz > 1){nameslatentcov$etaz2 <- input$name.etaz2}
@@ -870,7 +876,7 @@ shinyServer(function(input, output, session) {
       z <- NULL
       printz <- "NULL"
       if(length(input$variablez) != 0){z <- input$variablez}
-      if(input$latentz & input$nlatentz > 0){z <- c(z,latentcov())}
+      if(isLatentCovs()){z <- c(z,latentcov())}
       if(!is.null(z)){
         printz <- paste0("c(\"",
                          paste(z, collapse="\",\""), 
