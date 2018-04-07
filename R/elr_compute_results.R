@@ -244,7 +244,6 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   
   if(nz==0 & nk==1){
     hypotheses <- data.frame(rbind(hypothesis1))
-    row.names(hypotheses) <- "No average effects"
     names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
     
     if(stat=="Ftest"){
@@ -253,9 +252,10 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
       F.df2 <- resid.df
       F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
       hypotheses <- data.frame(rbind(c(Fvalue, F.df1, F.df2, F.pvalue)))
-      row.names(hypotheses) <- "No average effects"
       names(hypotheses) <- c("F value", "df1", "df2", "p-value")
     }
+    
+    row.names(hypotheses) <- "No average effects"
     
     return(hypotheses)
   }
@@ -297,10 +297,6 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   hypothesis4 <- c(Wald, Wald.df, Wald.pvalue)
   
   hypotheses <- data.frame(rbind(hypothesis1,hypothesis2,hypothesis3,hypothesis4))
-  row.names(hypotheses) <- c("No average effects",
-                             "No covariate effects in control group",
-                             "No treatment*covariate interaction",
-                             "No treatment effects")
   names(hypotheses) <- c("Wald Chi-Square", "df", "p-value")
   
   
@@ -310,12 +306,13 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
     F.df2 <- resid.df
     F.pvalue <- 1 - pf(Fvalue, F.df1, F.df2)
     hypotheses <- data.frame(Fvalue, F.df1, F.df2, F.pvalue)
-    row.names(hypotheses) <- c("No average effects",
-                               "No covariate effects in control group",
-                               "No treatment*covariate interaction",
-                               "No treatment effects")
     names(hypotheses) <- c("F value", "df1", "df2", "p-value")
   }
+  
+  row.names(hypotheses) <- c("No average effects",
+                             "No covariate effects in control group",
+                             "No treatment*covariate interaction",
+                             "No treatment effects")
   
   return(hypotheses)
   

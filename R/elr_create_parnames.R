@@ -74,6 +74,14 @@ createParNames <- function(obj){
   gammalabels[1] <- "Intercept"
   gammalabels <- array(gammalabels, dim=c(nz+1,nk,ng))
   
+  label.g.function <- "(K,Z)" 
+  label.covs <- ",K,Z"
+  if(nk==1 & nz==0){label.g.function <- "()"; label.covs <- ""}
+  if(nk>1 & nz==0){label.g.function <- "(K)"; label.covs <- ",K"}
+  if(nk==1 & nz>0){label.g.function <- "(Z)"; label.covs <- ",Z"}
+  
+  label.Egx <- paste0("E[g",1:(ng-1),label.g.function,"]")
+  
   pk <- paste0("Pk",0:(nk-1))
   px <- paste0("Px",0:(ng-1))
   if(nz>0){
@@ -135,6 +143,9 @@ createParNames <- function(obj){
              constrainedgammas=constrainedgammas,
              unconstrainedgammas=unconstrainedgammas,
              gammalabels=gammalabels,
+             label.g.function=label.g.function,
+             label.covs=label.covs,
+             label.Egx=label.Egx,
              cellmeanz=cellmeanz,
              meanz=meanz,
              pk=pk,
