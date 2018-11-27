@@ -12,12 +12,12 @@ elr_compute_descriptives_z <- function(object){
     d <- object@input@data
     d <- d[,vnamesz]
     
-    mean <- colMeans(d, na.rm=TRUE)
-    sd <- apply(d,2,function(x){sd(x, na.rm=TRUE)})
-    min <- apply(d,2,function(x){min(x)})
-    max <- apply(d,2,function(x){max(x)})
+    means <- colMeans(d, na.rm=TRUE)
+    sds <- apply(d,2,function(x){sd(x, na.rm=TRUE)})
+    mins <- apply(d,2,function(x){min(x)})
+    maxs <- apply(d,2,function(x){max(x)})
     
-    res <- data.frame(mean,sd,min,max)
+    res <- data.frame(Mean=means, SD=sds, Min=mins, Max=maxs)
     
   }else if(method=="sem"){
     
@@ -34,12 +34,12 @@ elr_compute_descriptives_z <- function(object){
     
     mean.ov <- data.frame(lavInspect(lavres, what="mean.ov"))
     mean.lv <- data.frame(lavInspect(lavres, what="mean.lv"))
-    mean.all <- rbind(mean.ov, mean.lv)
+    mean.all <- as.matrix(rbind(mean.ov, mean.lv))
     
-    mean <- as.matrix(mean.all) %*% freq
-    sd <- sqrt(cov.all %*% freq + (mean.all - mean)^2 %*% freq) ## law of total variance
+    means <- mean.all %*% freq
+    sds <- sqrt(cov.all %*% freq + (sweep(mean.all,1,means))^2 %*% freq) ## law of total variance
     
-    res <- data.frame(mean,sd)
+    res <- data.frame(Mean=means, SD=sds)
     res <- res[vnamesz,]
   }
   

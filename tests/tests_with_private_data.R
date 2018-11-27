@@ -1,7 +1,9 @@
 
 ############ Kirchmann Example with latent variable ############
 
-kirch <- foreign::read.spss("private/data/kirchmann.sav", to.data.frame=T)
+expect_message({
+  kirch <- foreign::read.spss("private/data/kirchmann.sav", to.data.frame=T)
+})
 
 mmtest <- generateMeasurementModel(names=c("eta2", "eta1"),
                                    indicators=list("eta2"=c("CESD_13","CESD_23"),
@@ -43,7 +45,9 @@ expect_equivalent(res_kirch_manps, oldres_kirch_manps)
 ############ Bettinas Example ############
 
 expect_warning({
-  d <- elrReadData("private/data/Gesamtdatei_Klasse 2 mit Erstsprache.sav")
+  expect_message({
+    d <- elrReadData("private/data/Gesamtdatei_Klasse 2 mit Erstsprache.sav") 
+  })
 })
 
 m1 <- effectLite(data=d, y="b_ELFE_Text", x="Gruppe", 
@@ -74,8 +78,7 @@ expect_equivalent(res_bettina_simple, oldres_bettina_simple)
 
 ########## Test with Rolf's problem data (non-convergence in lavaan) ############
 
-
-expect_warning(d <- elrReadData("private/data/problem1.sav"))
+expect_message(d <- elrReadData("private/data/problem1.sav"))
 expect_warning(m1 <- effectLite(y="Y", x="X", k="Z", data=d))
 
 
