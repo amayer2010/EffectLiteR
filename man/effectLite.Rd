@@ -5,11 +5,12 @@
 \title{Estimate average and conditional effects}
 \usage{
 effectLite(y, x, k = NULL, z = NULL, data, method = "sem",
-  control = "default", measurement = character(), fixed.cell = "default",
-  fixed.z = "default", missing = "default", se = "standard",
-  syntax.only = FALSE, interactions = "all", homoscedasticity = "default",
-  test.stat = "default", propscore = NULL, ids = ~0, weights = NULL,
-  add = character(), ...)
+  control = "default", measurement = character(),
+  fixed.cell = "default", fixed.z = "default", missing = "default",
+  se = "standard", syntax.only = FALSE, interactions = "all",
+  homoscedasticity = "default", test.stat = "default",
+  propscore = NULL, ids = ~0, weights = NULL, add = character(),
+  ...)
 }
 \arguments{
 \item{y}{Dependent variable (character string). Can be the name of a manifest variable or of a latent variable.}

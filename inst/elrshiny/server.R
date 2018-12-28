@@ -39,6 +39,8 @@ shinyServer(function(input, output, session) {
         return(example02lv)
       }else if(exdata=="example_multilevel"){
         return(example_multilevel)
+      }else if(exdata=="MDRS2016"){
+        return(MDRS2016)
       }                        
     }
     

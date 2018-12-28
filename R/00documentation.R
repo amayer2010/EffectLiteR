@@ -67,6 +67,30 @@ NULL
 NULL
 
 
+#' Dataset MDRS2016.
+#' 
+#' The simulated dataset with latent variables used in Mayer, Dietzfelbinger, Rosseel, and Steyer (2016). The variables are:
+#' 
+#' \itemize{
+#'   \item y11. First indicator of latent covariate (pretest mental health).
+#'   \item y21. Second indicator of latent covariate (pretest mental health).
+#'   \item y31. Third indicator of latent covariate (pretest mental health).
+#'   \item y12. First indicator of latent outcome (posttest mental health).
+#'   \item y22. Second indicator of latent outcome (posttest mental health).
+#'   \item y32. Third indicator of latent outcome (posttest mental health).
+#'   \item x. Categorical treatment variable with values 0 (wait list control group), 1 (conventional therapy), and 2 (innovative therapy).
+#'   \item k. Categorical covariate with values 0 (male) and 1 (female).
+#'   \item Ix1. Binary indicator for conventional therapy (X=1).
+#'   \item Ix2. Binary indicator for innovative therapy (X=2).
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 1000 rows and 10 variables.
+#' @name MDRS2016
+NULL
+
+
 #' Dataset example_multilevel.
 #' 
 #' A simulated dataset with a cluster ID and sampling weights to test multilevel options. The variables are:

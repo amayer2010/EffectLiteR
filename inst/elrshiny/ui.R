@@ -18,7 +18,7 @@ shinyUI(fluidPage(
         # hr(),        
         selectizeInput(inputId="exdata", label="Example Data", selected="",
                        choices= c("","nonortho","example01","example02lv",
-                                  "example_multilevel"),
+                                  "example_multilevel", "MDRS2016"),
                        options = list(placeholder = 'choose example data'),
                        width='50%'),    
         # hr(),
