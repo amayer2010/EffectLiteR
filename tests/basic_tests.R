@@ -115,7 +115,8 @@ expect_equivalent(res_2k3z, oldres_2k3z)
 
 
 ## 1 K; 4 Z
-m1 <- effectLite(data=d, y="dv", z=c("z1","z2","z3","k1"), 
+d$k1num <- as.numeric(d$k1)
+m1 <- effectLite(data=d, y="dv", z=c("z1","z2","z3","k1num"), 
                  k="kateg2", x="x", control="control")
 
 res_1k4z <- rbind(m1@results@Egx,
