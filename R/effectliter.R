@@ -25,7 +25,7 @@
 #' passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.
 #' @param syntax.only logical. If \code{TRUE}, only syntax is returned and the model 
 #' will not be estimated.
-#' @param interactions character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.
+#' @param interactions character. Indicates the type of interaction. Can be one of \code{"all"} (all interactions), \code{"2-way"} (only two-way interactions), \code{"X:K,X:Z"} (only X:K and X:Z interactions), \code{"X:K"} (only X:K interactions), \code{"X:Z"} (only X:Z interactions), \code{"none"} (no treatment by covariate interactions, but potentially interactions between categorical and continuous covariates), or \code{"no"} (no interactions at all). 
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.
 #' @param test.stat character. Can be one of \code{c("default","Chisq","Ftest")} and indicates the statistic used for the hypothesis tests. The tests are either based on the large sample Chi-Squared statistic (Wald tests) or the finite sample F statistic with approximate F distribution.  The default setting for \code{method="sem"} is \code{"Chisq"} and the default setting for \code{method="lm"} is \code{"Ftest"}.
 #' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
@@ -34,6 +34,7 @@
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
 #' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
+#' @references Mayer, A., Dietzfelbinger, L., Rosseel, Y. & Steyer, R. (2016). The EffectLiteR approach for analyzing average and conditional effects. Multivariate Behavioral Research, 51, 374-391.}
 #' @examples
 #' ## Example with one categorical covariate
 #' m1 <- effectLite(y="y", x="x", k="z", control="0", data=nonortho)

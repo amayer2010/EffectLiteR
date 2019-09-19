@@ -41,7 +41,9 @@ shinyServer(function(input, output, session) {
         return(example_multilevel)
       }else if(exdata=="MDRS2016"){
         return(MDRS2016)
-      }                        
+      }else if(exdata=="sophonet_data_simulated"){
+        return(sophonet_data_simulated)
+      }
     }
     
     if(!is.null(inFile)){

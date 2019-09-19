@@ -41,7 +41,7 @@ passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.}
 \item{syntax.only}{logical. If \code{TRUE}, only syntax is returned and the model 
 will not be estimated.}
 
-\item{interactions}{character. Can be one of \code{c("all","2-way","X:K,X:Z","X:K","X:Z","none","no")} and indicates the type of interaction used in the parameterization of the regression.}
+\item{interactions}{character. Indicates the type of interaction. Can be one of \code{"all"} (all interactions), \code{"2-way"} (only two-way interactions), \code{"X:K,X:Z"} (only X:K and X:Z interactions), \code{"X:K"} (only X:K interactions), \code{"X:Z"} (only X:Z interactions), \code{"none"} (no treatment by covariate interactions, but potentially interactions between categorical and continuous covariates), or \code{"no"} (no interactions at all).}
 
 \item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
 
@@ -96,4 +96,9 @@ m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
                     ids=~cid, weights=~weights)
 print(m1)
 }
+}
+\references{
+Mayer, A., Dietzfelbinger, L., Rosseel, Y. & Steyer, R. (2016). 
+The EffectLiteR approach for analyzing average and conditional effects. 
+Multivariate Behavioral Research, 51, 374-391.
 }

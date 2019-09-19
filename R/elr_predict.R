@@ -98,10 +98,11 @@ computeConditionalEffects <- function(obj, newdata=NULL,
   
   ## add factor scores
   ## TODO Add newdata to lavPredict...
+  ## This is important for predicting based on item level data (add also to shiny UI)
   if(length(latentz) > 0){
     if(!all(latentz %in% names(data))){
-      
-      fscores <- data.frame(do.call("rbind", lavPredict(lavresults)))
+      tmpdata <- obj@input@data ##TODO not sure if we should do it this way...
+      fscores <- data.frame(do.call("rbind", lavPredict(lavresults, newdata=tmpdata)))
       fscores <- subset(fscores, select=latentz)
       fscores$id <- unlist(lavInspect(lavresults, "case.idx"))
       data <- merge(data,fscores)
