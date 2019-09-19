@@ -137,17 +137,14 @@ NULL
 #'   \item tosca.shame.t1.i2 
 #'   \item fskn.se.t1.i1 
 #'   \item fskn.se.t1.i2 
-#'   \item komorbid 
+#'   \item comorbid 
 #'   \item iip.lov 
 #'   \item iip.dom tb
 #' }
 #' 
 #' @docType data
 #' @keywords datasets
-#' @references Leichsenring, F., Salzer, S., Beutel, M. E., Herpertz, S., Hiller, W., 
-#' Hoyer, J., Huesing, J., ...,	Leibing, E. (2014). Long-term outcome of psychodynamic
-#' therapy and cognitive-behavioral therapy in social anxiety disorder. American Journal of
-#' Psychiatry, 171, 1074–1082.
+#' @references Leichsenring, F., Salzer, S., Beutel, M. E., Herpertz, S., Hiller, W., Hoyer, J., Huesing, J., ..., Leibing, E. (2013). Psychodynamic therapy and cognitive-behavioral therapy in social anxiety disorder: A multicenter randomized controlled trial. American Journal of Psychiatry, 170, 759–767.
 #' @format A data frame with 328 rows and 24 variables.
 #' @name sophonet_data_simulated
 NULL

@@ -98,7 +98,5 @@ print(m1)
 }
 }
 \references{
-Mayer, A., Dietzfelbinger, L., Rosseel, Y. & Steyer, R. (2016). 
-The EffectLiteR approach for analyzing average and conditional effects. 
-Multivariate Behavioral Research, 51, 374-391.
+Mayer, A., Dietzfelbinger, L., Rosseel, Y. & Steyer, R. (2016). The EffectLiteR approach for analyzing average and conditional effects. Multivariate Behavioral Research, 51, 374-391.
 }
