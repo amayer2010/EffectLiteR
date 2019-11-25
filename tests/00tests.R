@@ -3,8 +3,6 @@ library(EffectLiteR)
 library(testthat)
 library(car)
 
-## TODO why does test_file() not work?
-
 source("tests/adjmean_tests.R")
 source("tests/basic_tests.R")
 source("tests/lm_method_tests.R")

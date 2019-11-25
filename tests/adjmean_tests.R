@@ -9,7 +9,6 @@ oldres_adjmeans_2k1z <- read.table("tests/oldres/oldres_adjmeans_2k1z.dat")
 expect_equivalent(res_adjmeans_2k1z, oldres_adjmeans_2k1z)
 
 
-
 ## 0 K; 0 Z
 m1 <- effectLite(data=example01, y="dv", z=NULL, k=NULL, x="x", 
                  control="control")
