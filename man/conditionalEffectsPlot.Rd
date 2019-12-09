@@ -4,8 +4,15 @@
 \alias{conditionalEffectsPlot}
 \title{Plot conditional effects}
 \usage{
-conditionalEffectsPlot(obj, zsel = "id", gxsel = "g1", colour = "",
-  show.ci = FALSE, regression = "default", regression.ci = FALSE)
+conditionalEffectsPlot(
+  obj,
+  zsel = "id",
+  gxsel = "g1",
+  colour = "",
+  show.ci = FALSE,
+  regression = "default",
+  regression.ci = FALSE
+)
 }
 \arguments{
 \item{obj}{Object of class \code{effectlite} obtained from fitting an effect 

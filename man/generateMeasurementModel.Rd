@@ -4,8 +4,7 @@
 \alias{generateMeasurementModel}
 \title{Generate measurement model}
 \usage{
-generateMeasurementModel(names = NULL, indicators, ncells,
-  model = NULL)
+generateMeasurementModel(names = NULL, indicators, ncells, model = NULL)
 }
 \arguments{
 \item{names}{A vector of character strings with names of latent variables. If not specified, names(indicators) is used.}

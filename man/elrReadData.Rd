@@ -4,8 +4,15 @@
 \alias{elrReadData}
 \title{Read Data File}
 \usage{
-elrReadData(file, name = NULL, header = "default", sep = "default",
-  dec = "default", use.value.labels = "default", na.strings = "NA")
+elrReadData(
+  file,
+  name = NULL,
+  header = "default",
+  sep = "default",
+  dec = "default",
+  use.value.labels = "default",
+  na.strings = "NA"
+)
 }
 \arguments{
 \item{file}{Name of the file to read.}

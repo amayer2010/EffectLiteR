@@ -3,7 +3,6 @@
 \docType{package}
 \name{EffectLiteR}
 \alias{EffectLiteR}
-\alias{EffectLiteR-package}
 \title{EffectLiteR}
 \description{
 EffectLiteR
