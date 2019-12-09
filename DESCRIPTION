@@ -1,5 +1,5 @@
 Package: EffectLiteR
-Version: 0.4-4.004
+Version: 0.4-4.005
 Date: 2019-12-09
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),

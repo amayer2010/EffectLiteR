@@ -237,7 +237,7 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   
   ## Hypothesis 1: No average treatment effects
   Wald <- try(t(est[Egx]) %*% solve(vcov.def[Egx,Egx]) %*% est[Egx], silent=TRUE)
-  if("try-error" %in% class(Wald)){Wald <- NA}
+  if(inherits(Wald, "try-error")){Wald <- NA}
   Wald.df <- length(Egx)
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis1 <- c(Wald, Wald.df, Wald.pvalue)
@@ -267,7 +267,7 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
   
   Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
-  if("try-error" %in% class(Wald)){Wald <- NA}
+  if(inherits(Wald, "try-error")){Wald <- NA}
   Wald.df <- length(gammas_tmp)
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis2 <- c(Wald, Wald.df, Wald.pvalue)
@@ -279,7 +279,7 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
   
   Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
-  if("try-error" %in% class(Wald)){Wald <- NA}
+  if(inherits(Wald, "try-error")){Wald <- NA}
   Wald.df <- length(gammas_tmp)
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis3 <- c(Wald, Wald.df, Wald.pvalue)
@@ -291,7 +291,7 @@ elrMainHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
   if(length(idx)>0){gammas_tmp <- gammas_tmp[-idx]}
   
   Wald <- try(t(est[gammas_tmp]) %*% solve(vcov.def[gammas_tmp,gammas_tmp]) %*% est[gammas_tmp], silent=TRUE)
-  if("try-error" %in% class(Wald)){Wald <- NA}
+  if(inherits(Wald, "try-error")){Wald <- NA}
   Wald.df <- length(gammas_tmp)
   Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
   hypothesis4 <- c(Wald, Wald.df, Wald.pvalue)
@@ -339,7 +339,7 @@ elrKConditionalHypothesisTests <- function(obj, est, vcov.def, resid.df, stat){
     for(i in 1:nk){
       Egxk_tmp <- Egxk[,i]
       Wald <- try(t(est[Egxk_tmp]) %*% solve(vcov.def[Egxk_tmp,Egxk_tmp]) %*% est[Egxk_tmp], silent=TRUE)
-      if("try-error" %in% class(Wald)){Wald <- NA}
+      if(inherits(Wald, "try-error")){Wald <- NA}
       Wald.df <- length(Egxk_tmp)
       Wald.pvalue <- 1 - pchisq(Wald, df=Wald.df)
       hypothesis <- c(Wald, Wald.df, Wald.pvalue)
