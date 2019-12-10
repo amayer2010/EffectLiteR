@@ -47,7 +47,7 @@ elrReadData <- function(file, name=NULL, header="default", sep="default",
     if(dec=="default"){dec <- "."}
     d <- try(read.csv(file, header=header, sep=sep, dec=dec,
                   na.strings=na.strings), silent=TRUE)
-    if(class(d) == "try-error"){
+    if(inherits(d, "try-error")){
       d <- read.csv2(file, header=header, na.strings=na.strings)
     }
     return(d)

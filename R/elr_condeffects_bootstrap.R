@@ -45,7 +45,7 @@ elr_condeff_boot_samples <- function(data, m1, formula, nboot){
     
     mboot <- try(eval(call))
     
-    if(class(mboot) == "try-error"){
+    if(inherits(mboot, "try-error")){
       res[[i]] <- NA
       
     }else{
