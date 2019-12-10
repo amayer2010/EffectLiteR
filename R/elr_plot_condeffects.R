@@ -27,7 +27,7 @@ conditionalEffectsPlot <- function(obj, zsel="id", gxsel="g1", colour="",
                                    show.ci=FALSE, regression="default",
                                    regression.ci=FALSE){
   
-  stopifnot(inherits(m1, "effectlite")) 
+  stopifnot(inherits(obj, "effectlite")) 
   stopifnot(regression %in% c("default","smooth","linear","none"))
   
   condeffects <- obj@results@condeffects
