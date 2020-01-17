@@ -15,6 +15,12 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
     if(fixed.z=="default"){fixed.z <- FALSE}
     if(homoscedasticity=="default"){homoscedasticity <- FALSE}
     if(test.stat=="default"){test.stat <- "Chisq"}
+    
+    if(!is.null(weights)){
+      if(x=="g"){
+        stop('EffectLiteR error: Please rename treatment variable ("g" is not allowed).')
+      }
+    }
   }
 
   if(method=="lm"){
