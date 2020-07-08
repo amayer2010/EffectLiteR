@@ -926,7 +926,7 @@ create_syntax_AveEffZ <- function(nz, alphas, relfreq, AveEffZ){
     
     for(i in 1:nz){
       tmp <- paste0(AveEffZ[i] ," := ",
-                    paste(alphas[i,,],relfreq, sep="*", collapse=" + "))
+                    paste(alphas[i+1,,],relfreq, sep="*", collapse=" + "))
       res <- paste0(res, "\n", tmp)
     }
   }
