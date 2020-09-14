@@ -1,6 +1,6 @@
 Package: EffectLiteR
-Version: 0.4-5.003
-Date: 2019-12-10
+Version: 0.4-5.004
+Date: 2020-07-08
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),
@@ -17,7 +17,7 @@ Depends:
     lavaan (>= 0.5-20)
 Imports:
     methods,
-    shiny (>= 0.11),
+    shiny (>= 1.5.0),
     foreign,
     ggplot2,
     nnet,
