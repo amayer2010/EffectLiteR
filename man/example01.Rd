@@ -4,7 +4,9 @@
 \name{example01}
 \alias{example01}
 \title{Dataset example01.}
-\format{A data frame with 2000 rows and 7 variables.}
+\format{
+A data frame with 2000 rows and 7 variables.
+}
 \description{
 A simulated dataset. The variables are:
 }

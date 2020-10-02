@@ -4,7 +4,9 @@
 \name{sophonet_data_simulated}
 \alias{sophonet_data_simulated}
 \title{Dataset sophonet_data_simulated.}
-\format{A data frame with 328 rows and 24 variables.}
+\format{
+A data frame with 328 rows and 24 variables.
+}
 \description{
 A simulated dataset based on the SOPHONET-study (Leichsenring et al., 2013). The variables are:
 }

@@ -4,7 +4,9 @@
 \name{MDRS2016}
 \alias{MDRS2016}
 \title{Dataset MDRS2016.}
-\format{A data frame with 1000 rows and 10 variables.}
+\format{
+A data frame with 1000 rows and 10 variables.
+}
 \description{
 The simulated dataset with latent variables used in Mayer, Dietzfelbinger, Rosseel, and Steyer (2016). The variables are:
 }

@@ -5,5 +5,7 @@
 \alias{EffectLiteR}
 \title{EffectLiteR}
 \description{
-EffectLiteR
+Use structural equation modeling to estimate average and conditional effects 
+of a treatment variable on an outcome variable, taking into account multiple
+continuous and categorical covariates.
 }

@@ -4,7 +4,9 @@
 \name{example02lv}
 \alias{example02lv}
 \title{Dataset example02lv.}
-\format{A data frame with 300 rows and 6 variables.}
+\format{
+A data frame with 300 rows and 6 variables.
+}
 \description{
 A simulated dataset with latent variables. The variables are:
 }

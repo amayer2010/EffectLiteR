@@ -4,7 +4,9 @@
 \name{nonortho}
 \alias{nonortho}
 \title{Dataset nonortho.}
-\format{A data frame with 500 rows and 3 variables}
+\format{
+A data frame with 500 rows and 3 variables
+}
 \description{
 A simulated dataset. The variables are:
 }

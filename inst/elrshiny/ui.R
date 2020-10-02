@@ -19,7 +19,8 @@ shinyUI(fluidPage(
         selectizeInput(inputId="exdata", label="Example Data", selected="",
                        choices= c("","nonortho","example01","example02lv",
                                   "example_multilevel", "MDRS2016", 
-                                  "sophonet_data_simulated"),
+                                  "sophonet_data_simulated",
+                                  "elrdata_categorical_items"),
                        options = list(placeholder = 'choose example data'),
                        width='50%'),    
         # hr(),
@@ -296,7 +297,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 1
@@ -308,7 +311,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 2
@@ -320,7 +325,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),  
           ### Cov 3
@@ -332,7 +339,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),  
           ### Cov 4
@@ -344,7 +353,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),  
           ### Cov 5
@@ -356,7 +367,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 6
@@ -368,7 +381,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 7
@@ -380,7 +395,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 8
@@ -392,7 +409,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 9
@@ -404,7 +423,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           ),
           ### Cov 10
@@ -416,7 +437,9 @@ br()
               choices = c("default" = "default",
                           "equivalent measures" = "parallel",
                           "essentially equivalent measures" = "tau-equi",
-                          "congeneric measures" = "tau-cong"),
+                          "congeneric measures" = "tau-cong",
+                          "essentially equivalent measures categorical" = "tau-equi-categorical",
+                          "congeneric measures categorical" = "tau-cong-categorical"),
               width='100%')
           )
         ),

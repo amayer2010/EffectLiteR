@@ -4,7 +4,9 @@
 \name{example_multilevel}
 \alias{example_multilevel}
 \title{Dataset example_multilevel.}
-\format{A data frame with 800 rows and 7 variables.}
+\format{
+A data frame with 800 rows and 7 variables.
+}
 \description{
 A simulated dataset with a cluster ID and sampling weights to test multilevel options. The variables are:
 }

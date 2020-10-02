@@ -4,7 +4,13 @@
 \alias{generateMeasurementModel}
 \title{Generate measurement model}
 \usage{
-generateMeasurementModel(names = NULL, indicators, ncells, model = NULL)
+generateMeasurementModel(
+  names = NULL,
+  indicators,
+  ncells,
+  model = NULL,
+  data = NULL
+)
 }
 \arguments{
 \item{names}{A vector of character strings with names of latent variables. If not specified, names(indicators) is used.}
@@ -13,7 +19,9 @@ generateMeasurementModel(names = NULL, indicators, ncells, model = NULL)
 
 \item{ncells}{Number of groups/cells.}
 
-\item{model}{A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("default","parallel","tau-equi","tau-cong")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used. If "default", the function tries to guess a reasonable measurement model: Congeneric for latent variables with three or more indicators, essentially tau-equivalent for latent variables with less than three indicators and for latent variables with cross-loadings (e.g., method factors), and parallel for single-indicator latent variables. If NULL, "default" is assumed for all latent variables.}
+\item{model}{A vector of character strings of the same length as names. It is used to specify the type of measurement model for each of the latent variables. Each element can be one of \code{c("default","parallel","tau-equi","tau-cong","tau-equi-categorical","tau-cong-categorical")} indicating whether a parallel, essentially tau-equivalent, or tau-congeneric measurement model is used and whether the items are categorical or not. If "default", the function tries to guess a reasonable measurement model: Congeneric for latent variables with three or more indicators, essentially tau-equivalent for latent variables with less than three indicators and for latent variables with cross-loadings (e.g., method factors), and parallel for single-indicator latent variables. If NULL, "default" is assumed for all latent variables.}
+
+\item{data}{A data set that includes the indicator variables. It is required only for categorical indicators to detect the number of categories.}
 }
 \description{
 This function automatically generates \code{lavaan} syntax for the measurement model for a call to \code{\link[EffectLiteR]{effectLite}}. It is currently also used in the shiny interface.
@@ -35,5 +43,14 @@ indicators <- list("eta" = c("y12","y22"),
                    "mf" = c("y12","y22"))
 ncells = 2
 cat(generateMeasurementModel(names, indicators, ncells))
+
+## Example with categorical items
+names <- c("eta", "xi")
+indicators <- list("eta" = paste0("y",1:7,1),
+                   "xi" = paste0("z",1:5,1))
+ncells = 2
+model = c("tau-equi-categorical","tau-cong-categorical")
+cat(generateMeasurementModel(names, indicators, ncells, model, 
+                             data=elrdata_categorical_items))
 
 }

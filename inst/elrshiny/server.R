@@ -43,6 +43,8 @@ shinyServer(function(input, output, session) {
         return(MDRS2016)
       }else if(exdata=="sophonet_data_simulated"){
         return(sophonet_data_simulated)
+      }else if(exdata=="elrdata_categorical_items"){
+        return(elrdata_categorical_items)
       }
     }
     
@@ -428,12 +430,13 @@ shinyServer(function(input, output, session) {
       
       ## switch to default options if custom mmodel is not specified
       if(!input$custommeasmodels){mmodel <- NULL}
-      
+
       mm <- generateMeasurementModel(
         names=names,
         indicators=indicators,
         ncells=ncells,
-        model=mmodel
+        model=mmodel,
+        data=d
       )
       
       return(mm)

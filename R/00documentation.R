@@ -3,6 +3,10 @@
 ############# documentation ###############
 
 #' EffectLiteR
+#' 
+#' Use structural equation modeling to estimate average and conditional effects 
+#' of a treatment variable on an outcome variable, taking into account multiple
+#' continuous and categorical covariates.
 #'
 #' @name EffectLiteR
 #' @docType package
@@ -148,6 +152,34 @@ NULL
 #' @format A data frame with 328 rows and 24 variables.
 #' @name sophonet_data_simulated
 NULL
+
+
+#' Dataset elrdata_categorical_items.
+#' 
+#' A simulated dataset for testing measurement models with categorical items:
+#' 
+#' \itemize{
+#'   \item x. Treatment variable with values 0, 1.
+#'   \item z11. indicator for covariate.
+#'   \item z21. indicator for covariate.
+#'   \item z31. indicator for covariate.
+#'   \item z41. indicator for covariate.
+#'   \item z51. indicator for covariate.
+#'   \item y11. indicator for outcome.
+#'   \item y21. indicator for outcome.
+#'   \item y31. indicator for outcome.
+#'   \item y41. indicator for outcome.
+#'   \item y51. indicator for outcome.
+#'   \item y61. indicator for outcome.
+#'   \item y71. indicator for outcome.
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 10000 rows and 13 variables.
+#' @name elrdata_categorical_items
+NULL
+
 
 
 
