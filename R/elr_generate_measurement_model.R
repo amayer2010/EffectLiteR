@@ -133,7 +133,7 @@ generateMeasurementModel <- function(names=NULL, indicators, ncells,
       
       if(model[i] %in% c("tau-equi-categorical","tau-cong-categorical")){
         item <- data[,indicators[[i]][k]]
-        nthresholds <- length(unique(item)) - 1
+        nthresholds <- length(unique(na.omit(item))) - 1
         
         for(t in 1:nthresholds){
           if(k==1 & t==1){
