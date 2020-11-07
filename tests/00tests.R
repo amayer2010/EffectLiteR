@@ -15,5 +15,5 @@ source("tests/tests_with_private_data.R")
 source("tests/many_cells_tests.R") ## takes some time...
 source("tests/aggregated_effects_tests.R")
 source("tests/hypothesis_tests.R")
-source("tests/categorical_items_tests.R") ## takes some time...
+source("tests/categorical_items_tests.R")
 

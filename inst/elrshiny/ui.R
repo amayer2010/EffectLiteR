@@ -451,7 +451,7 @@ br()
         br(),
         selectInput("control", "Reference Group", "", width='60%'),
         radioButtons("missing", "Missing Data", 
-                     choices=c("listwise","fiml"), 
+                     choices=c("listwise","fiml","pairwise"), 
                      selected = "listwise"),
         radioButtons("fixed.cell", "Sampling Model", 
                      choices=c("default"="default",
