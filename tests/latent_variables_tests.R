@@ -69,6 +69,7 @@ res_latmf <- rbind(m1@results@Egx,
                    m1@results@Egxgx,
                    m1@results@Egxgk,
                    m1@results@Egxgxk)
+
 oldres_latmf <- read.table("tests/oldres/oldres_latmf.dat")
 expect_equivalent(res_latmf, oldres_latmf)
 
