@@ -45,9 +45,9 @@ effectLite(
 
 \item{measurement}{Measurement model. The measurement model is lavaan syntax (character string), that will be appended before the automatically generated lavaan input. It can be used to specify a measurement for a latent outcome variable and/or latent covariates. See also the example and \code{\link[EffectLiteR]{generateMeasurementModel}}.}
 
-\item{fixed.cell}{logical. If \code{FALSE} (default), the group sizes are treated as stochastic rather than fixed.}
+\item{fixed.cell}{logical. If \code{FALSE}, the group sizes are treated as stochastic rather than fixed. The default setting for \code{method="sem"} is \code{FALSE} and the default setting for \code{method="lm"} is \code{TRUE}.}
 
-\item{fixed.z}{logical. If \code{FALSE} (default), the continuous covariates are treated as stochastic rather than fixed. fixed.z}
+\item{fixed.z}{logical. If \code{FALSE}, the continuous covariates are treated as stochastic rather than fixed. The default setting for \code{method="sem"} is \code{FALSE} and the default setting for \code{method="lm"} is \code{TRUE}.}
 
 \item{missing}{Missing data handling. Will be passed on to \code{\link[lavaan]{sem}} or ignored for \code{method="lm"}.}
 
@@ -59,7 +59,7 @@ will not be estimated.}
 
 \item{interactions}{character. Indicates the type of interaction. Can be one of \code{"all"} (all interactions), \code{"2-way"} (only two-way interactions), \code{"X:K,X:Z"} (only X:K and X:Z interactions), \code{"X:K"} (only X:K interactions), \code{"X:Z"} (only X:Z interactions), \code{"none"} (no treatment by covariate interactions, but potentially interactions between categorical and continuous covariates), or \code{"no"} (no interactions at all).}
 
-\item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells.}
+\item{homoscedasticity}{logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells. The default setting for \code{method="sem"} is \code{FALSE} and the default setting for \code{method="lm"} is \code{TRUE}.}
 
 \item{test.stat}{character. Can be one of \code{c("default","Chisq","Ftest")} and indicates the statistic used for the hypothesis tests. The tests are either based on the large sample Chi-Squared statistic (Wald tests) or the finite sample F statistic with approximate F distribution.  The default setting for \code{method="sem"} is \code{"Chisq"} and the default setting for \code{method="lm"} is \code{"Ftest"}.}
 

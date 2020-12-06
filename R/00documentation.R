@@ -191,7 +191,7 @@ NULL
 #' @importMethodsFrom methods show 
 NULL
 
-#' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var qnorm cov lm mahalanobis pchisq pf pt sd
+#' @importFrom stats as.formula ftable model.frame model.matrix pnorm relevel var qnorm cov lm mahalanobis pchisq pf pt sd na.omit
 NULL
 
 #' @importFrom utils capture.output read.csv read.csv2 read.table combn
