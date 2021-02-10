@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$propscore)){
       d <- dataInput()
       x <- d[[input$variablex]]    
-      ng <- length(unique(x))
+      ng <- length(unique(na.omit(x)))
       zselect <- c(zselect, paste0("logprop",1:(ng-1)))
     }
         
@@ -166,7 +166,7 @@ shinyServer(function(input, output, session) {
     
     d <- dataInput()
     x <- d[[input$variablex]]    
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
     res <- paste0("g",2:ng-1)
     
     return(res)
@@ -191,7 +191,7 @@ shinyServer(function(input, output, session) {
     
     d <- dataInput()
     x <- d[[input$variablex]]    
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
     
     if(!is.null(input$propscore)){
       zselect <- c(zselect, input$propscore)
@@ -228,7 +228,7 @@ shinyServer(function(input, output, session) {
     
     d <- dataInput()
     x <- d[[input$variablex]]    
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
       
     if(!is.null(input$propscore)){
       zselect3 <- c(zselect3, input$propscore)
@@ -272,7 +272,7 @@ shinyServer(function(input, output, session) {
 
     d <- dataInput()
     x <- d[[input$variablex]]
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
     res <- paste0("g",2:ng-1)
 
     return(res)
@@ -296,7 +296,7 @@ shinyServer(function(input, output, session) {
 
     d <- dataInput()
     x <- d[[input$variablex]]
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
 
     if(!is.null(input$propscore)){
       zselect4 <- c(zselect4, input$propscore)
@@ -332,7 +332,7 @@ shinyServer(function(input, output, session) {
     
     d <- dataInput()
     x <- d[[input$variablex]]
-    ng <- length(unique(x))
+    ng <- length(unique(na.omit(x)))
     
     if(!is.null(input$propscore)){
       zselect5 <- c(zselect5, paste0("logprop",1:(ng-1)))
@@ -355,7 +355,7 @@ shinyServer(function(input, output, session) {
       
       ## determine number of cells
       d <- dataInput()
-      ng <- length(unique(d[[input$variablex]]))
+      ng <- length(unique(na.omit(d[[input$variablex]])))
       nk <- 1
       if(length(input$variablek) != 0){
         for(i in 1:length(input$variablek)){
