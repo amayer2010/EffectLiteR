@@ -11,21 +11,7 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
   
   ## check consistency with method argument
   if(method=="sem"){
-    if(fixed.cell=="default"){
-      if(length(measurement) == 0){
-        # only manifest variables
-        fixed.cell <- FALSE
-        
-      }else if(grepl(" ~\\*~ ", measurement)){
-        # categorical indicators currently don't work with stochastic cells
-        fixed.cell <- TRUE
-        
-      }else{
-        # continuous indicators work with stochastic cells
-        fixed.cell <- FALSE
-      }
-    }
-    
+    if(fixed.cell=="default"){fixed.cell <- FALSE}
     if(fixed.z=="default"){fixed.z <- FALSE}
     if(homoscedasticity=="default"){homoscedasticity <- FALSE}
     if(test.stat=="default"){test.stat <- "Chisq"}
