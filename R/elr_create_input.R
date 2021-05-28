@@ -194,14 +194,6 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
   
   complexsurvey <- list(ids=ids, weights=weights)
   
-  ## robust se only works with fixed group sizes (TODO: Ask Yves why?)
-  if(se == "robust.sem" & fixed.cell==FALSE){
-    
-    warning("EffectLiteR warning: SE robust.sem currently only works with fixed cell sizes. Please use fixed.cell=TRUE.")
-    
-  }
-  
-  
   res <- new("input",
              method=method,
              vnames=vnames, 

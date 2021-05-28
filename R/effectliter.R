@@ -67,7 +67,7 @@
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="default", 
                        measurement=character(), fixed.cell="default", 
-                       fixed.z="default", missing="default", se="standard", 
+                       fixed.z="default", missing="default", se="default", 
                        syntax.only=FALSE, interactions="all", homoscedasticity="default",
                        test.stat="default", propscore=NULL, ids=~0, weights=NULL, 
                        add=character(),...){

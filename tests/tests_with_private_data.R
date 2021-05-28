@@ -79,7 +79,10 @@ expect_equivalent(res_bettina_simple, oldres_bettina_simple)
 ########## Test with Rolf's problem data (non-convergence in lavaan) ############
 
 expect_message(d <- elrReadData("private/data/problem1.sav"))
-expect_warning(m1 <- effectLite(y="Y", x="X", k="Z", data=d))
+# expect_warning(m1 <- effectLite(y="Y", x="X", k="Z", data=d)) ## old lavaan versions
+m1 <- effectLite(y="Y", x="X", k="Z", data=d)
+
+
 
 
 
