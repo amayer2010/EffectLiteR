@@ -16,7 +16,7 @@ effectLite(
   fixed.cell = "default",
   fixed.z = "default",
   missing = "default",
-  se = "standard",
+  se = "default",
   syntax.only = FALSE,
   interactions = "all",
   homoscedasticity = "default",

@@ -17,3 +17,5 @@ oldres_categ_items <- read.table("tests/oldres/oldres_categ_items.dat")
 expect_equivalent(res_categ_items, oldres_categ_items)
 
 
+m1 <- effectLite(y="eta", x="x", z="xi", data=elrdata_categorical_items, 
+                 measurement=mm, fixed.cell=FALSE)

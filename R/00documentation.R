@@ -182,6 +182,26 @@ NULL
 
 
 
+#' Dataset elrdata_logreg.
+#' 
+#' A simulated dataset for testing logistic regression:
+#' 
+#' \itemize{
+#'   \item y. Outcome variable with values 0, 1.
+#'   \item x. Treatment variable with values 0, 1.
+#'   \item z1. continuous covariate.
+#'   \item z2. continuous covariate.
+#'   \item k1. categorical covariate.
+#'   \item k2. categorical covariate.
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 10000 rows and 6 variables.
+#' @name elrdata_logreg
+NULL
+
+
 
 ############## namespace ###########
 
