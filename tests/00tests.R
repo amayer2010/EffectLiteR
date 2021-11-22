@@ -2,6 +2,8 @@
 library(EffectLiteR)
 library(testthat)
 library(car)
+library(haven)
+
 
 source("tests/adjmean_tests.R")
 source("tests/basic_tests.R")

@@ -83,6 +83,10 @@ expect_message(d <- elrReadData("private/data/problem1.sav"))
 m1 <- effectLite(y="Y", x="X", k="Z", data=d)
 
 
+######## Test Njal's problems with tibbles ##########
+d <- read_sav("private/data/Teacherdata_JA.sav")
+expect_message(m1 <- effectLite(y="dyslexia_knowl", x="reading_assessment", data=d))
+
 
 
 
