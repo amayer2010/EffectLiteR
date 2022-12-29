@@ -67,13 +67,10 @@ computeResults <- function(obj){
   if(length(obj@input@add > 0)){
     if(grepl(":=", obj@input@add)){
       
-      ## TODO: improve code
-      pt_tmp <- parTable(m1_sem) ## TODO: what about lm()
-      pt_tmp <- pt_tmp[pt_tmp$op == ":=",]
-      npar <- nrow(pt_tmp)
-      nnewpar <- length(unlist(gregexpr(":=", obj@input@add)))
-      newnames <- pt_tmp$label[(npar-nnewpar+1):npar]
-      
+      pt_tmp <- lavaanify(model="a~1", constraints=obj@input@add) ## needs fake model
+      pt_tmp <- subset(pt_tmp, op==":=")
+      newnames <- pt_tmp$lhs
+
       AdditionalEffects <- data.frame(est[newnames],
                                       se[newnames],
                                       tval[newnames],

@@ -55,10 +55,6 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
       stop('EffectLiteR error: Measurement models are currently not allowed with method="lm".')
     }
 
-    if(length(add) != 0){
-      stop('EffectLiteR error: Additional syntax is currently not allowed with method="lm".')
-    }
-    
     if(ids != ~0){
       stop('EffectLiteR error: Complex survey functionality is currently not allowed with method="lm".')
     }
