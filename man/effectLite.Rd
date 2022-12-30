@@ -77,7 +77,7 @@ will not be estimated.}
 Object of class effectlite.
 }
 \description{
-This function is the main funtion of the package and can be used to estimate
+This function is the main function of the package and can be used to estimate
 average and conditional effects of a treatment variable on an outcome variable,
 taking into account any number of continuous and categorical covariates.
 It automatically generates lavaan syntax for a multi-group structural equation

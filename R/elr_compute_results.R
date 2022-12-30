@@ -68,7 +68,7 @@ computeResults <- function(obj){
     if(grepl(":=", obj@input@add)){
       
       pt_tmp <- lavaanify(model="a~1", constraints=obj@input@add) ## needs fake model
-      pt_tmp <- subset(pt_tmp, op==":=")
+      pt_tmp <- pt_tmp[pt_tmp$op==":=",]
       newnames <- pt_tmp$lhs
 
       AdditionalEffects <- data.frame(est[newnames],
