@@ -14,8 +14,8 @@ elr_compute_descriptives_z <- function(object){
     
     means <- colMeans(d, na.rm=TRUE)
     sds <- apply(d,2,function(x){sd(x, na.rm=TRUE)})
-    mins <- apply(d,2,function(x){min(x)})
-    maxs <- apply(d,2,function(x){max(x)})
+    mins <- apply(d,2,function(x){min(x, na.rm=TRUE)})
+    maxs <- apply(d,2,function(x){max(x, na.rm=TRUE)})
     
     res <- data.frame(Mean=means, SD=sds, Min=mins, Max=maxs)
     

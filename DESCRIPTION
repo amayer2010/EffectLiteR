@@ -1,6 +1,6 @@
 Package: EffectLiteR
-Version: 0.4-6
-Date: 2023-06-18
+Version: 0.4-7.001
+Date: 2023-06-27
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),

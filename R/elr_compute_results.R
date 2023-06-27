@@ -419,7 +419,7 @@ computeStdDevEffectSize <- function(obj, est, m1_sem){
     
     y <- obj@input@data[, obj@input@vnames$y]
     x <- obj@input@data[, obj@input@vnames$x]
-    return(sd(y[x==0]))
+    return(sd(y[x==0], na.rm=TRUE))
     
   }
   
