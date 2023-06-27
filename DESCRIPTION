@@ -1,6 +1,6 @@
 Package: EffectLiteR
-Version: 0.4-6.001
-Date: 2022-12-30
+Version: 0.4-6
+Date: 2023-06-18
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),
@@ -21,13 +21,13 @@ Imports:
     foreign,
     ggplot2,
     nnet,
-    survey,
-    lavaan.survey,
     car
 Suggests:
-    testthat
+    testthat,
+    survey,
+    lavaan.survey
 License: GPL (>= 2)
 Encoding: UTF-8
 URL: https://github.com/amayer2010/EffectLiteR
 LazyData: yes
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

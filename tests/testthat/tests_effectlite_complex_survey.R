@@ -4,6 +4,22 @@ test_that("effectLite works with complex survey design",{
   
 ########## complex survey design #################
 
+# m1a <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
+#                   syntax.only=F, data=example_multilevel, ids=~cid, estimator="mlr")  
+# 
+# m1a <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
+#                   syntax.only=F, data=example_multilevel,
+#                   ids=~cid, weights=~weights)
+# m1b <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
+#                   syntax.only=F, data=example_multilevel)
+# m1c <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0",
+#                   syntax.only=F, data=example_multilevel,
+#                   cluster= "cid", sampling.weights = "weights")
+# m1a@results@Egx
+# m1b@results@Egx
+# m1c@results@Egx
+
+    
 expect_message({
   m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
                    syntax.only=F, data=example_multilevel, 
