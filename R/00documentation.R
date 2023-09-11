@@ -9,6 +9,7 @@
 #' continuous and categorical covariates.
 #'
 #' @name EffectLiteR
+#' @aliases EffectLiteR-package
 #' @docType package
 NULL
 
