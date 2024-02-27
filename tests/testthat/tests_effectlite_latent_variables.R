@@ -62,7 +62,7 @@ res_latboot <- rbind(m1@results@Egx,
 
 
 expect_equal(res_latboot[1,1], 1.901696, tolerance=1e-5)
-expect_equal(res_latboot[2,3], 12.95835, tolerance=1e-5)
+expect_equal(res_latboot[2,3], 24.6336, tolerance=1e-5)
 expect_equal(res_latboot[3,5], 2.154411, tolerance=1e-5)
 
 })

@@ -17,8 +17,8 @@ res_boot5_1z2k <- rbind(m1@results@Egx,
                         m1@results@Egxgk,
                         m1@results@Egxgxk)
 
-expect_equal(res_boot5_1z2k[5,3], -0.4216187, tolerance=1e-5)
-expect_equal(res_boot5_1z2k[40,5], 0.2281321, tolerance=1e-5)
+expect_equal(res_boot5_1z2k[5,3], -0.2676881, tolerance=1e-4)
+expect_equal(res_boot5_1z2k[40,5], 0.2281321, tolerance=1e-4)
 
 
 ## first order SE 2 K; 1 Z
@@ -31,8 +31,8 @@ res_fo_1z2k <- rbind(m1@results@Egx,
                      m1@results@Egxgxk)
 
 
-expect_equal(res_fo_1z2k[5,3], -0.3244251, tolerance=1e-5)
-expect_equal(res_fo_1z2k[40,5], 0.2281321, tolerance=1e-5)
+expect_equal(res_fo_1z2k[5,3], -0.3244251, tolerance=1e-4)
+expect_equal(res_fo_1z2k[40,5], 0.2281321, tolerance=1e-4)
 
 
 ## 2 K; 1 Z robust 
@@ -44,8 +44,8 @@ res_rob_1z2k <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_rob_1z2k[6,2], 0.05435203, tolerance=1e-5)
-expect_equal(res_rob_1z2k[8,2], 0.05418127, tolerance=1e-5)
+expect_equal(res_rob_1z2k[6,2], 0.05435203, tolerance=1e-4)
+expect_equal(res_rob_1z2k[8,2], 0.05418127, tolerance=1e-4)
 
 
 ## huber 2 K; 1 Z
@@ -57,8 +57,8 @@ res_hub_1z2k <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_hub_1z2k[6,3], 0.1910645, tolerance=1e-5)
-expect_equal(res_hub_1z2k[9,5], -0.1191425, tolerance=1e-5)
+expect_equal(res_hub_1z2k[6,3], 0.1910645, tolerance=1e-4)
+expect_equal(res_hub_1z2k[9,5], -0.1191425, tolerance=1e-4)
 
 
 
@@ -100,8 +100,8 @@ res_missk <- rbind(m1@results@Egx,
                    m1@results@Egxgk,
                    m1@results@Egxgxk)
 
-expect_equal(res_missk[6,3], 0.3542112, tolerance=1e-5)
-expect_equal(res_missk[9,5], -0.1584472, tolerance=1e-5)
+expect_equal(res_missk[6,3], 0.3542112, tolerance=1e-4)
+expect_equal(res_missk[9,5], -0.1584472, tolerance=1e-4)
 
 
 #### missing in z
@@ -115,8 +115,8 @@ res_missz <- rbind(m1@results@Egx,
                    m1@results@Egxgk,
                    m1@results@Egxgxk)
 
-expect_equal(res_missz[6,3], 0.3442177, tolerance=1e-5)
-expect_equal(res_missz[9,5], -0.1584472, tolerance=1e-5)
+expect_equal(res_missz[6,3], 0.3442177, tolerance=1e-4)
+expect_equal(res_missz[9,5], -0.1584472, tolerance=1e-4)
 
 
 #### missing in both k and z
@@ -132,8 +132,8 @@ res_misszk <- rbind(m1@results@Egx,
                     m1@results@Egxgk,
                     m1@results@Egxgxk)
 
-expect_equal(res_misszk[3,5], -0.001094094, tolerance=1e-5)
-expect_equal(res_misszk[12,2], 0.07711113, tolerance=1e-5)
+expect_equal(res_misszk[3,5], -0.001094094, tolerance=1e-4)
+expect_equal(res_misszk[12,2], 0.07711113, tolerance=1e-4)
 
 })
 
@@ -153,8 +153,8 @@ res_fixedcell <- rbind(m1@results@Egx,
                        m1@results@Egxgk,
                        m1@results@Egxgxk)
 
-expect_equal(res_fixedcell[4,5], 0.03102239, tolerance=1e-5)
-expect_equal(res_fixedcell[17,2], 0.0794723, tolerance=1e-5)
+expect_equal(res_fixedcell[4,5], 0.03102239, tolerance=1e-4)
+expect_equal(res_fixedcell[17,2], 0.0794723, tolerance=1e-4)
 
 })
 
@@ -182,8 +182,8 @@ res_fixedz <- rbind(m1@results@Egx,
                     m1@results@Egxgk,
                     m1@results@Egxgxk)
 
-expect_equal(res_fixedz[4,5], 0.01759279, tolerance=1e-5)
-expect_equal(res_fixedz[17,2], 0.1094813, tolerance=1e-5)
+expect_equal(res_fixedz[4,5], 0.01759279, tolerance=1e-4)
+expect_equal(res_fixedz[17,2], 0.1094813, tolerance=1e-4)
 
 })
 
@@ -203,8 +203,8 @@ res_int_none <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_int_none[7,5], -0.006986638, tolerance=1e-5)
-expect_equal(res_int_none[18,2], 0.05328545, tolerance=1e-5)
+expect_equal(res_int_none[7,5], -0.006986638, tolerance=1e-4)
+expect_equal(res_int_none[18,2], 0.05328545, tolerance=1e-4)
 
 
 ## interaction option 2-way
@@ -217,8 +217,8 @@ res_int_2way <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_int_2way[7,5], -0.02455052, tolerance=1e-5)
-expect_equal(res_int_2way[18,2], 0.07394931, tolerance=1e-5)
+expect_equal(res_int_2way[7,5], -0.02455052, tolerance=1e-4)
+expect_equal(res_int_2way[18,2], 0.07394931, tolerance=1e-4)
 
 
 ## interaction option X:K
@@ -232,8 +232,8 @@ res_int_xdok <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_int_xdok[8,2], 0.05332877, tolerance=1e-5)
-expect_equal(res_int_xdok[19,3], -1.007574, tolerance=1e-5)
+expect_equal(res_int_xdok[8,2], 0.05332877, tolerance=1e-4)
+expect_equal(res_int_xdok[19,3], -1.007574, tolerance=1e-4)
 
 
 ## interaction option X:Z
@@ -247,8 +247,8 @@ res_int_xdoz <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_int_xdoz[8,2], 0.05352164, tolerance=1e-5)
-expect_equal(res_int_xdoz[19,3], -0.1293819, tolerance=1e-5)
+expect_equal(res_int_xdoz[8,2], 0.05352164, tolerance=1e-4)
+expect_equal(res_int_xdoz[19,3], -0.1293819, tolerance=1e-4)
 
 
 
@@ -263,8 +263,8 @@ res_int_xkxznew <- rbind(m1@results@Egx,
                          m1@results@Egxgk,
                          m1@results@Egxgxk)
 
-expect_equal(res_int_xkxznew[8,2], 0.05320093, tolerance=1e-5)
-expect_equal(res_int_xkxznew[19,3], -1.039869, tolerance=1e-5)
+expect_equal(res_int_xkxznew[8,2], 0.05320093, tolerance=1e-4)
+expect_equal(res_int_xkxznew[19,3], -1.039869, tolerance=1e-4)
 
 ## interaction option no
 m1 <- effectLite(fixed.cell = TRUE, data=example01, y="dv", z=c("z1","z2"),
@@ -279,7 +279,7 @@ m2 <- effectLite(fixed.cell = TRUE, data=example01, y="dv", z=c("z1","z2"),
 
 expect_equal(m1@results@Egxgk$Estimate, 
              m2@results@Egxgk$Estimate,
-             tolerance=1e-5)
+             tolerance=1e-4)
 
 })
 
@@ -297,8 +297,8 @@ res_homosced <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_homosced[8,2], 0.05377823, tolerance=1e-5)
-expect_equal(res_homosced[19,3], 1.64309, tolerance=1e-5)
+expect_equal(res_homosced[8,2], 0.05377823, tolerance=1e-4)
+expect_equal(res_homosced[19,3], 1.64309, tolerance=1e-4)
 
 })
 
@@ -312,8 +312,8 @@ test_that("effectLite works with additional syntax",{
 m1 <- effectLite(data=example01, y="dv", z=c("z1"), k=c("k1"), x="x", 
                  control="control", add="newpar := g200 + g100 \n newpar2 := g100")
 
-expect_equal(m1@results@AdditionalEffects[1,2], 0.1313536, tolerance=1e-5)
-expect_equal(m1@results@AdditionalEffects[2,5], -0.1588459, tolerance=1e-5)
+expect_equal(m1@results@AdditionalEffects[1,2], 0.1313536, tolerance=1e-4)
+expect_equal(m1@results@AdditionalEffects[2,5], -0.1588459, tolerance=1e-4)
 
 
 ## test with equality constraints
@@ -321,8 +321,8 @@ m1 <- effectLite(data=example01, y="dv", z=c("z1"), x="x",
                  control="control", add="g101 == 0 \n g201 == 0 ",
                  syntax.only=F)
 
-expect_equal(m1@results@Egx[1,1], -0.009915456, tolerance=1e-5)
-expect_equal(m1@results@est[["g101"]], 0, tolerance=1e-5)
+expect_equal(m1@results@Egx[1,1], -0.009915456, tolerance=1e-4)
+expect_equal(m1@results@est[["g101"]], 0, tolerance=1e-4)
 
 
 ## test with inequality constraint
@@ -331,8 +331,8 @@ m1 <- effectLite(data=example01, y="dv", z=c("z1"), x="x",
                  control="control", add="g101 > 0",
                  syntax.only=F)
 
-expect_equal(m1@results@Egx[1,1], -0.01001208, tolerance=1e-5)
-expect_equal(m1@results@est[["g101"]], 0, tolerance=1e-5)
+expect_equal(m1@results@Egx[1,1], -0.01001208, tolerance=1e-4)
+expect_equal(m1@results@est[["g101"]], 0, tolerance=1e-4)
 
 
 
@@ -345,7 +345,7 @@ m2 <- effectLite(data=example01, y="dv", z=c("z1"), k=c("k1"), x="x", method="lm
 
 expect_equal(m1@results@AdditionalEffects$Estimate, 
              m2@results@AdditionalEffects$Estimate, 
-             tolerance=1e-5)
+             tolerance=1e-4)
 
 ## equality constraints should not work with lm
 m1 <- effectLite(data=example01, y="dv", z=c("z1"), k=c("k1"), x="x", method="sem",

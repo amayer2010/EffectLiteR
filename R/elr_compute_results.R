@@ -137,7 +137,14 @@ computeResults <- function(obj){
                          se[obj@parnames@adjmeans],
                          tval[obj@parnames@adjmeans])
   names(adjmeans) <- c("Estimate", "SE", "Est./SE")
+
+  ## adjusted means given K=k
+  adjmeansgk <- data.frame(est[obj@parnames@adjmeansgk],
+                           se[obj@parnames@adjmeansgk],
+                           tval[obj@parnames@adjmeansgk])
+  names(adjmeansgk) <- c("Estimate", "SE", "Est./SE")
   
+    
   ## average effect of continuous covariates
   AveEffZ <- data.frame()
   if(obj@input@method == "sem"){
@@ -165,6 +172,7 @@ computeResults <- function(obj){
              Egxgxk=Egxgxk,
              gx=gx,
              adjmeans=adjmeans,
+             adjmeansgk=adjmeansgk,
              AveEffZ=AveEffZ,
              condeffects=data.frame() ## we compute conditional effects later using computeConditionalEffects()
   )

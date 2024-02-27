@@ -128,6 +128,10 @@ createParNames <- function(obj){
   tmp <- expand.grid(g=1:(ng-1), k=0:(nk-1))
   Egxgk <- paste0("Eg",tmp$g,"gk",tmp$k)
   
+  ## Adjusted means given k for E(gx|K=k)
+  tmp <- expand.grid(x=0:(ng-1), k=0:(nk-1))
+  adjmeansgk <- paste0("adjmean",tmp$x,"gk",tmp$k)
+  
   ## E(gx|X=x,K=k)
   tmp <- expand.grid(g=1:(ng-1), x=0:(ng-1), k=0:(nk-1))
   Egxgxk <- paste0("Eg",tmp$g,"gx",tmp$x,"k",tmp$k)
@@ -163,6 +167,7 @@ createParNames <- function(obj){
              Egxgk=Egxgk,
              Egxgxk=Egxgxk,
              adjmeans=adjmeans,
+             adjmeansgk=adjmeansgk,
              AveEffZ=AveEffZ
   )
   

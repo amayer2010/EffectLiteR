@@ -1,13 +1,16 @@
 Package: EffectLiteR
-Version: 0.4-7.001
-Date: 2023-06-27
+Version: 0.4-7.010
+Date: 2024-02-26
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),
 	person("Lisa", "Dietzfelbinger", role=c("ctb"),
-	email="lisa.dietzfelbinger@uni-jena.de"))
+	email="lisa.dietzfelbinger@uni-jena.de"),
+	person("Yves", "Rosseel", role=c("ctb"),
+	email="yves.rosseel@ugent.be"))
 Author: Axel Mayer [aut, cre],
-    Lisa Dietzfelbinger [ctb]
+    Lisa Dietzfelbinger [ctb],
+    Yves Rosseel [ctb]
 Maintainer: Axel Mayer <amayer2010@gmail.com>
 Description: Use structural equation modeling to estimate average and
     conditional effects of a treatment variable on an outcome variable, taking into
@@ -21,7 +24,9 @@ Imports:
     foreign,
     ggplot2,
     nnet,
-    car
+    car,
+    restriktor,
+    ic.infer
 Suggests:
     testthat,
     survey,

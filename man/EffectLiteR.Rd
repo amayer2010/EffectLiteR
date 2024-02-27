@@ -3,6 +3,7 @@
 \docType{package}
 \name{EffectLiteR}
 \alias{EffectLiteR}
+\alias{EffectLiteR-package}
 \title{EffectLiteR}
 \description{
 Use structural equation modeling to estimate average and conditional effects 

@@ -60,6 +60,7 @@ createLavaanSyntax <- function(obj) {
   Ezk <- parnames@Ezk
   Egx <- parnames@Egx
   adjmeans <- parnames@adjmeans
+  adjmeansgk <- parnames@adjmeansgk
   Pkgx <- parnames@Pkgx
   Pxgk <- parnames@Pxgk
   Ezgx <- parnames@Ezgx
@@ -144,6 +145,9 @@ createLavaanSyntax <- function(obj) {
   
   ## Effects given a value k of K  
   model <- paste0(model, create_syntax_Egxgk(ng,nk,Egxgk,Ezgk,gammas))
+
+  ## Adjmeans given a value k of K  
+  model <- paste0(model, create_syntax_adjmeansgk(ng,nk,adjmeansgk,Ezgk,gammas))
   
   ## Effects given X=x and K=k
   model <- paste0(model, create_syntax_Egxgxk(ng,nk,nz,Egxgxk,gammas,cellmeanz))
@@ -263,6 +267,7 @@ createLMSyntax <- function(obj) {
   Ezk <- parnames@Ezk
   Egx <- parnames@Egx
   adjmeans <- parnames@adjmeans
+  adjmeansgk <- parnames@adjmeansgk
   Pkgx <- parnames@Pkgx
   Pxgk <- parnames@Pxgk
   Ezgx <- parnames@Ezgx
@@ -339,6 +344,9 @@ createLMSyntax <- function(obj) {
   
   ## Effects given X=x and K=k
   model <- paste0(model, create_syntax_Egxgxk(ng,nk,nz,Egxgxk,gammas,cellmeanz))
+  
+  ## Adjmeans given a value k of K  
+  model <- paste0(model, create_syntax_adjmeansgk(ng,nk,adjmeansgk,Ezgk,gammas))
   
   ## additional syntax
   if(length(inp@add) != 0){
@@ -848,6 +856,61 @@ create_syntax_Egxgk <- function(ng,nk,Egxgk,Ezgk,gammas){
     }
     
   }
+  
+  return(res)
+}
+
+
+create_syntax_adjmeansgk <- function(ng,nk,adjmeansgk,Ezgk,gammas){
+  
+  res <- NULL
+  adjmeansgk <- matrix(adjmeansgk, nrow=ng)
+  Ezgk <- matrix(Ezgk, ncol=nk)
+  Ezgk <- rbind("1", Ezgk)
+  
+  if(nk>1){
+    res <- paste0(res, "\n\n## Adjmeans given K=k")
+    
+    for(i in 1:ng){
+      for(k in 1:nk){
+        
+        # adjmean0gk0
+        if(i==1 & k==1){
+          gammaselect <- c(gammas[,k,i])
+          Ezgkselect <- Ezgk[,1]
+          tmp <- paste0(adjmeansgk[i,k], " := ", 
+                        paste(gammaselect, Ezgkselect, sep="*", collapse=" + ")) 
+          res <- paste0(res, "\n", tmp)
+        }
+        
+        # adjmean0gkk
+        if(i==1 & k>1){
+        gammaselect <- c(gammas[,c(1,k),i])
+        Ezgkselect <- rep(Ezgk[,1], times=2)
+        tmp <- paste0(adjmeansgk[i,k], " := ", 
+                      paste(gammaselect, Ezgk[,k], sep="*", collapse=" + "))
+        res <- paste0(res, "\n", tmp)
+        }
+        
+        # adjmeanxgk0
+        if(i>1 & k==1){
+          gammaselect <- c(gammas[,k,c(1,i)])
+          Ezgkselect <- rep(Ezgk[,1], times=2)
+          tmp <- paste0(adjmeansgk[i,k], " := ", 
+                        paste(gammaselect, Ezgk[,k], sep="*", collapse=" + "))
+          res <- paste0(res, "\n", tmp)
+        }
+        
+        # adjmeanxgkk
+        if(i>1 & k>1){
+          gammaselect <- c(gammas[,c(1,k),c(1,i)])
+          Ezgkselect <- rep(Ezgk[,1], times=4)
+          tmp <- paste0(adjmeansgk[i,k], " := ", 
+                        paste(gammaselect, Ezgk[,k], sep="*", collapse=" + "))
+          res <- paste0(res, "\n", tmp)
+        }
+      }
+    }}
   
   return(res)
 }
