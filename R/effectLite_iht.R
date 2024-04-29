@@ -88,16 +88,16 @@ effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
     if(linear.lm.flag || tolower(test) == "fbar") {
         test.stat <- "Fbar"
         df2 <- ntotal - length(object@parnames@unconstrainedgammas)
-        pvalue <- ( 1 - restriktor:::pfbar(Wald.info.A, 
+        pvalue <- ( 1 - pfbar(Wald.info.A, 
                                            df1 = rev(df1), 
                                            df2 = df2, 
                                            wt = wt) )
     } else {
         test.stat <- "Wald"
-        pvalue <- ( 1 - restriktor:::pfbar(Wald.info.A, 
-                                           df1 = rev(df1), 
-                                           df2 = +Inf,
-                                           wt = wt) )
+        pvalue <- ( 1 - pfbar(Wald.info.A, 
+                              df1 = rev(df1), 
+                              df2 = +Inf,
+                              wt = wt) )
     }
 
     # output list
@@ -106,4 +106,17 @@ effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
                 pvalue = pvalue)
 
     out
+}
+
+
+
+## Note YR: The pfbar() function is taken from restriktor
+pfbar <- function(x, df1, df2, wt.bar) {
+  if (x <= 0) {
+    return(0)
+  }
+  zed <- df1 == 0
+  cdf <- ifelse(any(zed), wt.bar[zed], 0)
+  cdf <- cdf + sum(pf(x/df1[!zed], df1[!zed], df2) * wt.bar[!zed])
+  return(cdf)
 }
