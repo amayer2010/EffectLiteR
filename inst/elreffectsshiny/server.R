@@ -5,7 +5,6 @@ library(shiny)
 library(foreign)
 library(ggplot2)
 library(nnet)
-library(lavaan.survey)
 
 options(shiny.maxRequestSize=100*1024^2)
 

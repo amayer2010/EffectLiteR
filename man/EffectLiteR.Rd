@@ -10,3 +10,20 @@ Use structural equation modeling to estimate average and conditional effects
 of a treatment variable on an outcome variable, taking into account multiple
 continuous and categorical covariates.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/amayer2010/EffectLiteR}
+}
+
+}
+\author{
+\strong{Maintainer}: Axel Mayer \email{amayer2010@gmail.com}
+
+Other contributors:
+\itemize{
+  \item Lisa Dietzfelbinger \email{lisa.dietzfelbinger@uni-jena.de} [contributor]
+  \item Yves Rosseel \email{yves.rosseel@ugent.be} [contributor]
+}
+
+}
