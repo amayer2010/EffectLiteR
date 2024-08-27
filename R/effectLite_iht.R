@@ -91,13 +91,13 @@ effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
         pvalue <- ( 1 - pfbar(Wald.info.A, 
                                            df1 = rev(df1), 
                                            df2 = df2, 
-                                           wt = wt) )
+                                           wt.bar = wt) )
     } else {
         test.stat <- "Wald"
         pvalue <- ( 1 - pfbar(Wald.info.A, 
                               df1 = rev(df1), 
                               df2 = +Inf,
-                              wt = wt) )
+                              wt.bar = wt) )
     }
 
     # output list

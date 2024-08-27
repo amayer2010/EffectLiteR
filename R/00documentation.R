@@ -7,11 +7,7 @@
 #' Use structural equation modeling to estimate average and conditional effects 
 #' of a treatment variable on an outcome variable, taking into account multiple
 #' continuous and categorical covariates.
-#'
-#' @name EffectLiteR
-#' @aliases EffectLiteR-package
-#' @docType package
-NULL
+"_PACKAGE"
 
 
 #' Dataset nonortho.
@@ -203,6 +199,23 @@ NULL
 NULL
 
 
+#' Dataset elrdata_kieferetal2024.
+#' 
+#' A simulated dataset for logistic regression from Kiefer, Lugauer, and Mayer (2024):
+#' 
+#' \itemize{
+#'   \item Y. Outcome variable with values 0, 1.
+#'   \item X. Treatment variable with values 0, 1.
+#'   \item Z. continuous covariate.
+#' }
+#' 
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 600 rows and 3 variables.
+#' @name elrdata_kieferetal2024
+NULL
+
+
 
 ############## namespace ###########
 
@@ -218,5 +231,7 @@ NULL
 #' @importFrom utils capture.output read.csv read.csv2 read.table combn
 NULL
 
+#' @importFrom numDeriv jacobian
+NULL
 
 

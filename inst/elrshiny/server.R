@@ -1,13 +1,5 @@
-# library(EffectLiteR)
-# library(lavaan)
-# library(methods)
-# library(shiny)
-# library(foreign)
-# library(ggplot2)
-# library(nnet)
-# library(lavaan.survey)
 
-# options(shiny.maxRequestSize=100*1024^2) 
+options(shiny.maxRequestSize=100*1024^2) 
 
 shinyServer(function(input, output, session) {
   
@@ -655,12 +647,8 @@ shinyServer(function(input, output, session) {
   })  
   
   
-  ###### Output Data Table #########  
-  output$mytable1 = renderDataTable({ 
-    d <- dataInput()
-    dprint <- format(d, digits=3)
-    dprint
-  })
+  ###### Output Data Table #########
+  output$mytable1 = DT::renderDT({dataInput()})
 
   ###### Output Conditional Effects Table #########
   output$helptextcondeffects <- renderPrint({
