@@ -29,8 +29,8 @@
 #' @param homoscedasticity logical. If \code{TRUE}, residual variances of the dependent variable are assumed to be homogeneous across cells. The default setting for \code{method="sem"} is \code{FALSE} and the default setting for \code{method="lm"} is \code{TRUE}.
 #' @param test.stat character. Can be one of \code{c("default","Chisq","Ftest")} and indicates the statistic used for the hypothesis tests. The tests are either based on the large sample Chi-Squared statistic (Wald tests) or the finite sample F statistic with approximate F distribution.  The default setting for \code{method="sem"} is \code{"Chisq"} and the default setting for \code{method="lm"} is \code{"Ftest"}.
 #' @param propscore Vector of covariates (character vector) that will be used to compute (multiple) propensity scores based on a multinomial regression without interactions. Alternatively, the user can specify a formula with the treatment variable as dependent variable for more control over the propensity score model.
-#' @param ids Formula specifying cluster ID variables. Will be passed on to \code{lavaan.survey} if \code{lavaan.survey} is installed. If not, the \code{cluster} argument in \code{\link[lavaan]{sem}} will be used. See \code{\link[survey]{svydesign}} for details.
-#' @param weights Formula to specify sampling weights. Currently only one weight variable is supported. Will be passed on to \code{lavaan.survey} if \code{lavaan.survey} is installed. If not, the \code{sampling.weights} argument in \code{\link[lavaan]{sem}} will be used. See \code{svydesign} for details. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
+#' @param ids Formula specifying cluster ID variable. Because \code{lavaan.survey} that used this argument is no longer on CRAN, the \code{cluster} argument in \code{\link[lavaan]{sem}} will now be used. 
+#' @param weights Formula to specify sampling weights. Because \code{lavaan.survey} that used this argument is no longer on CRAN, the \code{sampling.weights} argument in \code{\link[lavaan]{sem}} will now be used. Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.
 #' @param add Character string that will be pasted at the end of the generated lavaan syntax. Can for example be used to add additional (in-) equality constraints or to compute user-defined conditional effects.
 #' @param ... Further arguments passed to \code{\link[lavaan]{sem}}.
 #' @return Object of class effectlite.
@@ -56,13 +56,12 @@
 #'                  measurement=measurement, data=example02lv)
 #' print(m1)
 #' 
-#'\dontrun{
 #' ## Example with cluster variable and sampling weights
 #' m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
-#'                     syntax.only=F, data=example_multilevel, 
-#'                     ids=~cid, weights=~weights)
+#'                     syntax.only=FALSE, data=example_multilevel, 
+#'                     cluster="cid", sampling.weights="weights")
 #' print(m1)
-#' }
+#' 
 #' @export
 #' @import lavaan
 effectLite <- function(y, x, k=NULL, z=NULL, data, method="sem", control="default", 

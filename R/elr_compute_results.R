@@ -186,7 +186,7 @@ computeResults <- function(obj){
 
 computeLavaanResults <- function(obj){
 
-  ## lavaan.survey -- complex survey designs
+  ## complex survey designs
   ids <- obj@input@complexsurvey$ids
   weights <- obj@input@complexsurvey$weights
   
@@ -204,32 +204,8 @@ computeLavaanResults <- function(obj){
     m1 <- do.call("sem", sem.args)
     
   }else{ # at least one lavaan.survey argument specified
-    
-    if(requireNamespace("lavaan.survey", quietly = TRUE)){ ## check if lavaan.survey is available
       
-      if(!obj@input@fixed.cell){## currently only works for fixed cell sizes
-        stop("EffectLiteR error: The complex survey functionality currently only works for fixed cell sizes. Please use fixed.cell=TRUE.")
-      }
-      
-      sem.args <- list(model=obj@syntax@model,
-                       group="cell", 
-                       missing=obj@input@missing,
-                       se=obj@input@se,
-                       fixed.x=obj@input@fixed.z,
-                       group.label=obj@input@vlevels$cell, 
-                       data=obj@input@data, 
-                       group.w.free = !obj@input@fixed.cell)
-      sem.args <- c(sem.args, obj@input@method_args)
-      m1 <- do.call("sem", sem.args)
-      
-      survey.design <- survey::svydesign(ids=ids, weights=weights, 
-                                         data=obj@input@data)
-      m1 <- lavaan.survey::lavaan.survey(lavaan.fit=m1, 
-                                         survey.design=survey.design)
-      
-    }else{ ## lavaan.survey not installed
-      
-      warning("EffectLiteR warning: Since lavaan.survey is not installed, the lavaan:sem arguments cluster and sampling.weights are used. Only the first specified cluster variable and/or the first  specified sampling weight are used. Consider specifying these arguments directly in the call to effectLite() instead. They will be passed on to lavaan:sem.")
+      message("EffectLiteR message: Since lavaan.survey is no longer on CRAN, the lavaan:sem arguments cluster and sampling.weights are used instead of the lavaan.survey aruments ids and weights. Only the first specified cluster variable and the first specified sampling weight are used.")
       
       ids <- all.vars(ids)[1]
       if(is.na(ids)){ids <- NULL}
@@ -252,8 +228,6 @@ computeLavaanResults <- function(obj){
       m1 <- do.call("sem", sem.args)
       
     }
-        
-  }
   
   return(m1)
   

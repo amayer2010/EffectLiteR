@@ -535,7 +535,7 @@ tabPanel('Complex Survey',
                         multiple=FALSE, selected="",
                         options = list(placeholder = 'select sampling weights'),
                         width='60%'),
-         helpText('The lavaan.survey package is called to account for cluster variables and sampling weights. This is an experimental feature.'),
+         helpText('The cluster and sampling weights argument of lavaan::sem are used for cluster variables and sampling weights. The observed frequencies will be re-computed. This is an experimental feature.'),
          helpText('Note: Only use weights if you know what you are doing. For example, some conditional treatment effects may require different weights than average effects.')
          
       ),

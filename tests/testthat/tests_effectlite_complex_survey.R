@@ -19,11 +19,11 @@ test_that("effectLite works with complex survey design",{
 # m1b@results@Egx
 # m1c@results@Egx
 
-    
 expect_message({
-  m1 <- effectLite(y="y", x="x", z="z", fixed.cell=TRUE, control="0", 
+  m1 <- effectLite(y="y", x="x", z="z", fixed.cell=FALSE, control="0", 
                    syntax.only=F, data=example_multilevel, 
                    ids=~cid, weights=~weights)
+  
 })
 
 res_compsurv <- rbind(m1@results@Egx,
@@ -32,7 +32,7 @@ res_compsurv <- rbind(m1@results@Egx,
                       m1@results@Egxgxk)
 
 expect_equal(res_compsurv[1,1], 1.35829, tolerance=1e-5)
-expect_equal(res_compsurv[2,3], 6.142792, tolerance=1e-5)
+expect_equal(res_compsurv[2,3], 6.290873, tolerance=1e-5)
 expect_equal(res_compsurv[3,5], 0.9926885, tolerance=1e-5)
 
 })
@@ -48,18 +48,16 @@ test_that("effectLite works with propensity score weighting",{
 ## otherwise lavaan.survey:::get.stats.design produces an error, because
 ## sample.cov.g does not have a var attribute..
 
-expect_message({
-  m1 <- effectLite(y="y", x="x", z="weights", fixed.cell=TRUE, control="0", 
-                   weights=~iptw, data=example_multilevel)
-})
+m1 <- effectLite(y="y", x="x", z="weights", fixed.cell=TRUE, control="0", 
+                 sampling.weights="iptw", data=example_multilevel)
 
 res_iptw1 <- rbind(m1@results@Egx,
                    m1@results@Egxgx,
                    m1@results@Egxgk,
                    m1@results@Egxgxk)
 
-expect_equal(res_iptw1[2,2], 0.13653, tolerance=1e-5)
-expect_equal(res_iptw1[2,3], 9.816644, tolerance=1e-5)
+expect_equal(res_iptw1[2,2], 0.1358172, tolerance=1e-5)
+expect_equal(res_iptw1[2,3], 9.868166, tolerance=1e-5)
 expect_equal(res_iptw1[2,5], 0.8223211, tolerance=1e-5)
 
 actual_names <- names(res_iptw1)

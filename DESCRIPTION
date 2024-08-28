@@ -1,6 +1,6 @@
 Package: EffectLiteR
-Version: 0.4-7.013
-Date: 2024-08-21
+Version: 0.4-7.014
+Date: 2024-08-28
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),
@@ -30,8 +30,7 @@ Imports:
     ic.infer,
     numDeriv
 Suggests:
-    testthat,
-    survey
+    testthat
 License: GPL (>= 2)
 Encoding: UTF-8
 URL: https://github.com/amayer2010/EffectLiteR
