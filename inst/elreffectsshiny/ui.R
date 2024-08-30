@@ -160,7 +160,7 @@ tabPanel('elrEffects',
   mainPanel(
     tabsetPanel(
       ######### Data Table ##########
-      tabPanel('Data', dataTableOutput("mytable1")),
+      tabPanel('Data', DT::DTOutput("mytable1")),
 
       ######### lm Results ##########
       tabPanel("Results",

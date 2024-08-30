@@ -180,7 +180,13 @@ shinyServer(function(input, output, session) {
 
   
   ###### Output Data Table #########  
-  output$mytable1 = DT::renderDT({dataInput()})
+  output$mytable1 = DT::renderDT({
+    d <- dataInput()
+    if(!is.null(d)){
+      d <- format(d, digits=3)
+      d <- DT::datatable(d)
+    }
+    d})
 
   # ###### Output Regression Equation 1 #########
   # output$regequation <- renderPrint({      

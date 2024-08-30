@@ -565,7 +565,7 @@ tabPanel('User-Specified Tests',
   mainPanel(
     tabsetPanel(
       ######### Data Table ##########
-      tabPanel('Data', dataTableOutput("mytable1")),
+      tabPanel('Data', DT::DTOutput("mytable1")),
       
       ######### EffectLiteR ##########
       tabPanel("EffectLiteR", verbatimTextOutput("summary")),
@@ -592,7 +592,7 @@ tabPanel('User-Specified Tests',
                downloadLink('downloadConditionalEffects', 'Download Conditional Effects Data'),
                br(),
                br(),
-               dataTableOutput("condeffs")),
+               DT::DTOutput("condeffs")),
       
       ######### Conditional Effects II ##########
       tabPanel("Conditional Effects II", 
@@ -635,7 +635,7 @@ tabPanel('User-Specified Tests',
                column(12, wellPanel(
                  h5("Subset used to compute aggregated effects"),
                  uiOutput("uiaggeff3"),
-                 dataTableOutput("aggeffstable")
+                 DT::DTOutput("aggeffstable")
                ))
       ),
       

@@ -648,7 +648,14 @@ shinyServer(function(input, output, session) {
   
   
   ###### Output Data Table #########
-  output$mytable1 = DT::renderDT({dataInput()})
+  output$mytable1 = DT::renderDT({
+    d <- dataInput()
+    if(!is.null(d)){
+      d <- format(d, digits=3)
+      d <- DT::datatable(d)
+    }
+    d})
+  
 
   ###### Output Conditional Effects Table #########
   output$helptextcondeffects <- renderPrint({
@@ -661,13 +668,15 @@ shinyServer(function(input, output, session) {
       cat("This datatable shows the values and standard errors of the effect function for given values of the categorical and continuous covariates. Regression factor scores are used for latent covariates.")
     }
   })
-    
-  output$condeffs = renderDataTable({
+  
+  
+  output$condeffs = DT::renderDT({
     if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
       return(NULL)
     }else{            
       m1 <- model()
       condprint <- format(m1@results@condeffects, digits=3)
+      condprint <- DT::datatable(condprint)
       condprint
     }  
   })
@@ -697,11 +706,12 @@ shinyServer(function(input, output, session) {
       cell <- m1@input@data[["cell"]]
       dp <- na.omit(data.frame(y,cell))
       binwidth <- (range(y, na.rm=TRUE)[2]-range(y, na.rm=TRUE)[1])/30
-
-      p <- ggplot2::qplot(y, data=dp, geom="histogram",
-                 binwidth=binwidth,
-                 xlab=input$variabley,
-                 main=paste0("Distribution of ", input$variabley, " in cells"))
+      
+      p <- ggplot2::ggplot(data=dp, ggplot2::aes(x = y))
+      p <- p + ggplot2::geom_histogram(binwidth=binwidth)
+      p <- p + ggplot2::ggtitle(paste0("Distribution of ", input$variabley, 
+                                       " in cells"))
+      p <- p + ggplot2::xlab(input$variabley)
       p <- p + ggplot2::facet_wrap( ~ cell)
       p <- p + ggplot2::theme_bw()
       print(p)
@@ -741,15 +751,17 @@ shinyServer(function(input, output, session) {
       
       dp <- data.frame(y,cell,zselected)
       
-      p <- ggplot2::qplot(y=y, x=zselected, data=dp, 
-                 ylab=input$variabley,
-                 xlab=input$zselect,                 
-                 main=paste0("Regression of ", input$variabley, " on ", 
-                             input$zselect, " in cells"))
+      p <- ggplot2::ggplot(data=dp, ggplot2::aes(x=zselected, y=y))
+      p <- p + ggplot2::geom_point()
+      p <- p + ggplot2::ggtitle(paste0("Regression of ", input$variabley, " on ", 
+                                       input$zselect, " in cells"))
+      p <- p + ggplot2::ylab(input$variabley) + ggplot2::xlab(input$zselect)
       p <- p + ggplot2::facet_wrap( ~ cell)
-      p <- p + ggplot2::geom_smooth(method = "lm")
+      p <- p + ggplot2::geom_smooth(method = "lm", formula=y~x)
       p <- p + ggplot2::theme_bw()
-      print(p)                  
+      print(p)
+      
+      
     }
         
   })
@@ -1326,13 +1338,14 @@ shinyServer(function(input, output, session) {
   })
   
   #### output aggregated effects table ####
-  output$aggeffstable = renderDataTable({
+  output$aggeffstable = DT::renderDT({
     if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
       return(NULL)
     }else{            
       m1 <- model()
       idx <- agg.subset()
       condprint <- format(m1@results@condeffects[idx,], digits=3)
+      condprint <- DT::datatable(condprint)
       condprint
     }  
   })
@@ -1358,13 +1371,14 @@ shinyServer(function(input, output, session) {
   })
   
   #### output aggregated effects table ####
-  output$aggeffstable = renderDataTable({
+  output$aggeffstable = DT::renderDT({
     if((input$variabley == "" & !input$latenty) || input$variablex == "" ){
       return(NULL)
     }else{            
       m1 <- model()
       idx <- agg.subset()
       condprint <- format(m1@results@condeffects[idx,], digits=3)
+      condprint <- DT::datatable(condprint)
       condprint
     }  
   })    

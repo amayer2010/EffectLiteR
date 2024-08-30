@@ -66,15 +66,15 @@ conditionalEffectsPlot <- function(obj, zsel="id", gxsel="g1", colour="",
     plotheader <- "Estimated conditional effects in the sample"
   }
   
-  p <- ggplot2::qplot(y=yselected, x=zselected, 
-                      data=condeffects,
-                      ylab=paste0(gxsel,g1label),
-                      xlab=zsel,                 
-                      main=plotheader)
+  p <- ggplot2::ggplot(data=condeffects, ggplot2::aes(y=yselected, x=zselected))
+  p <- p + ggplot2::geom_point()
+  p <- p + ggplot2::ggtitle(plotheader)
+  p <- p + ggplot2::ylab(paste0(gxsel,g1label)) + ggplot2::xlab(zsel)
+  
   if(regression == "smooth"){
-    p <- p + ggplot2::geom_smooth(method="loess", se=regression.ci)
+    p <- p + ggplot2::geom_smooth(method="loess", se=regression.ci, formula=y~x)
   }else if(regression == "linear"){
-    p <- p + ggplot2::geom_smooth(method="lm", se=regression.ci)
+    p <- p + ggplot2::geom_smooth(method="lm", se=regression.ci, formula=y~x)
   }
   
   if(show.ci & !is.null(colourselected)){
