@@ -4,14 +4,14 @@
 \alias{effectLite_iht}
 \title{Informative hypothesis tests for effectLite}
 \usage{
-effectLite_iht(object, constraints = NULL, test = "Fbar")
+effectLite_iht(object, constraints = NULL, test = "default")
 }
 \arguments{
 \item{object}{effectlite. Fitted model of class effectlite estimated with \code{\link[EffectLiteR]{effectLite}} using \code{method="sem"}.}
 
 \item{constraints}{character. Specification of constraints for the ordered hypothesis test.}
 
-\item{test}{character. Statistical test to be used for the ordered hypothesis test. Can be one of \code{c("Fbar", "Wald")}.}
+\item{test}{character. Statistical test to be used for the ordered hypothesis test. Can be one of \code{c("default", "Fbar", "Wald")}.}
 }
 \value{
 list with test statistics and p-value.

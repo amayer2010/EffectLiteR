@@ -14,7 +14,7 @@
 #'
 #' @param object effectlite. Fitted model of class effectlite estimated with \code{\link[EffectLiteR]{effectLite}} using \code{method="sem"}.
 #' @param constraints character. Specification of constraints for the ordered hypothesis test.
-#' @param test character. Statistical test to be used for the ordered hypothesis test. Can be one of \code{c("Fbar", "Wald")}. 
+#' @param test character. Statistical test to be used for the ordered hypothesis test. Can be one of \code{c("default", "Fbar", "Wald")}. 
 #'
 #' @return list with test statistics and p-value.
 #' @export
@@ -28,7 +28,7 @@
 #' print(test)
 #' 
 #' @import restriktor
-effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
+effectLite_iht <- function(object, constraints = NULL, test = "default") {
 
     if(!inherits(object, "effectlite")) {
         stop("object is not (or does not inherit from) class ",
@@ -42,6 +42,8 @@ effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
     if(is.null(constraints)) {
         stop("please use the constraints= argument to specify the ordered hypothesis")
     }
+  
+  stopifnot(test %in% c("default", "Fbar", "Wald"))
     
     # lavaan object (without constraints)
     lavfit.unco <- object@results@lavresults
@@ -84,16 +86,29 @@ effectLite_iht <- function(object, constraints = NULL, test = "Fbar") {
     df1 <- 0:(nrow(R.H1) - meq)
     
     # df2?
-    linear.lm.flag <- all(lavfit.final@Model@modprop$uvreg)
-    if(linear.lm.flag || tolower(test) == "fbar") {
+    if(test == "default"){
+      ## method="lm" is currently not allowed but will then be tested here
+      linear.lm.flag <- all(lavfit.final@Model@modprop$uvreg)
+      if(linear.lm.flag){
         test.stat <- "Fbar"
+      }else{
+        test.stat <- "Wald"
+      }
+      
+    }else if(tolower(test) == "fbar"){
+      test.stat <- "Fbar"
+      
+    }else if(tolower(test) == "wald"){
+      test.stat <- "Wald"
+    }
+    
+    if(test.stat == "Fbar") {
         df2 <- ntotal - length(object@parnames@unconstrainedgammas)
         pvalue <- ( 1 - pfbar(Wald.info.A, 
                                            df1 = rev(df1), 
                                            df2 = df2, 
                                            wt.bar = wt) )
     } else {
-        test.stat <- "Wald"
         pvalue <- ( 1 - pfbar(Wald.info.A, 
                               df1 = rev(df1), 
                               df2 = +Inf,

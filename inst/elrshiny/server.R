@@ -1085,7 +1085,33 @@ shinyServer(function(input, output, session) {
     }  
   })
   
+
+  ###### Output User Specified Informative Hypothesis Test #########
+  output$iht <- renderPrint({      
+    
+    if(input$variabley == "" & input$latenty == FALSE || input$variablex == ""){            
+      
+      cat("Please specify the outcome variable and the treatment variable")
+      
+    }else if(input$add.syntax.iht == ""){
+      
+      cat("No user-defined informative hypothesis test specified")
+      
+    }else{
+      
+      m1 <- model()
+      con <- input$add.syntax.iht
+      test <- input$iht.test.stat
+      ihtest <- data.frame(effectLite_iht(object=m1, 
+                                          constraints=con, 
+                                          test=test))  
+      row.names(ihtest) <- "User-Specified Informative Hypothesis Test"  
+      print(ihtest, digits=3, print.gap=3)
+      
+    }  
+  })
   
+    
   
   ###### Download Data (Conditional Effects Table) #######
   output$downloadConditionalEffects <- downloadHandler(

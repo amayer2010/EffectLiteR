@@ -556,9 +556,18 @@ tabPanel('User-Specified Tests',
          br(),
          br(),
          h5("User-Specified Wald Test"),
-         helpText('This text can be used to specify an additional (user-specified) Wald test based on names of model parameters.'),
+         helpText('This text can be used to specify an additional (user-specified) Wald test based on names of model parameters (see syntax tab).'),
          helpText('Example: g000 == 0 ; g100 == 0'),
-         tags$textarea(id="add.syntax.wald", rows=5, cols=40, "")
+         tags$textarea(id="add.syntax.wald", rows=5, cols=40, ""),
+         br(),
+         br(),
+         h5("User-Specified Informative Hypothesis Test"),
+         helpText('This text can be used to specify an additional (user-specified) informative hypothesis test based on names of model parameters (see syntax tab).'),
+         helpText('Example: adjmean1 > adjmean0'),
+         tags$textarea(id="add.syntax.iht", rows=5, cols=40, ""),
+         radioButtons("iht.test.stat", "Informative Hypothesis Test Statistic", 
+                      choices=c("default","Fbar","Wald"), 
+                      selected = "default")
 )
   )),
   
@@ -666,7 +675,8 @@ tabPanel('User-Specified Tests',
       tabPanel("User-Specified Tests", 
                verbatimTextOutput("covtests"),
                verbatimTextOutput("addeffects"),
-               verbatimTextOutput("waldtest")
+               verbatimTextOutput("waldtest"),
+               verbatimTextOutput("iht")
       ),
       
       ######### Plot 1 ##########
