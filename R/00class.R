@@ -45,6 +45,7 @@ setClass("parnames", representation(
   label.Egx="character",
   cellmeanz="character",
   meanz="character",
+  veps="character",
   pk="character",
   px="character",
   Ezk="character",

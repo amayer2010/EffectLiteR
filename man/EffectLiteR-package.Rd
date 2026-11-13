@@ -20,6 +20,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Axel Mayer \email{amayer2010@gmail.com}
 
+Authors:
+\itemize{
+  \item Axel Mayer \email{amayer2010@gmail.com}
+}
+
 Other contributors:
 \itemize{
   \item Lisa Dietzfelbinger \email{lisa.dietzfelbinger@uni-jena.de} [contributor]

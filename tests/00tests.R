@@ -17,6 +17,8 @@ test_file("tests/testthat/tests_effectlite_some_options.R")
 test_file("tests/testthat/tests_effectlite_hypotheses.R")
 test_file("tests/testthat/tests_effectlite_categorical_items.R")
 test_file("tests/testthat/tests_effectlite_many_cells.R") ## takes some time...
+test_file("tests/testthat/tests_elreffects.R")
+test_file("tests/testthat/tests_elrpredict.R")
 
 
 ## see also (does not work from here, because data won't be found)

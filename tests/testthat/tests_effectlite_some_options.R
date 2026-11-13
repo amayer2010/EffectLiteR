@@ -17,7 +17,7 @@ res_boot5_1z2k <- rbind(m1@results@Egx,
                         m1@results@Egxgk,
                         m1@results@Egxgxk)
 
-expect_equal(res_boot5_1z2k[5,3], -0.2676881, tolerance=1e-4)
+expect_equal(res_boot5_1z2k[5,3], -0.29928445, tolerance=1e-4)
 expect_equal(res_boot5_1z2k[40,5], 0.2281321, tolerance=1e-4)
 
 

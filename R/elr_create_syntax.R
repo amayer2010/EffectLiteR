@@ -42,7 +42,6 @@ createLavaanSyntax <- function(obj) {
   fixed.cell <- inp@fixed.cell
   fixed.z <- inp@fixed.z
   sampmeanz <- inp@sampmeanz
-  homoscedasticity <- inp@homoscedasticity
   observed.freq <- inp@observed.freq
   interactions <- inp@interactions
   
@@ -55,6 +54,7 @@ createLavaanSyntax <- function(obj) {
   relfreq <- parnames@relfreq
   groupw <- parnames@groupw
   meanz <- parnames@meanz
+  veps <- parnames@veps
   pk <- parnames@pk
   px <- parnames@px
   Ezk <- parnames@Ezk
@@ -94,8 +94,8 @@ createLavaanSyntax <- function(obj) {
   ## covariances between stochastic z
   model <- paste0(model, create_syntax_covz(z, nz, fixed.z))
   
-  ## homoscedastic residual variances
-  model <- paste0(model, create_syntax_homoscedasticity(y,ng,nk,homoscedasticity))
+  ## residual variances
+  model <- paste0(model, create_syntax_veps(y,ng,nk,veps))
   
   ## compute relative group frequencies
   model <- paste0(model, create_syntax_group_freq(fixed.cell, relfreq, 
@@ -430,16 +430,13 @@ create_syntax_covz <- function(z, nz, fixed.z){
 }
   
 
-create_syntax_homoscedasticity <- function(y, ng, nk, homoscedasticity){
+create_syntax_veps <- function(y, ng, nk, veps){
 
-  res <- NULL
-  if(homoscedasticity){
-    tmp <- paste0(y, " ~~ c(", 
-                  paste(rep("veps", times=ng*nk),collapse=","),
-                  ")*", y)
-    res <- paste0(res, "\n", tmp)
-  }
-  
+  tmp <- paste0(y, " ~~ c(", 
+                paste(veps, collapse=","),
+                ")*", y)
+  res <- paste0("\n", tmp)
+
   return(res)
 }
 

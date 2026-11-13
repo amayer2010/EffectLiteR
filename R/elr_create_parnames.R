@@ -6,6 +6,7 @@ createParNames <- function(obj){
   nz <- inp@nz ## number of z
   nk <- inp@nk ## number of unfolded categories of K
   interactions <- inp@interactions
+  homoscedasticity <- inp@homoscedasticity
   
   sep <- ""
   ## longer parameter names for many groups and/or covariates
@@ -94,6 +95,14 @@ createParNames <- function(obj){
     cellmeanz <- meanz <- Ezk <- character()
   }
   
+  ## residual variances
+  veps <- character()
+  if(homoscedasticity){
+    veps <- rep("veps", times=ng*nk)
+  }else{
+    veps <- paste0("veps",inp@vlevels$cell)
+  }
+  
   groupw <- paste0("gw",inp@vlevels$cell)
   relfreq <- paste0("relfreq",inp@vlevels$cell)
   Egx <- paste0("Eg",1:(ng-1))
@@ -152,6 +161,7 @@ createParNames <- function(obj){
              label.Egx=label.Egx,
              cellmeanz=cellmeanz,
              meanz=meanz,
+             veps=veps,
              pk=pk,
              px=px,         
              Ezk=Ezk,

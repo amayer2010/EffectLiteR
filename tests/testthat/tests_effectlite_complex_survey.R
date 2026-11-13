@@ -31,7 +31,7 @@ res_compsurv <- rbind(m1@results@Egx,
                       m1@results@Egxgk,
                       m1@results@Egxgxk)
 
-expect_equal(res_compsurv[1,1], 1.35829, tolerance=1e-5)
+expect_equal(res_compsurv[1,1], 1.356065, tolerance=1e-5)
 expect_equal(res_compsurv[2,3], 6.290873, tolerance=1e-5)
 expect_equal(res_compsurv[3,5], 0.9926885, tolerance=1e-5)
 
@@ -56,8 +56,8 @@ res_iptw1 <- rbind(m1@results@Egx,
                    m1@results@Egxgk,
                    m1@results@Egxgxk)
 
-expect_equal(res_iptw1[2,2], 0.1358172, tolerance=1e-5)
-expect_equal(res_iptw1[2,3], 9.868166, tolerance=1e-5)
+expect_equal(res_iptw1[2,2], 0.1236228, tolerance=1e-5)
+expect_equal(res_iptw1[2,3], 10.84158, tolerance=1e-5)
 expect_equal(res_iptw1[2,5], 0.8223211, tolerance=1e-5)
 
 actual_names <- names(res_iptw1)

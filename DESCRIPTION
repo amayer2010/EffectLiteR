@@ -1,6 +1,6 @@
 Package: EffectLiteR
-Version: 0.5-1
-Date: 2024-09-01
+Version: 0.5-2.001
+Date: 2026-11-13
 Title: Average and Conditional Effects
 Authors@R: c(person("Axel", "Mayer", role=c("aut","cre"),
 	email="amayer2010@gmail.com"),
@@ -35,4 +35,4 @@ License: GPL (>= 2)
 Encoding: UTF-8
 URL: https://github.com/amayer2010/EffectLiteR
 LazyData: yes
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.0.0
