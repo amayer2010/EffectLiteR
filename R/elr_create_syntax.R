@@ -40,6 +40,7 @@ createLavaanSyntax <- function(obj) {
   nz <- inp@nz
   nk <- inp@nk
   fixed.cell <- inp@fixed.cell
+  cell <- inp@vlevels$cell
   fixed.z <- inp@fixed.z
   sampmeanz <- inp@sampmeanz
   sampvarz <- inp@sampvarz
@@ -102,7 +103,7 @@ createLavaanSyntax <- function(obj) {
                                                  sampvarz))
   
   ## covariances between stochastic z
-  model <- paste0(model, create_syntax_covz(z, nz, fixed.z))
+  model <- paste0(model, create_syntax_covz(z, nz, fixed.z, cell))
   
   ## compute relative group frequencies
   model <- paste0(model, create_syntax_group_freq(fixed.cell, relfreq, 
@@ -454,7 +455,10 @@ create_syntax_cellvarz <- function(z, nz, fixed.z, cellvarz, sampvarz){
 
 
 
-create_syntax_covz <- function(z, nz, fixed.z){
+create_syntax_covz <- function(z, nz, fixed.z, cell){
+  
+  ##TODO needs improvement, parameter labels should be defined in parnames
+  ##TODO fixed.z not supported, yet 
 
   ## covariances between stochastic z
   res <- NULL
@@ -462,8 +466,18 @@ create_syntax_covz <- function(z, nz, fixed.z){
   ## syntax covariances between z in each cell
   if(!fixed.z){
     if(nz > 1){
-      tmp <- combn(z,2)
-      res <- paste0("\n", paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n"))
+      
+      for(i in 1:(nz-1)){
+        for(j in (i+1):nz){
+          
+          tmp1 <- paste0("c(", paste0("covz",i,"z",j, cell, collapse=","),")*")
+          tmp2 <- paste0(z[i], " ~~ ", tmp1, z[j])
+          res <- paste0(res, "\n", tmp2)
+        }
+      }
+      
+      # tmp <- combn(z,2)
+      # res <- paste0("\n", paste0(tmp[1,], " ~~ ", tmp[2,], collapse="\n"))
     }
   }
   
