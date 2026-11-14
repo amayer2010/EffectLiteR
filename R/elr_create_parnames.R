@@ -88,11 +88,13 @@ createParNames <- function(obj){
   if(nz>0){
     tmp <- expand.grid(z=1:nz, k=0:(nk-1), x=0:(ng-1))
     cellmeanz <- with(tmp, paste0("mz",x,sep,k,sep,z))
-    meanz <- paste0("Ez",1:nz)  
+    cellvarz <- with(tmp, paste0("varz",x,sep,k,sep,z))
+    meanz <- paste0("Ez",1:nz)
+    varz <- paste0("Varz",1:nz)
     tmp <- expand.grid(k=0:(nk-1), z=1:nz)
     Ezk <- with(tmp, paste0("Ez",z,"k",k))    
   }else{
-    cellmeanz <- meanz <- Ezk <- character()
+    cellmeanz <- cellvarz <- meanz <- varz <- Ezk <- character()
   }
   
   ## residual variances
@@ -160,7 +162,9 @@ createParNames <- function(obj){
              label.covs=label.covs,
              label.Egx=label.Egx,
              cellmeanz=cellmeanz,
+             cellvarz=cellvarz,
              meanz=meanz,
+             varz=varz,
              veps=veps,
              pk=pk,
              px=px,         

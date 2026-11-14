@@ -168,9 +168,11 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
   ## observed sample means for manifest covariates (fixed.z only)
   if(nz==0){
     sampmeanz <- matrix(nrow=0, ncol=0)
+    sampvarz <- matrix(nrow=0, ncol=0)
     
   }else if(!fixed.z){
     sampmeanz <- matrix(nrow=0, ncol=0)
+    sampvarz <- matrix(nrow=0, ncol=0)
     
   }else if(fixed.z){
       
@@ -182,12 +184,16 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
     }
     
     sampmeanz <- NULL
+    sampvarz <- NULL
     for (i in 1:nz) {
       namez <- z[i]
       tmp <- tapply(d[[namez]], d$cell, function(x){mean(x, na.rm=TRUE)})
       sampmeanz <- rbind(sampmeanz, tmp)
+      tmp <- tapply(d[[namez]], d$cell, function(x){var(x, na.rm=TRUE)})
+      sampvarz <- rbind(sampvarz, tmp)
     }
     row.names(sampmeanz) <- z
+    row.names(sampvarz) <- z
     
   }
   
@@ -220,6 +226,7 @@ createInput <- function(y, x, k, z, data, method, control, measurement,
              missing=missing,
              observed.freq=observed.freq,
              sampmeanz=sampmeanz,
+             sampvarz=sampvarz,
              se=se,
              interactions=interactions,
              complexsurvey=complexsurvey,

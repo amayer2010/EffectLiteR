@@ -42,6 +42,7 @@ createLavaanSyntax <- function(obj) {
   fixed.cell <- inp@fixed.cell
   fixed.z <- inp@fixed.z
   sampmeanz <- inp@sampmeanz
+  sampvarz <- inp@sampvarz
   observed.freq <- inp@observed.freq
   interactions <- inp@interactions
   
@@ -51,9 +52,11 @@ createLavaanSyntax <- function(obj) {
   gammas <- parnames@gammas
   constrainedgammas <- parnames@constrainedgammas
   cellmeanz <- parnames@cellmeanz
+  cellvarz <- parnames@cellvarz
   relfreq <- parnames@relfreq
   groupw <- parnames@groupw
   meanz <- parnames@meanz
+  varz <- parnames@varz
   veps <- parnames@veps
   pk <- parnames@pk
   px <- parnames@px
@@ -87,15 +90,19 @@ createLavaanSyntax <- function(obj) {
   ## syntax regression coefficients in each cell
   model <- paste0(model, create_syntax_regcoef(y,z,nz,alphas))
   
+  ## residual variances
+  model <- paste0(model, create_syntax_veps(y,ng,nk,veps))
+  
   ## mean z in each cell
   model <- paste0(model, create_syntax_cellmeanz(z, nz, fixed.z, cellmeanz, 
                                                  sampmeanz))
+
+  ## variance z in each cell
+  model <- paste0(model, create_syntax_cellvarz(z, nz, fixed.z, cellvarz, 
+                                                 sampvarz))
   
   ## covariances between stochastic z
   model <- paste0(model, create_syntax_covz(z, nz, fixed.z))
-  
-  ## residual variances
-  model <- paste0(model, create_syntax_veps(y,ng,nk,veps))
   
   ## compute relative group frequencies
   model <- paste0(model, create_syntax_group_freq(fixed.cell, relfreq, 
@@ -241,6 +248,7 @@ createLMSyntax <- function(obj) {
   fixed.cell <- inp@fixed.cell
   fixed.z <- inp@fixed.z
   sampmeanz <- inp@sampmeanz
+  sampvarz <- inp@sampvarz
   observed.freq <- inp@observed.freq
   interactions <- inp@interactions
   
@@ -259,6 +267,7 @@ createLMSyntax <- function(obj) {
   }
   
   cellmeanz <- parnames@cellmeanz
+  cellvarz <- parnames@cellvarz
   relfreq <- parnames@relfreq
   groupw <- parnames@groupw
   meanz <- parnames@meanz
@@ -302,6 +311,10 @@ createLMSyntax <- function(obj) {
   ## mean z in each cell
   model <- paste0(model, create_syntax_cellmeanz(z, nz, fixed.z, cellmeanz, 
                                                  sampmeanz))
+  
+  ## variance z in each cell
+  model <- paste0(model, create_syntax_cellvarz(z, nz, fixed.z, cellvarz, 
+                                                sampvarz))
   
   ## compute unconditional means of z
   model <- paste0(model, create_syntax_ez(nz, meanz, cellmeanz, relfreq))
@@ -411,6 +424,34 @@ create_syntax_cellmeanz <- function(z, nz, fixed.z, cellmeanz, sampmeanz){
 
   return(res)
 }
+
+
+create_syntax_cellvarz <- function(z, nz, fixed.z, cellvarz, sampvarz){
+  
+  res <- NULL
+  if(!fixed.z){
+    ## stochastic z
+    if (nz>0) {
+      cellvarz <- matrix(cellvarz, nrow=nz)    
+      for (i in 1:nz) {
+        tmp <- paste0(z[i]," ~~ c(", paste(cellvarz[i,],collapse=","), ")*", z[i])
+        res <- paste0(res, "\n", tmp)
+      }
+    }
+    
+  }else if(fixed.z){
+    ## fixed z
+    if (nz>0) {
+      res <- paste0(res, "\n\n## Fixed Variances of Z")
+      cellvarz <- matrix(cellvarz, nrow=nz)
+      tmp <- paste0(cellvarz, " := ",  sampvarz, collapse="\n")
+      res <- paste0(res, "\n", tmp)
+    }
+  }
+  
+  return(res)
+}
+
 
 
 create_syntax_covz <- function(z, nz, fixed.z){

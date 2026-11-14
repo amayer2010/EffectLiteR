@@ -23,6 +23,7 @@ setClass("input", representation(
   missing="character",
   observed.freq="numeric", ## observed group frequencies (fixed.cell only)
   sampmeanz="array", ## manifest sample means for continuous covriates
+  sampvarz="array", ## manifest sample variances for continuous covriates
   se="character", ## lavaan standard errors
   interactions="character", ## type of interaction (all, 2-way, no)
   complexsurvey="list",
@@ -44,7 +45,9 @@ setClass("parnames", representation(
   label.covs="character",
   label.Egx="character",
   cellmeanz="character",
+  cellvarz="character",
   meanz="character",
+  varz="character",
   veps="character",
   pk="character",
   px="character",
